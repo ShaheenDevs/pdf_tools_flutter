@@ -278,9 +278,10 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added `.github/workflows/flutter-android-ci.yml` to perform Flutter dependency resolution, Android scaffold generation, Stacked code generation, analysis, widget tests, and debug APK build on GitHub-hosted runners. On successful push validation, it commits generated Android and Stacked files to this branch.
 - Added an explicit Material import to the widget test.
 - Local tests: not run because Flutter/Dart SDKs are not installed and outbound DNS/network access is unavailable in this environment; awaiting GitHub Actions result.
-- Source foundation commit chain includes `35e0aeb5` (initial scaffold), `46466a9e` (theme compatibility), `f4155d2b` (public navigation-service import), and `ee1901c8` (generated locator lint convention).
-- Latest README/status commit: `92a51241b4e3ca42fbc94ad0e7a7888116b6707e`.
-- Remaining: verify the first GitHub Actions run, fix any failures, and confirm generated Android/Stacked files are present before closing Milestone 1.
+- Source foundation commit chain includes `35e0aeb5` (initial scaffold), `46466a9e` (theme compatibility), `f4155d2b` (public navigation-service import), `ee1901c8` (generated locator lint convention), `20a4bd25` (GitHub Actions Flutter CI), and `ae779f90` (widget test import cleanup).
+- Latest README/status commit before this update: `a3ba95050133ce989bdb354061f5c247be27db82`.
+- GitHub Actions runs `45473596826` and `45473633399` were started; results are pending at the time of this update.
+- Remaining: verify CI results, fix any failures, and confirm generated Android/Stacked files are present before closing Milestone 1.
 
 ### 2026-11-25 — Project initialization and repository analysis
 - Received project requirements and permanent development prompt.
