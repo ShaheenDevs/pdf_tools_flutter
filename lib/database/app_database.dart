@@ -47,11 +47,15 @@ class AppDatabase extends _$AppDatabase {
   int get schemaVersion => 1;
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async => m.createAll(),
+    onCreate: (m) async {
+      await m.createAll();
+    },
     onUpgrade: (m, from, to) async {
       // Add forward-only migrations here when the schema changes.
     },
-    beforeOpen: (details) async => customStatement('PRAGMA foreign_keys = ON'),
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
   );
 }
 
