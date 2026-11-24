@@ -3,7 +3,7 @@ name: Flutter Android CI
 on:
   push:
     branches:
-      - project/initial-roadmap
+      - main
     paths:
       - 'lib/**'
       - 'test/**'
@@ -12,7 +12,7 @@ on:
       - '.github/workflows/flutter-android-ci.yml'
   pull_request:
     branches:
-      - project/initial-roadmap
+      - main
   workflow_dispatch:
 
 permissions:
@@ -52,7 +52,7 @@ jobs:
         run: flutter build apk --debug
 
       - name: Commit generated Android and Stacked files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/project/initial-roadmap'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -61,5 +61,5 @@ jobs:
             echo "No generated files changed."
           else
             git commit -m "chore: add generated Android and Stacked files [skip ci]"
-            git push origin HEAD:project/initial-roadmap
+            git push origin HEAD:main
           fi
