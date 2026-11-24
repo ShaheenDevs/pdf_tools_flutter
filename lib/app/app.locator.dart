@@ -1,4 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: depend_on_referenced_packages
 //
 // This initial locator follows the generated registration style used by
 // the reference application. Run build_runner after changing app.dart.
