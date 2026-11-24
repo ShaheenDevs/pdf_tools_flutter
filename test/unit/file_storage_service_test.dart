@@ -20,7 +20,7 @@ void main() {
     expect(path.startsWith('documents'), isTrue);
     expect(await storage.readBytes(path), [1, 2, 3]);
     await storage.deleteFile(path);
-    expect(() => storage.readBytes(path), throwsA(isA<FileSystemException>()));
+    expect(storage.readBytes(path), throwsA(isA<FileSystemException>()));
   });
 
   test('rejects path traversal and unsafe extensions', () async {
