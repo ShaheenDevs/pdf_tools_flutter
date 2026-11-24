@@ -276,7 +276,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added an offline-first home workspace with non-interactive tool previews and an empty recent-documents state; no placeholder action is wired to pretend a feature works.
 - Dependencies currently limited to Flutter, Stacked, and Stacked Services plus code-generation/test tooling; PDF, camera, database, and file-picker packages are deferred to their feature milestones.
 - Tests: not run. Flutter and Dart SDKs are not installed in the execution environment; Android platform scaffolding and generated code remain pending.
-- Commit chain: see the project branch history; latest source foundation changes are recorded before this README update.
+- Source foundation commit chain includes `35e0aeb5` (initial scaffold), `46466a9e` (theme compatibility), and `f4155d2b` (public navigation-service import).
+- Latest README/status commit: `92a51241b4e3ca42fbc94ad0e7a7888116b6707e`.
 - Remaining: generate Android platform files, run pub get/build_runner/analyze/test on a Flutter-equipped environment, then close Milestone 1.
 
 ### 2026-11-25 — Project initialization and repository analysis
