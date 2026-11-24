@@ -167,9 +167,9 @@ For each feature, follow this flow:
 ### Milestone 1 — Project foundation
 - [x] Inspect target repository state and preserve existing content.
 - [x] Create the initial Flutter source foundation using the reference Stacked conventions.
-- [~] Configure dependencies, app entry point, Stacked locator, and route annotations; generated routing and Android platform configuration remain pending.
+- [~] Configure dependencies, app entry point, Stacked locator, and route annotations; generated routing and Android platform configuration are delegated to the new GitHub Actions validation workflow.
 - [x] Add a basic app shell, reusable theme, and initial home workspace.
-- [~] Add a widget test and setup instructions; execution is pending because Flutter/Dart are unavailable in the development environment.
+- [~] Add a widget test and setup instructions; execution is delegated to GitHub Actions because Flutter/Dart are unavailable in the development environment.
 
 ### Milestone 2 — Local database and file storage
 - [ ] Add Drift/SQLite database and migrations.
@@ -245,7 +245,7 @@ The proposed local SQLite schema is described in **D. Planned Architecture and P
 - Android device or emulator
 
 ### Initial setup
-The repository now contains the initial Dart/Flutter source foundation. Android platform scaffolding has not yet been generated because the Flutter SDK is unavailable in the development environment. After installing Flutter and generating the Android platform files, use:
+The repository now contains the initial Dart/Flutter source foundation. Android platform scaffolding has not yet been generated because the Flutter SDK is unavailable in the development environment. The GitHub Actions workflow `.github/workflows/flutter-android-ci.yml` generates Android platform files, resolves dependencies, runs Stacked code generation, analyzes the project, runs tests, builds a debug APK, and commits generated Android/Stacked files to the development branch when validation succeeds. To run locally, use:
 
 ```bash
 flutter pub get
@@ -259,8 +259,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## I. Known Issues and Decisions
 
-- [ ] Android platform scaffolding has not yet been generated; run `flutter create . --platforms=android` from the repository root after installing Flutter.
-- [ ] Stacked generated router/locator output must be regenerated and verified with build_runner.
+- [ ] Await the first GitHub Actions run to verify generated Android platform files, Stacked code generation, analysis, widget tests, and debug APK build.
+- [ ] If CI succeeds, verify that the generated Android and Stacked files are committed back to this branch.
 - [ ] PDF engine and camera/scanning package selection must be validated for Android support, licensing, maintenance, and required edit operations.
 - [ ] Premium purchase provider and entitlement verification are not yet selected.
 - [ ] OCR provider, credit model, and privacy policy are not yet selected.
@@ -275,10 +275,13 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added the Flutter entry point, Stacked app configuration and locator, centralized theme, HomeView, HomeViewModel, and a first home-screen widget test.
 - Added an offline-first home workspace with non-interactive tool previews and an empty recent-documents state; no placeholder action is wired to pretend a feature works.
 - Dependencies currently limited to Flutter, Stacked, and Stacked Services plus code-generation/test tooling; PDF, camera, database, and file-picker packages are deferred to their feature milestones.
-- Tests: not run. Flutter and Dart SDKs are not installed in the execution environment; Android platform scaffolding and generated code remain pending.
-- Source foundation commit chain includes `35e0aeb5` (initial scaffold), `46466a9e` (theme compatibility), `f4155d2b` (public navigation-service import), and `ee1901c8` (generated locator lint convention).
-- Latest README/status commit: `92a51241b4e3ca42fbc94ad0e7a7888116b6707e`.
-- Remaining: generate Android platform files, run pub get/build_runner/analyze/test on a Flutter-equipped environment, then close Milestone 1.
+- Added `.github/workflows/flutter-android-ci.yml` to perform Flutter dependency resolution, Android scaffold generation, Stacked code generation, analysis, widget tests, and debug APK build on GitHub-hosted runners. On successful push validation, it commits generated Android and Stacked files to this branch.
+- Added an explicit Material import to the widget test.
+- Local tests: not run because Flutter/Dart SDKs are not installed and outbound DNS/network access is unavailable in this environment; awaiting GitHub Actions result.
+- Source foundation commit chain includes `35e0aeb5` (initial scaffold), `46466a9e` (theme compatibility), `f4155d2b` (public navigation-service import), `ee1901c8` (generated locator lint convention), `20a4bd25` (GitHub Actions Flutter CI), and `ae779f90` (widget test import cleanup).
+- Latest README/status commit before this update: `a3ba95050133ce989bdb354061f5c247be27db82`.
+- GitHub Actions runs `45473596826` and `45473633399` were started; results are pending at the time of this update.
+- Remaining: verify CI results, fix any failures, and confirm generated Android/Stacked files are present before closing Milestone 1.
 
 ### 2026-11-25 — Project initialization and repository analysis
 - Received project requirements and permanent development prompt.
