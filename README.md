@@ -72,7 +72,7 @@ Status legend:
 | Area / feature | Status | Flutter | Backend | Testing |
 |---|---|---|---|---|
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
-| Project setup | [~] | Flutter source foundation and Stacked shell added; Android platform scaffold and code generation pending | N/A | Not run: Flutter SDK unavailable |
+| Project setup | [~] | Flutter source foundation and Stacked shell merged to main; CI generates Android platform files and Stacked code | N/A | Not run: Flutter SDK unavailable |
 | Local database and file storage | ☐ | Pending | N/A | Pending |
 | Document library | ☐ | Pending | N/A | Pending |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
@@ -167,9 +167,9 @@ For each feature, follow this flow:
 ### Milestone 1 — Project foundation
 - [x] Inspect target repository state and preserve existing content.
 - [x] Create the initial Flutter source foundation using the reference Stacked conventions.
-- [~] Configure dependencies, app entry point, Stacked locator, and route annotations; generated routing and Android platform configuration are delegated to the new GitHub Actions validation workflow.
+- [~] Configure dependencies, app entry point, Stacked locator, and route annotations; CI generation succeeds, but analysis currently fails on a leftover default Flutter counter test.
 - [x] Add a basic app shell, reusable theme, and initial home workspace.
-- [~] Add a widget test and setup instructions; execution is delegated to GitHub Actions because Flutter/Dart are unavailable in the development environment.
+- [~] Add a home-screen widget test and setup instructions; CI reached analysis but tests/build were skipped after analysis errors.
 
 ### Milestone 2 — Local database and file storage
 - [ ] Add Drift/SQLite database and migrations.
@@ -245,7 +245,7 @@ The proposed local SQLite schema is described in **D. Planned Architecture and P
 - Android device or emulator
 
 ### Initial setup
-The repository now contains the initial Dart/Flutter source foundation. Android platform scaffolding has not yet been generated because the Flutter SDK is unavailable in the development environment. The GitHub Actions workflow `.github/workflows/flutter-android-ci.yml` generates Android platform files, resolves dependencies, runs Stacked code generation, analyzes the project, runs tests, builds a debug APK, and commits generated Android/Stacked files to the development branch when validation succeeds. To run locally, use:
+The repository now contains the initial Dart/Flutter source foundation. Android platform scaffolding has not yet been generated because the Flutter SDK is unavailable in the development environment. The GitHub Actions workflow `.github/workflows/flutter-android-ci.yml` generates Android platform files, resolves dependencies, runs Stacked code generation, analyzes the project, runs tests, builds a debug APK, and commits generated Android/Stacked files to `main` when validation succeeds. To run locally, use:
 
 ```bash
 flutter pub get
@@ -259,8 +259,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## I. Known Issues and Decisions
 
-- [ ] Await the first GitHub Actions run to verify generated Android platform files, Stacked code generation, analysis, widget tests, and debug APK build.
-- [ ] If CI succeeds, verify that the generated Android and Stacked files are committed back to this branch.
+- [ ] Fix the leftover default `test/widget_test.dart` counter test, which references a non-existent `MyApp` and an unavailable `material_ui` package; then rerun CI.
+- [ ] After CI succeeds, verify generated Android and Stacked files are committed to `main`.
 - [ ] PDF engine and camera/scanning package selection must be validated for Android support, licensing, maintenance, and required edit operations.
 - [ ] Premium purchase provider and entitlement verification are not yet selected.
 - [ ] OCR provider, credit model, and privacy policy are not yet selected.
@@ -279,9 +279,9 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added an explicit Material import to the widget test.
 - Local tests: not run because Flutter/Dart SDKs are not installed and outbound DNS/network access is unavailable in this environment; awaiting GitHub Actions result.
 - Source foundation commit chain includes `35e0aeb5` (initial scaffold), `46466a9e` (theme compatibility), `f4155d2b` (public navigation-service import), `ee1901c8` (generated locator lint convention), `20a4bd25` (GitHub Actions Flutter CI), and `ae779f90` (widget test import cleanup).
-- Latest README/status commit before this update: `a3ba95050133ce989bdb354061f5c247be27db82`.
-- GitHub Actions runs `45473596826` and `45473633399` were started; results are pending at the time of this update.
-- Remaining: verify CI results, fix any failures, and confirm generated Android/Stacked files are present before closing Milestone 1.
+- The feature branch was merged into `main` by merge commit `60f5aaba913e937ff33b795204f36e13ea72e802`; subsequent work continues on `main`.
+- GitHub Actions runs `45473596826` and `45473633399` both failed at `flutter analyze`. Android platform generation, dependency resolution, and Stacked code generation succeeded; widget tests and APK build were skipped. The failures include a leftover Flutter template counter test (`test/widget_test.dart`) referencing `MyApp` and `material_ui`, which does not exist in this project.
+- Remaining: remove the unused template test, rerun CI on `main`, and confirm generated Android/Stacked files are committed before closing Milestone 1.
 
 ### 2026-11-25 — Project initialization and repository analysis
 - Received project requirements and permanent development prompt.
