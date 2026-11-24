@@ -276,8 +276,9 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Confirmed GitHub push permissions are available.
 - Created the `project/initial-roadmap` branch for the planning milestone.
 - Tests: not run; no Flutter application source exists yet.
-- Commit: pending.
-- Remaining: commit this roadmap, then begin Milestone 1 project foundation.
+- Roadmap commit: `3e79d85596f4cc45f7163694ecb2722933519857`.
+- This development-history entry is finalized in the follow-up documentation commit.
+- Remaining: begin Milestone 1 project foundation.
 
 ## Development Rules
 
