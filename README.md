@@ -177,7 +177,7 @@ For each feature, follow this flow:
 - [x] Implement app-private file storage with unique names, temporary-write/rename behavior, relative paths, extension validation, and path-traversal protection.
 - [x] Register the database and storage service with Stacked.
 - [~] Add database and storage unit tests; CI execution and generated Drift code validation are pending.
-- [ ] Add a repository abstraction for document metadata and file lifecycle operations.
+- [x] Add a document repository for import, list, rename, and delete, including rollback of a stored file when metadata insertion fails.
 
 ### Milestone 3 — Document library and import
 - [ ] Build the document library, empty/loading/error states, search, rename, and delete.
