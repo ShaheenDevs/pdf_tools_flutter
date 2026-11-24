@@ -72,7 +72,7 @@ Status legend:
 | Area / feature | Status | Flutter | Backend | Testing |
 |---|---|---|---|---|
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
-| Project setup | ☐ | Pending | N/A | Pending |
+| Project setup | [~] | Flutter source foundation and Stacked shell added; Android platform scaffold and code generation pending | N/A | Not run: Flutter SDK unavailable |
 | Local database and file storage | ☐ | Pending | N/A | Pending |
 | Document library | ☐ | Pending | N/A | Pending |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
@@ -165,11 +165,11 @@ For each feature, follow this flow:
 ## E. Implementation Roadmap
 
 ### Milestone 1 — Project foundation
-- [ ] Inspect target repository state and preserve existing content.
-- [ ] Create the Flutter project foundation using the reference Stacked conventions.
-- [ ] Configure dependencies, Android permissions, app entry point, routing, and service locator.
-- [ ] Add a basic app shell and reusable theme/common widgets.
-- [ ] Add setup instructions and initial tests.
+- [x] Inspect target repository state and preserve existing content.
+- [x] Create the initial Flutter source foundation using the reference Stacked conventions.
+- [~] Configure dependencies, app entry point, Stacked locator, and route annotations; generated routing and Android platform configuration remain pending.
+- [x] Add a basic app shell, reusable theme, and initial home workspace.
+- [~] Add a widget test and setup instructions; execution is pending because Flutter/Dart are unavailable in the development environment.
 
 ### Milestone 2 — Local database and file storage
 - [ ] Add Drift/SQLite database and migrations.
@@ -245,7 +245,7 @@ The proposed local SQLite schema is described in **D. Planned Architecture and P
 - Android device or emulator
 
 ### Initial setup
-The repository currently contains only this planning README. Flutter project files and run commands will be added in Milestone 1. Once initialized, the expected workflow will be:
+The repository now contains the initial Dart/Flutter source foundation. Android platform scaffolding has not yet been generated because the Flutter SDK is unavailable in the development environment. After installing Flutter and generating the Android platform files, use:
 
 ```bash
 flutter pub get
@@ -259,7 +259,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## I. Known Issues and Decisions
 
-- [ ] Target repository has not yet been scaffolded as a Flutter application.
+- [ ] Android platform scaffolding has not yet been generated; run `flutter create . --platforms=android` from the repository root after installing Flutter.
+- [ ] Stacked generated router/locator output must be regenerated and verified with build_runner.
 - [ ] PDF engine and camera/scanning package selection must be validated for Android support, licensing, maintenance, and required edit operations.
 - [ ] Premium purchase provider and entitlement verification are not yet selected.
 - [ ] OCR provider, credit model, and privacy policy are not yet selected.
@@ -268,6 +269,15 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - [ ] Digital signature scope (visual signature placement versus certificate-based cryptographic signing) must be explicitly defined before implementation.
 
 ## J. Development History
+
+### 2026-11-25 — Milestone 1: initial Flutter source foundation
+- Added `pubspec.yaml`, `.gitignore`, and `analysis_options.yaml`.
+- Added the Flutter entry point, Stacked app configuration and locator, centralized theme, HomeView, HomeViewModel, and a first home-screen widget test.
+- Added an offline-first home workspace with non-interactive tool previews and an empty recent-documents state; no placeholder action is wired to pretend a feature works.
+- Dependencies currently limited to Flutter, Stacked, and Stacked Services plus code-generation/test tooling; PDF, camera, database, and file-picker packages are deferred to their feature milestones.
+- Tests: not run. Flutter and Dart SDKs are not installed in the execution environment; Android platform scaffolding and generated code remain pending.
+- Commit chain: see the project branch history; latest source foundation changes are recorded before this README update.
+- Remaining: generate Android platform files, run pub get/build_runner/analyze/test on a Flutter-equipped environment, then close Milestone 1.
 
 ### 2026-11-25 — Project initialization and repository analysis
 - Received project requirements and permanent development prompt.
@@ -278,7 +288,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Tests: not run; no Flutter application source exists yet.
 - Roadmap commit: `3e79d85596f4cc45f7163694ecb2722933519857`.
 - This development-history entry is finalized in the follow-up documentation commit.
-- Remaining: begin Milestone 1 project foundation.
+- Remaining: finish Milestone 1 by generating Android platform files and validating the project with Flutter/Dart.
 
 ## Development Rules
 
