@@ -167,9 +167,9 @@ For each feature, follow this flow:
 ### Milestone 1 — Project foundation
 - [x] Inspect target repository state and preserve existing content.
 - [x] Create the initial Flutter source foundation using the reference Stacked conventions.
-- [~] Configure dependencies, app entry point, Stacked locator, and route annotations; CI generation succeeds, but analysis currently fails on a leftover default Flutter counter test.
+- [~] Configure dependencies, app entry point, Stacked locator, and route annotations; CI platform and code generation succeed; analysis is blocked because `flutter create` regenerates its default counter test.
 - [x] Add a basic app shell, reusable theme, and initial home workspace.
-- [~] Add a home-screen widget test and setup instructions; CI reached analysis but tests/build were skipped after analysis errors.
+- [~] Add a home-screen widget test and setup instructions; CI reached analysis but tests/build were skipped after the generated default counter test caused errors.
 
 ### Milestone 2 — Local database and file storage
 - [ ] Add Drift/SQLite database and migrations.
@@ -259,7 +259,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## I. Known Issues and Decisions
 
-- [ ] Fix the leftover default `test/widget_test.dart` counter test, which references a non-existent `MyApp` and an unavailable `material_ui` package; then rerun CI.
+- [ ] Remove the default `test/widget_test.dart` counter test after `flutter create` in CI, because Flutter recreates it when absent from source; then rerun CI.
 - [ ] After CI succeeds, verify generated Android and Stacked files are committed to `main`.
 - [ ] PDF engine and camera/scanning package selection must be validated for Android support, licensing, maintenance, and required edit operations.
 - [ ] Premium purchase provider and entitlement verification are not yet selected.
@@ -280,8 +280,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Local tests: not run because Flutter/Dart SDKs are not installed and outbound DNS/network access is unavailable in this environment; awaiting GitHub Actions result.
 - Source foundation commit chain includes `35e0aeb5` (initial scaffold), `46466a9e` (theme compatibility), `f4155d2b` (public navigation-service import), `ee1901c8` (generated locator lint convention), `20a4bd25` (GitHub Actions Flutter CI), and `ae779f90` (widget test import cleanup).
 - The feature branch was merged into `main` by merge commit `60f5aaba913e937ff33b795204f36e13ea72e802`; subsequent work continues on `main`.
-- GitHub Actions runs `45473596826` and `45473633399` both failed at `flutter analyze`. Android platform generation, dependency resolution, and Stacked code generation succeeded; widget tests and APK build were skipped. The failures include a leftover Flutter template counter test (`test/widget_test.dart`) referencing `MyApp` and `material_ui`, which does not exist in this project.
-- Remaining: remove the unused template test, rerun CI on `main`, and confirm generated Android/Stacked files are committed before closing Milestone 1.
+- GitHub Actions runs `45473596826` and `45473633399` all failed at `flutter analyze`. Android platform generation, dependency resolution, and Stacked code generation succeeded; widget tests and APK build were skipped. The root cause was that `flutter create --platforms=android .` recreated its default `test/widget_test.dart` counter test, which references `MyApp` and `material_ui`, neither of which exists in this project. The CI workflow now removes that generated template test immediately after platform generation.
+- Remaining: rerun CI with the generated template test removed, and confirm generated Android/Stacked files are committed before closing Milestone 1.
 
 ### 2026-11-25 — Project initialization and repository analysis
 - Received project requirements and permanent development prompt.
