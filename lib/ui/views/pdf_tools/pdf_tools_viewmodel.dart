@@ -27,6 +27,7 @@ class PdfToolsViewModel extends BaseViewModel {
   Uint8List? _splitSourceBytes;
   String _splitSourceTitle = 'Document';
   int splitPageCount = 0;
+  String splitRangeText = '';
 
   bool get hasSplitSource => _splitSourceBytes != null;
 
@@ -67,9 +68,12 @@ class PdfToolsViewModel extends BaseViewModel {
       _splitSourceBytes = Uint8List.fromList(bytes);
       _splitSourceTitle = p.basenameWithoutExtension(file.name);
       splitPageCount = metadata.pageCount;
+      splitRangeText = '1-$splitPageCount';
       successMessage = 'Loaded $splitPageCount pages. Enter ranges to export.';
     });
   }
+
+  void updateSplitRangeText(String value) => splitRangeText = value;
 
   Future<void> splitPdfByRanges(String rangeText) async {
     await _run(() async {
@@ -95,6 +99,7 @@ class PdfToolsViewModel extends BaseViewModel {
       successMessage = 'Created \${outputs.length} split PDF file(s).';
       _splitSourceBytes = null;
       splitPageCount = 0;
+      splitRangeText = '';
     });
   }
 
