@@ -41,3 +41,6 @@ GitHub Actions currently builds a **debug APK**. A passing debug build is not a 
 ## Device acceptance
 
 The user has confirmed physical-device testing for the scanner/page editor, PDF operations, annotation/signature/finishing, and share/batch workflows. Automated GitHub Actions results are tracked independently and must not be inferred from device acceptance.
+
+
+Startup cleanup is isolated behind a catch-all best-effort guard. A path-provider/platform failure during optional stale-file recovery does not block app launch; locator and database initialization errors are not swallowed.
