@@ -50,7 +50,7 @@ Status legend:
 
 | Feature | Status | Scope |
 |---|---|---|
-| Batch processing | ☐ | Apply supported operations to multiple documents |
+| Batch processing | [~] | Batch-compress multiple local PDFs with per-file failure isolation, progress, and safe stop-between-files; premium entitlement gating is pending |
 | Advanced compression | ☐ | Offer additional compression profiles and controls |
 | OCR credits | ☐ | Future OCR integration; cloud/API dependency and credit policy to be designed |
 | Cloud backup | ☐ | Future optional Node.js API and remote storage integration |
@@ -80,6 +80,7 @@ Status legend:
 | Annotation, highlighting, and signatures | [~] | Local page-level markup with SQLite persistence and annotated-copy export; PKCS#12 certificate signing exports a separate signed copy | N/A | Repository and signing-input tests authored; physical-device validation pending |
 | Watermark and page numbers | [~] | Local PDF watermark and per-page numbering exports through `pdf_manipulator` | N/A | Service tests authored; physical-device validation pending |
 | Share and export | [~] | Preview actions share local documents and save copies through Android system UI | N/A | Export service guard tests authored; device verification pending |
+| Batch PDF processing | [~] | Multi-file compression with progress, per-file failure isolation, and safe cancellation between files | N/A | Manual/automated batch validation pending |
 | Premium entitlements and ads | ☐ | Pending | Optional future service | Pending |
 | OCR and cloud backup | ☐ | Pending | Optional future Node.js service | Pending |
 | Release preparation | ☐ | Pending | N/A | Pending |
