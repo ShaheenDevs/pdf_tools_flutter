@@ -49,7 +49,7 @@ class _DocumentPreviewViewState extends State<DocumentPreviewView> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
-          if (widget.isPdf && widget.documentId != null)
+          if (widget.isPdf && widget.documentId != null && widget.pageCount > 0)
             IconButton(
               tooltip: 'Annotate PDF',
               icon: const Icon(Icons.draw_outlined),
