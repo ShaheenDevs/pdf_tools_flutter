@@ -87,7 +87,7 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
             _ToolCard(
               icon: Icons.image_outlined,
               title: 'Images to PDF',
-              description: 'Turn multiple JPG, PNG, WebP or HEIC images into one PDF.',
+              description: 'Turn multiple JPG or PNG images into one PDF.',
               buttonLabel: 'Choose images',
               busy: viewModel.isBusy,
               onPressed: viewModel.imagesToPdf,
