@@ -516,3 +516,10 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - The overall GitHub Actions run has now completed with conclusion `success`; all substantive validation, APK assembly, generated-file commit, and final cleanup steps passed.
 - The workflow also passed the guard that prevents Android release builds from using the generated debug signing key. Production signing remains intentionally unconfigured until the publisher supplies a protected upload key.
 - No local CLI commands or tests were run. Physical-device acceptance remains based on the user's earlier confirmations; this CI result does not replace the outstanding release-candidate manual QA matrix.
+
+
+### 2026-11-25 — Scanner temporary-file lifecycle hardening
+- The scanner plugin returns temporary PDF and page-image paths. The app now reads those outputs into memory, persists them through the repository's app-private storage workflow, and then best-effort deletes the plugin-generated temporary files in a finally block.
+- Cleanup handles duplicate paths and missing/already-removed files without masking scan-import errors or invalidating the saved app-managed copy. A cancelled scan (null result) remains a no-op.
+- Added unit coverage for deleting temporary PDF/page files and tolerating missing paths. GitHub Actions is triggered by these lib/** and test/** changes; its result is pending and no local CLI tests were run.
+- Commits: service d3dbd37e, ViewModel integration 41dc2151, and cleanup tests 003f5ff3.
