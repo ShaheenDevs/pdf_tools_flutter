@@ -12,8 +12,13 @@ class ImageThumbnailService {
 }
 
 Uint8List _createThumbnail(Uint8List sourceBytes) {
-  // Bound compressed input before decoding; reject excessive dimensions immediately after.\n  if (sourceBytes.length > 30 * 1024 * 1024) {\n    throw const FormatException('The selected image is too large to preview.');\n  }\n  final img.Image? decoded = img.decodeImage(sourceBytes);
-  if (decoded == null || decoded.width < 1 || decoded.height < 1 ||\n      decoded.width * decoded.height > 40 * 1000 * 1000) {
+  // Bound compressed input before decoding; reject excessive dimensions immediately after.
+  if (sourceBytes.length > 30 * 1024 * 1024) {
+    throw const FormatException('The selected image is too large to preview.');
+  }
+  final img.Image? decoded = img.decodeImage(sourceBytes);
+  if (decoded == null || decoded.width < 1 || decoded.height < 1 ||
+      decoded.width * decoded.height > 40 * 1000 * 1000) {
     throw const FormatException('The selected image could not be decoded.');
   }
 
@@ -22,7 +27,7 @@ Uint8List _createThumbnail(Uint8List sourceBytes) {
       : decoded.height;
   final double scale = 360 / longestSide;
   final int width = (decoded.width * scale).round().clamp(1, 360).toInt();
-  final int height = (decoded.height * scale).round().clamp(1, 360);
+  final int height = (decoded.height * scale).round().clamp(1, 360).toInt();
   final img.Image thumbnail = img.copyResize(
     decoded,
     width: width,
