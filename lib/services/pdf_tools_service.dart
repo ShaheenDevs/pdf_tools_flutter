@@ -15,7 +15,7 @@ class PdfToolsService {
       final inputs = pdfBytes
           .map((bytes) => PdfInput(MemorySource(Uint8List.fromList(bytes))))
           .toList(growable: false);
-      await pdf.merge(inputs, output);
+      await _runPdf(() => pdf.merge(inputs, output));
       return output.takeBytes();
     } finally {
       await pdf.dispose();
@@ -40,9 +40,9 @@ class PdfToolsService {
         }
         final sink = MemorySink();
         final input = PdfInput(MemorySource(Uint8List.fromList(sourceBytes)));
-        await pdf
-            .editOnce(input, sink)
-            .keepPages(PdfPages.list(range));
+        await _runPdf(
+          () => pdf.editOnce(input, sink).keepPages(PdfPages.list(range)),
+        );
         final bytes = sink.takeBytes();
         if (bytes.isEmpty) {
           throw const FormatException('The split PDF could not be generated.');
@@ -66,7 +66,7 @@ class PdfToolsService {
       final images = imageBytes
           .map((bytes) => MemorySource(Uint8List.fromList(bytes)))
           .toList(growable: false);
-      await pdf.imagesToPdf(images, output);
+      await _runPdf(() => pdf.imagesToPdf(images, output));
       return output.takeBytes();
     } finally {
       await pdf.dispose();
@@ -81,9 +81,11 @@ class PdfToolsService {
     final pdf = Pdf();
     final output = MemorySink();
     try {
-      await pdf.compress(
-        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
-        output,
+      await _runPdf(
+        () => pdf.compress(
+          PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+          output,
+        ),
       );
       final compressed = output.takeBytes();
       if (compressed.isEmpty) {
@@ -92,6 +94,21 @@ class PdfToolsService {
       return compressed;
     } finally {
       await pdf.dispose();
+    }
+  }
+  Future<T> _runPdf<T>(Future<T> Function() operation) async {
+    try {
+      return await operation();
+    } on PdfPasswordRequired {
+      throw const FormatException(
+        'This PDF is password-protected. Choose an unlocked copy.',
+      );
+    } on PdfCorrupted {
+      throw const FormatException(
+        'A selected PDF is damaged or is not a valid PDF file.',
+      );
+    } on PdfError catch (error) {
+      throw FormatException('PDF operation failed: ${error.message}');
     }
   }
 }
