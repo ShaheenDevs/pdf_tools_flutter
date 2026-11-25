@@ -117,10 +117,10 @@ class PdfToolsService {
         (editor) async {
           await editor.addWatermark(
             normalized,
-            style: PdfWatermarkStyle(
+            style: const PdfWatermarkStyle(
               fontSize: 34,
               opacity: 0.22,
-              rotation: -35,
+              angleDegrees: -35,
             ),
             position: const PdfWatermarkPosition.center(),
             layer: PdfWatermarkLayer.foreground,
@@ -152,7 +152,7 @@ class PdfToolsService {
               style: const PdfWatermarkStyle(
                 fontSize: 9,
                 opacity: 0.85,
-                rotation: 0,
+                angleDegrees: 0,
               ),
               position: const PdfWatermarkPosition.corner(
                 PdfCorner.bottomRight,
@@ -189,7 +189,7 @@ class PdfToolsService {
         PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
         output,
         credentials: PdfSigningCredentials.pkcs12(
-          Uint8List.fromList(pkcs12Bytes),
+          MemorySource(Uint8List.fromList(pkcs12Bytes)),
           certificatePassword,
         ),
         reason: reason,
