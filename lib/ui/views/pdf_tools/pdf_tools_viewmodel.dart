@@ -156,6 +156,51 @@ class PdfToolsViewModel extends BaseViewModel {
     });
   }
 
+
+  Future<void> watermarkPdf(String watermarkText) async {
+    await _run(() async {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        allowMultiple: false,
+        withData: true,
+      );
+      if (picked == null || picked.files.isEmpty) return;
+      final source = await _readPickedFile(picked.files.single);
+      final output = await _pdfToolsService.addWatermark(
+        sourceBytes: source,
+        text: watermarkText,
+      );
+      final previewReady = await _savePdf(
+        title: '${p.basenameWithoutExtension(picked.files.single.name)}_watermarked',
+        bytes: output,
+      );
+      successMessage = 'Watermarked PDF saved as a separate library document.';
+      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
+    });
+  }
+
+  Future<void> addPageNumbers() async {
+    await _run(() async {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        allowMultiple: false,
+        withData: true,
+      );
+      if (picked == null || picked.files.isEmpty) return;
+      final file = picked.files.single;
+      final source = await _readPickedFile(file);
+      final output = await _pdfToolsService.addPageNumbers(source);
+      final previewReady = await _savePdf(
+        title: '${p.basenameWithoutExtension(file.name)}_numbered',
+        bytes: output,
+      );
+      successMessage = 'Numbered PDF saved as a separate library document.';
+      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
+    });
+  }
+
   Future<List<int>> _readPickedFile(PlatformFile file) async {
     final bytes = file.bytes ??
         (file.path == null ? null : await File(file.path!).readAsBytes());
