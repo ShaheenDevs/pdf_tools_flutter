@@ -3,7 +3,7 @@ description: Offline-first PDF scanning and management for Android.
 publish_to: "none"
 version: 1.0.0+1
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.10.0 <4.0.0"
 dependencies:
   flutter:
     sdk: flutter
@@ -17,6 +17,7 @@ dependencies:
   pdfx: ^2.11.0
   image: ^4.13.1
   pdf: ^3.13.1
+  pdf_manipulator: 6.0.0
   cunning_document_scanner: ^3.1.0
 dev_dependencies:
   flutter_test:
