@@ -271,8 +271,8 @@ class PdfToolsService {
       throw const FormatException('The PDF page has invalid dimensions.');
     }
     const pixelsPerPoint = 2.0;
-    final width = (widthPoints * pixelsPerPoint).round().clamp(1, 2400);
-    final height = (heightPoints * pixelsPerPoint).round().clamp(1, 3200);
+    final width = (widthPoints * pixelsPerPoint).round().clamp(1, 2400).toInt();
+    final height = (heightPoints * pixelsPerPoint).round().clamp(1, 3200).toInt();
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder);
     canvas.scale(width.toDouble(), height.toDouble());
