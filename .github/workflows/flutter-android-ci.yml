@@ -46,6 +46,13 @@ jobs:
           find android -type f -name '*.gradle*' -exec sed -i 's/9[.]1[.]0/9.1.1/g' {} +
           grep -R -q '9.1.1' android --include='*.gradle*'
 
+      - name: Prevent debug-key release signing
+        run: |
+          if grep -Eq 'signingConfig = signingConfigs.getByName\("debug"\)' android/app/build.gradle.kts; then
+            echo "Release build must not use the debug signing key."
+            exit 1
+          fi
+
       - name: Remove generated Flutter counter test
         run: rm -f test/widget_test.dart
 
