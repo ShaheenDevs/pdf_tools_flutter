@@ -83,7 +83,7 @@ Status legend:
 | Batch PDF processing | ☒ | Multi-file compression with progress, per-file failure isolation, and safe cancellation between files | N/A | User confirmed physical-device testing; automated validation is tracked by CI |
 | Premium entitlements and ads | [~] | Purchase verification and offline entitlement policy documented; billing/UI integration awaits Play Console product catalog and account decision | Optional Node.js verification API designed, not implemented | Architecture documented; implementation pending product setup |
 | OCR and cloud backup | [~] | Provider evaluation criteria, privacy boundaries, and API contracts documented; OCR languages/provider and storage vendor remain undecided | Optional Node.js API contract designed, not implemented | Architecture documented; provider and product decisions pending |
-| Release preparation | ☐ | Pending | N/A | Pending |
+| Release preparation | [~] | Branded app label, permission review, and release-blocker checklist documented; production package ID/signing/assets remain pending | N/A | User-confirmed device testing; CI validation tracked separately |
 
 ## D. Planned Architecture and Project Structure
 
@@ -224,15 +224,20 @@ For each feature, follow this flow:
 - [x] Add the architecture decision record: [Premium, OCR, and Optional Cloud Architecture](docs/premium-ocr-cloud-architecture.md).
 
 ### Milestone 9 — QA and release
-- [ ] Run Flutter analyze and automated tests.
-- [ ] Test Android permissions, lifecycle, low-storage, large-file, and offline scenarios.
-- [ ] Test export/share on supported Android versions.
-- [ ] Review performance, accessibility, app size, privacy disclosures, and release configuration.
-- [ ] Document release steps and known limitations.
+- [x] Set the Android launcher label to **PDF Tools & Scanner**.
+- [x] Keep the Android manifest limited to the camera permission needed by scanning; use the platform file picker rather than broad storage permission.
+- [x] Add a release-readiness checklist documenting the current offline data policy and production blockers: [Android Release Readiness](docs/android-release-readiness.md).
+- [ ] Complete current GitHub Actions analysis, automated tests, and Android debug APK build.
+- [ ] Verify Android permission denial/recovery, lifecycle/process recreation, low-storage, large-file, malformed/encrypted PDF, and offline scenarios.
+- [ ] Finish accessibility, performance, and app-size review on representative devices.
+- [ ] Set a publisher-controlled application ID, production signing configuration, icons/splash assets, support/privacy URLs, and Play listing.
+- [ ] Build and test a signed release AAB; debug APK success alone is not release acceptance.
 
 ## F. Backend and API Documentation
 
 The future premium/OCR/cloud integration boundaries and proposed REST contracts are documented in [docs/premium-ocr-cloud-architecture.md](docs/premium-ocr-cloud-architecture.md). These endpoints are design contracts only; no backend or remote dependency has been added to the core app.
+
+Android launch blockers and permission/data-policy review are tracked in [docs/android-release-readiness.md](docs/android-release-readiness.md).
 
 **Current decision: no backend APIs are required for the core application.** No authentication, remote database, or cloud storage dependency will be introduced for local scanning and PDF tools.
 
@@ -351,6 +356,15 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Documented OCR provider evaluation criteria with language coverage as the first selection gate; provider choice remains open until required languages (including whether Urdu/Arabic are required) are confirmed.
 - Designed versioned Node.js API contracts for purchase verification, entitlements, OCR jobs/credits, and encrypted backup lifecycle. These are design-only; no backend, ads SDK, billing integration, or cloud upload was introduced.
 - Added `docs/premium-ocr-cloud-architecture.md`. Milestone 8 integration remains in progress pending Play Console products, account policy, OCR language/provider, and storage/ads provider decisions.
+
+
+
+### 2026-11-25 — Milestone 9: Android release readiness started
+- Changed the Android launcher label from the generated Flutter project name to `PDF Tools & Scanner`.
+- Reviewed the Android manifest: camera is the only declared runtime permission; document import/export uses the platform file picker and app-private storage, so no broad external-storage permission is added.
+- Added `docs/android-release-readiness.md` with the publisher-owned application ID, production signing, app artwork, privacy/store metadata, permission/lifecycle/large-file/offline QA, accessibility, performance, and signed AAB gates.
+- Updated GitHub Actions path filters so changes under `android/**` trigger Android validation.
+- Production application ID remains `com.example.pdf_tools_flutter` until the publisher supplies a verified unique identifier; debug signing is not a production release configuration.
 
 ## Development Rules
 
