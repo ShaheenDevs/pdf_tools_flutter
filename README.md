@@ -42,7 +42,7 @@ Status legend:
 | Split PDFs | [~] | Export semicolon-separated page ranges as separate local PDFs |
 | Basic PDF compression | [~] | Lossless local PDF optimization; save a separate copy and report size change |
 | Image to PDF | [~] | Convert multiple local JPG/PNG images into one PDF |
-| Local annotation and highlighting | ☐ | Add, edit, and persist annotations/highlights locally |
+| Local annotation and highlighting | [~] | Draw pen/highlight strokes over PDF pages and persist normalized markup locally; flatten/export integration pending |
 | Share and export | ☐ | Export generated files through Android share/save flows |
 | Document library | ☒ | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; user confirmed physical-device validation |
 
@@ -61,9 +61,9 @@ Status legend:
 
 | Feature | Status | Scope |
 |---|---|---|
-| Digital signature | ☐ | Create/import a signature and place it on PDF pages |
-| Watermark | ☐ | Add text or image watermarks to selected pages |
-| Page numbers | ☐ | Configure and apply page numbering |
+| Digital signature | [~] | Apply a certificate-backed PKCS#12/PFX digital signature; freehand signature marks are also available in the annotation editor |
+| Watermark | [~] | Add a translucent text watermark to all pages and save a separate PDF copy |
+| Page numbers | [~] | Add per-page `Page N of total` labels at the bottom-right and save a separate PDF copy |
 | PDF preview | ☒ | Offline PDF page navigation and zoomable local image preview |
 | Document metadata | ☒ | Persist title, file path, page count, size, timestamps, and generated PDF/image preview thumbnails |
 
@@ -77,8 +77,8 @@ Status legend:
 | Document library | ☒ | PDF/image import, searchable local list, rename/delete, PDF page counts, thumbnails, offline PDF/image preview | N/A | User confirmed PDF/image import and preview were run and tested on a physical Android device; automated tests are present, with CI tracked separately |
 | Camera scanning and page editing | [~] | Native multi-page scanning, crop/rotate, reorder/delete, PDF regeneration for scanned documents | N/A | Repository and image/PDF service tests added; physical-device validation pending |
 | Merge, split, image-to-PDF, and compression | [~] | Offline PDF operations screen, service, and local-library output persistence | N/A | Automated service tests authored; CLI execution intentionally skipped; physical-device verification pending |
-| Compression and annotations | ☐ | Pending | N/A | Pending |
-| Signature, watermark, and page numbers | ☐ | Pending | N/A | Pending |
+| Annotation, highlighting, and signatures | [~] | Local page-level ink/highlight/freehand-signature overlay with SQLite persistence; PKCS#12 certificate signing exports a separate signed copy | N/A | Repository and signing-input tests authored; physical-device validation pending |
+| Watermark and page numbers | [~] | Local PDF watermark and per-page numbering exports through `pdf_manipulator` | N/A | Service tests authored; physical-device validation pending |
 | Share and export | ☐ | Pending | N/A | Pending |
 | Premium entitlements and ads | ☐ | Pending | Optional future service | Pending |
 | OCR and cloud backup | ☐ | Pending | Optional future Node.js service | Pending |
@@ -202,10 +202,10 @@ For each feature, follow this flow:
 - [~] Map password-protected and corrupted PDF errors to clear user messages; physical-device validation for malformed, encrypted, large, and unsupported inputs remains pending.
 
 ### Milestone 6 — Annotation and document finishing
-- [ ] Implement local annotation and highlighting.
-- [ ] Implement digital signature placement.
-- [ ] Implement watermark and page numbers.
-- [ ] Verify that edits persist after closing and reopening documents.
+- [~] Implement local page-level pen/highlight/freehand-signature overlays persisted in the existing Drift annotations table; flattening the overlay into exported PDF content remains pending.
+- [~] Implement certificate-backed PKCS#12/PFX digital signing. Certificate bytes are used in memory and are not copied into app storage; a valid certificate bundle and password are required.
+- [~] Implement text watermark and per-page numbering exports. Each operation creates a separate PDF in the local library and preserves the source document.
+- [~] Persist annotation strokes in SQLite and reload them when reopening the annotation editor; complete physical-device validation and PDF flatten/export integration remain pending.
 
 ### Milestone 7 — Export and batch workflows
 - [ ] Implement share/export and Android save destinations.
@@ -407,3 +407,11 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added service tests for merge, split, image-to-PDF, compression, and invalid merge input. Per the user's instruction, CLI execution/results are intentionally not used as a progress gate; physical-device validation remains outstanding.
 - Updated the Android CI generated-file commit step to persist the resolved `pubspec.lock` alongside generated Android/Stacked/Drift files, so the new native PDF dependency and its transitive versions are reproducible.
 - Milestone 4 scanner/page-editor device verification remains pending and is not marked complete.
+
+### 2026-11-25 — Milestone 6: annotation and document finishing
+- Added repository APIs to create, list by document/page, and delete local annotations using the existing Drift `annotations` table; no schema migration or remote service is required.
+- Added an annotation editor launched from PDF preview. It renders the PDF with an interactive overlay and supports pen, translucent yellow highlighting, and freehand signature marks. Stroke coordinates are normalized to the page viewport and saved as JSON payloads in SQLite, then reloaded for the selected page.
+- Added certificate-backed digital signing using the PDF engine's PKCS#12/PFX credentials API. The user selects a PDF and a local certificate bundle, enters its password, and the app saves a separate signed PDF. Certificate bytes are processed in memory and are not copied to app storage. This requires a valid PKCS#12/PFX certificate and password; a drawn signature mark is not itself a cryptographic signature.
+- Added text watermark and per-page numbering operations. Watermarks use translucent foreground text; page numbers use distinct `Page N of total` labels at the bottom-right. Both create separate PDF copies in the local library and preserve the source.
+- Added repository and service tests for annotation persistence/cleanup, watermark/page numbering page-count preservation, and missing signing credentials. Per the user's instruction, CLI execution is intentionally skipped; physical-device validation remains outstanding.
+- Limitation tracked: annotation strokes currently persist as editable app-side overlays and are not yet flattened into the PDF file during export. Add a dedicated flatten/export flow before treating markup as embedded PDF content.
