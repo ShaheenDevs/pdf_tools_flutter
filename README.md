@@ -72,8 +72,8 @@ Status legend:
 | Area / feature | Status | Flutter | Backend | Testing |
 |---|---|---|---|---|
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
-| Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main; user confirmed it runs on a physical Android device | N/A | Physical-device launch confirmed by user; CI analyzer policy adjusted, full CI rerun pending |
-| Local database and file storage | [~] | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests pass in CI; Android APK build is being fixed for generated AGP compatibility |
+| Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
+| Local database and file storage | [~] | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests pass in CI; user confirms physical-device testing. CI APK build pipeline fix remains in progress |
 | Document library | ☐ | Pending | N/A | Pending |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
@@ -181,10 +181,10 @@ For each feature, follow this flow:
 - [~] Complete Android debug APK validation. Run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086) passed analysis and all seven tests but failed at APK build because Flutter 3.50.1 requires Android Gradle Plugin 9.1.1 while the generated project supplied 9.1.0. CI now patches the generated plugin version before building; awaiting validation run.
 
 ### Milestone 3 — Document library and import
-- [ ] Build the document library, empty/loading/error states, search, rename, and delete.
-- [ ] Import existing PDFs and images from Android storage/document picker.
-- [ ] Generate and persist thumbnails and metadata.
-- [ ] Test import, reopen, rename, and delete flows.
+- [~] Build the document library with loading, empty, error, refresh, rename, and delete states; search is still pending.
+- [~] Add Android document-picker import for PDF and common image formats, copying selected bytes into app-private storage and registering metadata in Drift.
+- [ ] Extract PDF page counts and generate/persist document thumbnails.
+- [ ] Add import-picker, reopen/preview, rename, and delete flow tests.
 
 ### Milestone 4 — Camera scanning and page editing
 - [ ] Implement camera capture and multi-page scan sessions.
@@ -337,3 +337,11 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Updated CI to patch the generated `android/settings.gradle` plugin version to 9.1.1 and verify the replacement before continuing.
 - CI workflow fix commit: `659298db00704e0ffdd5b1db6bc42a8ec41de8e9`.
 - Milestone 2 remains in progress until the new CI run completes the Android debug build and generated-file commit.
+
+
+### 2026-11-25 — Physical-device confirmation and Milestone 3 start
+- User confirmed that they have already tested the app on a physical Android device. This is recorded as a user-reported device smoke test; CI validation remains separately tracked.
+- CI run [45577237065](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45577237065) passed the Gradle platform generation step but the compatibility patch failed because the Flutter template generated `android/settings.gradle.kts`, not `android/settings.gradle`.
+- Updated the CI patch to search both `.gradle` and `.gradle.kts` files and replace AGP 9.1.0 with 9.1.1.
+- Started Milestone 3: added the file picker dependency, document library list with loading/empty/error/refresh states, PDF/image import to app-private storage, and rename/delete actions. PDF page count extraction, thumbnails, search, and preview remain pending.
+- Milestone 3 implementation commits: `65597a0` (picker dependency), `40ed552` (ViewModel), `4b9d891` (library UI), `68fdbe4` (test injection), `33647fa` (widget test setup).
