@@ -47,6 +47,37 @@ class FileStorageService {
     return relative;
   }
 
+
+  /// Removes abandoned atomic-write files older than [maxAge].
+  ///
+  /// A recent .pending file may belong to an active write, so cleanup only
+  /// considers files whose modification time is older than the cutoff.
+  /// Completed files are never selected.
+  Future<int> cleanupStalePendingFiles({
+    Duration maxAge = const Duration(hours: 24),
+    DateTime? now,
+  }) async {
+    if (maxAge.isNegative) {
+      throw ArgumentError.value(maxAge, 'maxAge', 'Must not be negative');
+    }
+    final Directory root = await _root;
+    final DateTime cutoff = (now ?? DateTime.now()).subtract(maxAge);
+    var removed = 0;
+    await for (final entity in root.list(recursive: true, followLinks: false)) {
+      if (entity is! File || !entity.path.endsWith('.pending')) continue;
+      try {
+        final FileStat stat = await entity.stat();
+        if (stat.modified.isBefore(cutoff)) {
+          await entity.delete();
+          removed++;
+        }
+      } on FileSystemException {
+        // A file may disappear or become inaccessible during cleanup.
+      }
+    }
+    return removed;
+  }
+
   Future<List<int>> readBytes(String relativePath) async {
     final File file = await _resolve(relativePath);
     if (!await file.exists()) {
