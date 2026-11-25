@@ -266,7 +266,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 - [ ] CI test/build follow-up is tracked separately and is not the feature acceptance gate; physical-device validation was confirmed by the user.
 - [x] Generated Android and Stacked files are present on `main`.
-- [x] PDF engine selected: PDFx for offline rendering and page navigation; Android CI and device validation for the newly added import/preview flow remain pending.\n- [x] Scanner package selected for Milestone 4: `cunning_document_scanner` (MIT; Android/iOS; multi-page capture and automatic crop; Android API 24 minimum in current 3.x docs).
+- [x] PDF engine selected: PDFx for offline rendering and page navigation; Android CI and device validation for the newly added import/preview flow remain pending.
+- [x] Scanner package selected for Milestone 4: `cunning_document_scanner` (MIT; Android/iOS; multi-page capture and automatic crop; Android API 24 minimum in current 3.x docs).
 - [ ] Premium purchase provider and entitlement verification are not yet selected.
 - [ ] OCR provider, credit model, and privacy policy are not yet selected.
 - [ ] Cloud backup storage and optional backend deployment are not yet designed.
@@ -275,7 +276,12 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## J. Development History
 
-### 2026-11-25 — Milestone 3 accepted on physical device; Milestone 4 started\n- User explicitly confirmed that the PDF/image import and preview flows were run and tested on a physical Android device, and asked that CLI execution not block progress. Milestone 3 is accepted on that basis.\n- Automated test/build checks remain a separate quality signal and are not represented as passed by this device confirmation.\n- Started Milestone 4 package evaluation. Selected `cunning_document_scanner` 3.x because its current package documentation describes multi-page scanning, automatic crop, image/PDF outputs, Android support, and an MIT license. Android camera permission and API 24 minimum are being configured.\n\n### 2026-11-25 — Milestone 2: local database and file storage started
+### 2026-11-25 — Milestone 3 accepted on physical device; Milestone 4 started
+- User explicitly confirmed that the PDF/image import and preview flows were run and tested on a physical Android device, and asked that CLI execution not block progress. Milestone 3 is accepted on that basis.
+- Automated test/build checks remain a separate quality signal and are not represented as passed by this device confirmation.
+- Started Milestone 4 package evaluation. Selected `cunning_document_scanner` 3.x because its current package documentation describes multi-page scanning, automatic crop, image/PDF outputs, Android support, and an MIT license. Android camera permission and API 24 minimum are being configured.
+
+### 2026-11-25 — Milestone 2: local database and file storage started
 - Added Drift and SQLite dependencies plus an app-support-directory database connection.
 - Added schema v1 for documents, document pages, and annotations, including cascading foreign keys and unique page ordering per document.
 - Added app-private file storage for documents, images, thumbnails, and temporary files. Writes use a pending file followed by rename; APIs return relative paths and reject unsafe extensions/path traversal.
