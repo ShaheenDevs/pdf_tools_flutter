@@ -61,7 +61,7 @@ class HomeView extends StackedView<HomeViewModel> {
               const SizedBox(height: 12),
               _ToolGrid(
                 onScan: viewModel.isBusy ? null : viewModel.scanDocument,
-                onPdfTools: (tool) => _openPdfTools(context, tool),
+                onPdfTools: (tool) => _openPdfTools(context, tool, viewModel),
               ),
               const SizedBox(height: 28),
               Row(
@@ -163,12 +163,17 @@ class HomeView extends StackedView<HomeViewModel> {
     );
   }
 
-  Future<void> _openPdfTools(BuildContext context, String initialTool) async {
+  Future<void> _openPdfTools(
+    BuildContext context,
+    String initialTool,
+    HomeViewModel viewModel,
+  ) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PdfToolsView(initialTool: initialTool),
       ),
     );
+    if (context.mounted) await viewModel.loadDocuments();
   }
 
   Future<void> _openDocument(
