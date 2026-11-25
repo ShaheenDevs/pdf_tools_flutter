@@ -315,28 +315,28 @@ class _ToolGrid extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           onTap: item.label == 'Scan document' ? onScan : null,
           child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFE9ECF3)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(item.icon, color: AppTheme.primary, size: 25),
-              const SizedBox(height: 10),
-              Text(
-                item.label,
-                style: const TextStyle(
-                  color: AppTheme.ink,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFE9ECF3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(item.icon, color: AppTheme.primary, size: 25),
+                const SizedBox(height: 10),
+                Text(
+                  item.label,
+                  style: const TextStyle(
+                    color: AppTheme.ink,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ),
         );
       },
