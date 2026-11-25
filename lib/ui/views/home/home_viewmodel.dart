@@ -7,6 +7,7 @@ import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
 import 'package:pdf_tools_flutter/services/file_storage_service.dart';
 import 'package:pdf_tools_flutter/services/pdf_metadata_service.dart';
+import 'package:pdf_tools_flutter/services/image_thumbnail_service.dart';
 import 'package:stacked/stacked.dart';
 
 class HomeViewModel extends BaseViewModel {
@@ -16,12 +17,14 @@ class HomeViewModel extends BaseViewModel {
     FileStorageService? fileStorage,
   }) : _repository = repository ?? locator<DocumentRepository>(),
        _pdfMetadataService = pdfMetadataService ?? PdfMetadataService(),
+       _imageThumbnailService = ImageThumbnailService(),
        _fileStorage = fileStorage ?? locator<FileStorageService>() {
     loadDocuments();
   }
 
   final DocumentRepository _repository;
   final PdfMetadataService _pdfMetadataService;
+  final ImageThumbnailService _imageThumbnailService;
   final FileStorageService _fileStorage;
 
   Future<String> absolutePathFor(String relativePath) =>
@@ -98,17 +101,26 @@ class HomeViewModel extends BaseViewModel {
         sourceType: isPdf ? 'imported_pdf' : 'imported_image',
       );
       String? importWarning;
-      if (isPdf) {
+      if (isPdf || ['jpg', 'jpeg', 'png', 'webp'].contains(extension)) {
         try {
-          final PdfMetadata metadata = await _pdfMetadataService.inspect(bytes);
-          await _repository.updatePdfMetadata(
+          final List<int> thumbnailBytes;
+          final int pageCount;
+          if (isPdf) {
+            final PdfMetadata metadata = await _pdfMetadataService.inspect(bytes);
+            thumbnailBytes = metadata.firstPageThumbnail;
+            pageCount = metadata.pageCount;
+          } else {
+            thumbnailBytes = await _imageThumbnailService.createThumbnail(bytes);
+            pageCount = 1;
+          }
+          await _repository.updateDocumentMetadata(
             documentId: documentId,
-            pageCount: metadata.pageCount,
-            thumbnailBytes: metadata.firstPageThumbnail,
+            pageCount: pageCount,
+            thumbnailBytes: thumbnailBytes,
           );
         } catch (error) {
           importWarning =
-              'PDF imported, but its preview could not be generated. The original file is safe.';
+              'File imported, but its preview could not be generated. The original file is safe.';
         }
       }
       await loadDocuments();
