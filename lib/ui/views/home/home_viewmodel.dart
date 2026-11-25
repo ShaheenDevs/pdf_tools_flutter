@@ -36,7 +36,23 @@ class HomeViewModel extends BaseViewModel {
     }
   }
   List<Document> documents = [];
+  String searchQuery = '';
   String? errorMessage;
+
+  List<Document> get visibleDocuments {
+    final String query = searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return documents;
+    return documents.where((document) {
+      return document.title.toLowerCase().contains(query) ||
+          document.sourceType.toLowerCase().contains(query) ||
+          p.extension(document.filePath).toLowerCase().contains(query);
+    }).toList();
+  }
+
+  void updateSearchQuery(String value) {
+    searchQuery = value;
+    notifyListeners();
+  }
 
   Future<void> loadDocuments() async {
     setBusy(true);
