@@ -530,3 +530,9 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Recent pending files are preserved to avoid racing active writes; completed document/image/thumbnail files are never selected. Cleanup is best-effort so a recovery issue does not prevent the app from opening.
 - Added tests proving stale pending files are removed while recent pending files and completed files remain, and that invalid negative cleanup ages are rejected.
 - Commits: storage service `9a3911ce`, startup integration `f64dbc90`, and tests `8b9ee5d9`. GitHub Actions validation is pending; no local CLI tests were run.
+
+
+### 2026-11-25 — Make startup recovery fully non-blocking
+- Broadened the startup cleanup guard to catch any cleanup failure, including platform/plugin exceptions, rather than only filesystem exceptions. The recovery is optional maintenance; app launch proceeds even if the storage provider is temporarily unavailable.
+- This does not suppress failures from locator setup or database registration; only the isolated cleanup call is guarded.
+- Commit: `3f33124f`. GitHub Actions validation is triggered by the startup change; no local CLI commands or tests were run.
