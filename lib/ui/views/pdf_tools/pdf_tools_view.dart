@@ -15,7 +15,7 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
     Widget? child,
   ) {
     return Scaffold(
-      appBar: AppBar(title: const Text('PDF tools')),
+      appBar: AppBar(title: Text(initialTool ?? 'PDF tools')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
