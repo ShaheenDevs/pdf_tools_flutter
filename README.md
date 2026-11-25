@@ -267,6 +267,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 ## I. Known Issues and Decisions
 
 - [ ] CI test/build follow-up is tracked separately and is not the feature acceptance gate; physical-device validation was confirmed by the user.
+- [x] Latest CI analysis failure traced to `pdf_manipulator` 6.0.0 breaking API changes: watermark `rotation` is now `angleDegrees`, and PKCS#12 certificate bytes must be wrapped in `MemorySource` as a `DataSource`. Source updated; validation rerun pending.
 - [x] Generated Android and Stacked files are present on `main`.
 - [x] PDF engine selected: PDFx for offline rendering and page navigation; Android CI and device validation for the newly added import/preview flow remain pending.
 - [x] Scanner package selected for Milestone 4: `cunning_document_scanner` (MIT; Android/iOS; multi-page capture and automatic crop; Android API 24 minimum in current 3.x docs).
