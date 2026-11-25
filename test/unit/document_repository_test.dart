@@ -5,6 +5,22 @@ import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
 import 'package:pdf_tools_flutter/services/file_storage_service.dart';
 
+class _FailingDeleteStorage extends FileStorageService {
+  _FailingDeleteStorage({required super.rootDirectory});
+
+  String? failPath;
+  final List<String> attemptedPaths = [];
+
+  @override
+  Future<void> deleteFile(String relativePath) async {
+    attemptedPaths.add(relativePath);
+    if (relativePath == failPath) {
+      throw FileSystemException('Simulated cleanup failure', relativePath);
+    }
+    await super.deleteFile(relativePath);
+  }
+}
+
 void main() {
   late AppDatabase database;
   late Directory root;
@@ -196,6 +212,32 @@ void main() {
     expect(await repository.getAnnotations(documentId: documentId, pageIndex: 0), isEmpty);
     await repository.deleteDocument(documentId);
     expect(await repository.getAnnotations(documentId: documentId), isEmpty);
+  });
+
+  test('document deletion attempts every file when one cleanup fails', () async {
+    final failingStorage = _FailingDeleteStorage(rootDirectory: root);
+    storage = failingStorage;
+    repository = DocumentRepository(database: database, fileStorage: storage);
+    final id = await repository.importDocument(
+      title: 'Cleanup resilience',
+      bytes: [37, 80, 68, 70],
+      extension: 'pdf',
+    );
+    await repository.updateDocumentMetadata(
+      documentId: id,
+      pageCount: 1,
+      thumbnailBytes: [137, 80, 78, 71],
+    );
+    final document = (await repository.getDocuments()).single;
+    failingStorage.failPath = document.filePath;
+
+    await repository.deleteDocument(id);
+
+    expect(await repository.getDocuments(), isEmpty);
+    expect(failingStorage.attemptedPaths, contains(document.filePath));
+    expect(failingStorage.attemptedPaths, contains(document.thumbnailPath));
+    expect(await File('${root.path}/${document.thumbnailPath}').exists(), isFalse);
+    expect(await File('${root.path}/${document.filePath}').exists(), isTrue);
   });
 
   test('rejects empty document titles', () async {
