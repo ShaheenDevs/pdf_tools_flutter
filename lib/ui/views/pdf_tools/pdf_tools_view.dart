@@ -93,6 +93,14 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
               onPressed: viewModel.imagesToPdf,
             ),
             _ToolCard(
+              icon: Icons.verified_user_outlined,
+              title: 'Digital signature',
+              description: 'Sign with a PKCS#12 / PFX certificate stored on your device.',
+              buttonLabel: 'Choose certificate',
+              busy: viewModel.isBusy,
+              onPressed: () => _requestCertificatePassword(context, viewModel),
+            ),
+            _ToolCard(
               icon: Icons.branding_watermark_outlined,
               title: 'Add watermark',
               description: 'Add custom translucent text to every page and save a copy.',
@@ -127,6 +135,44 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
     );
   }
 
+
+
+  Future<void> _requestCertificatePassword(
+    BuildContext context,
+    PdfToolsViewModel viewModel,
+  ) async {
+    final controller = TextEditingController();
+    final password = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Certificate password'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          obscureText: true,
+          decoration: const InputDecoration(
+            labelText: 'PKCS#12 / PFX password',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (value) => Navigator.pop(dialogContext, value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (password != null && password.isNotEmpty) {
+      await viewModel.signPdf(password);
+    }
+  }
 
   Future<void> _requestWatermark(
     BuildContext context,
