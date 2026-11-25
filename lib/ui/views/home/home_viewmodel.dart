@@ -6,19 +6,26 @@ import 'package:pdf_tools_flutter/app/app.locator.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
 import 'package:pdf_tools_flutter/services/pdf_metadata_service.dart';
+import 'package:pdf_tools_flutter/services/file_storage_service.dart';
 import 'package:stacked/stacked.dart';
 
 class HomeViewModel extends BaseViewModel {
   HomeViewModel({
     DocumentRepository? repository,
     PdfMetadataService? pdfMetadataService,
+    FileStorageService? fileStorage,
   }) : _repository = repository ?? locator<DocumentRepository>(),
-       _pdfMetadataService = pdfMetadataService ?? PdfMetadataService() {
+       _pdfMetadataService = pdfMetadataService ?? PdfMetadataService(),
+       _fileStorage = fileStorage ?? locator<FileStorageService>() {
     loadDocuments();
   }
 
   final DocumentRepository _repository;
   final PdfMetadataService _pdfMetadataService;
+  final FileStorageService _fileStorage;
+
+  Future<String> absolutePathFor(String relativePath) =>
+      _fileStorage.absolutePathFor(relativePath);
   List<Document> documents = [];
   String? errorMessage;
 
