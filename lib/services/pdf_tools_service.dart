@@ -33,13 +33,13 @@ class PdfToolsService {
 
     final pdf = Pdf();
     try {
-      final input = PdfInput(MemorySource(Uint8List.fromList(sourceBytes)));
       final outputs = <Uint8List>[];
       for (final range in pageRanges) {
         if (range.isEmpty || range.toSet().length != range.length) {
           throw ArgumentError('Each page range must contain unique page indexes.');
         }
         final sink = MemorySink();
+        final input = PdfInput(MemorySource(Uint8List.fromList(sourceBytes)));
         await pdf
             .editOnce(input, sink)
             .keepPages(PdfPages.list(range));
