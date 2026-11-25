@@ -1,32 +1,60 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pdf_tools_flutter/database/app_database.dart';
+import 'package:pdf_tools_flutter/repositories/document_repository.dart';
+import 'package:pdf_tools_flutter/services/file_storage_service.dart';
 import 'package:pdf_tools_flutter/ui/views/home/home_view.dart';
+import 'package:pdf_tools_flutter/ui/views/home/home_viewmodel.dart';
 
 void main() {
-  testWidgets('home view displays the initial document workspace', (
+  late AppDatabase database;
+  late Directory storageRoot;
+
+  setUp(() async {
+    database = AppDatabase.forTesting();
+    storageRoot = await Directory.systemTemp.createTemp('pdf-tools-widget-');
+  });
+
+  tearDown(() async {
+    await database.close();
+    if (await storageRoot.exists()) {
+      await storageRoot.delete(recursive: true);
+    }
+  });
+
+  testWidgets('home view displays the document workspace and empty library', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeView()));
+    final repository = DocumentRepository(
+      database: database,
+      fileStorage: FileStorageService(rootDirectory: storageRoot),
+    );
+    final viewModel = HomeViewModel(repository: repository);
+    await tester.pumpWidget(
+      MaterialApp(home: HomeView(testViewModel: viewModel)),
+    );
+    await tester.pumpAndSettle();
 
     expect(find.text('PDF Tools & Scanner'), findsOneWidget);
     expect(find.text('Quick tools'), findsOneWidget);
 
-    final pageScrollable = find
-        .descendant(
-          of: find.byType(Scaffold),
-          matching: find.byType(Scrollable),
-        )
-        .first;
-
     await tester.scrollUntilVisible(
       find.text('Recent documents'),
       250,
-      scrollable: pageScrollable,
+      scrollable: find
+          .descendant(
+            of: find.byType(Scaffold),
+            matching: find.byType(Scrollable),
+          )
+          .first,
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Scan document'), findsOneWidget);
     expect(find.text('Recent documents'), findsOneWidget);
     expect(find.text('No documents yet'), findsOneWidget);
+    expect(find.text('Import'), findsOneWidget);
   });
 }
