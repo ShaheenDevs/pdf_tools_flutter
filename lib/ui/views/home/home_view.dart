@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:pdf_tools_flutter/app/app_theme.dart';
@@ -103,6 +105,8 @@ class HomeView extends StackedView<HomeViewModel> {
                     onRename: () => _renameDocument(context, document, viewModel),
                     onDelete: () => _confirmDelete(context, document, viewModel),
                     onOpen: () => _openDocument(context, document, viewModel),
+                    thumbnailLoader: () =>
+                        viewModel.thumbnailBytesFor(document.thumbnailPath),
                   ),
                 ),
             ],
@@ -338,12 +342,14 @@ class _DocumentTile extends StatelessWidget {
     required this.onRename,
     required this.onDelete,
     required this.onOpen,
+    required this.thumbnailLoader,
   });
 
   final Document document;
   final VoidCallback onRename;
   final VoidCallback onDelete;
   final VoidCallback onOpen;
+  final Future<List<int>?> Function() thumbnailLoader;
 
   @override
   Widget build(BuildContext context) {
@@ -360,12 +366,29 @@ class _DocumentTile extends StatelessWidget {
       ),
       child: ListTile(
         onTap: onOpen,
-        leading: CircleAvatar(
-          backgroundColor: AppTheme.primary.withValues(alpha: 0.10),
-          child: Icon(
-            isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
-            color: AppTheme.primary,
-          ),
+        leading: FutureBuilder<List<int>?>(
+          future: thumbnailLoader(),
+          builder: (context, snapshot) {
+            final bytes = snapshot.data;
+            if (bytes != null && bytes.isNotEmpty) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.memory(
+                  Uint8List.fromList(bytes),
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
+                ),
+              );
+            }
+            return CircleAvatar(
+              backgroundColor: AppTheme.primary.withValues(alpha: 0.10),
+              child: Icon(
+                isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
+                color: AppTheme.primary,
+              ),
+            );
+          },
         ),
         title: Text(
           document.title,
