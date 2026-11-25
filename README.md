@@ -473,3 +473,11 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added text watermark and per-page numbering operations. Watermarks use translucent foreground text; page numbers use distinct `Page N of total` labels at the bottom-right. Both create separate PDF copies in the local library and preserve the source.
 - Added repository and service tests for annotation persistence/cleanup, watermark/page numbering page-count preservation, and missing signing credentials. Per the user's instruction, CLI execution is intentionally skipped; physical-device validation remains outstanding.
 - Export behavior: saved markup is exported as transparent page-sized PDF image-stamp annotations, not flattened page content. Existing unrelated PDF comments/forms are preserved.
+
+
+### 2026-11-25 — Milestone 9: CI widget-test timeout fix
+- The completed CI run [45645994683](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45645994683) passed Android platform generation, Gradle compatibility, dependency resolution, Stacked/Drift generation, Flutter analysis, and 32 tests. One home-library search widget test timed out after ten minutes; the Android debug APK step was skipped because the test step failed.
+- Root cause: each document tile created a new thumbnail-loading Future inside its FutureBuilder during every build. When the Future completed, the builder rebuilt and started another Future, producing a repeated asynchronous rebuild cycle in the populated-library widget test.
+- Changed document tiles to cache their thumbnail Future in widget state and refresh it only when the document's thumbnail path changes. This prevents the FutureBuilder completion from recursively starting new file reads.
+- Fix commits: 9b3d108739b5e18d1d3dd421792945489e32a013 and c5eb8e02f0f262dd9023ee4b38581accbd89cab4. A fresh GitHub Actions validation has been triggered; its final test and APK results remain pending.
+- Physical-device acceptance recorded elsewhere in this README is separate from this automated CI result. No local CLI commands or tests were run.
