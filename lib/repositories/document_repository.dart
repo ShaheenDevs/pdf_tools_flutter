@@ -46,6 +46,64 @@ class DocumentRepository {
   }
 
 
+  Future<int> importScannedDocument({
+    required String title,
+    required List<int> pdfBytes,
+    required List<List<int>> pageImageBytes,
+  }) async {
+    if (pdfBytes.isEmpty || pageImageBytes.isEmpty) {
+      throw ArgumentError('A scan must contain a PDF and at least one page.');
+    }
+    final String pdfPath = await _fileStorage.saveBytes(
+      folder: StorageFolder.documents,
+      bytes: pdfBytes,
+      extension: 'pdf',
+    );
+    final List<String> imagePaths = [];
+    try {
+      for (final bytes in pageImageBytes) {
+        if (bytes.isEmpty) {
+          throw ArgumentError('Scanned page image cannot be empty.');
+        }
+        imagePaths.add(await _fileStorage.saveBytes(
+          folder: StorageFolder.images,
+          bytes: bytes,
+          extension: 'jpg',
+        ));
+      }
+      return await _database.transaction(() async {
+        final DateTime now = DateTime.now();
+        final int documentId = await _database.into(_database.documents).insert(
+          DocumentsCompanion.insert(
+            title: title.trim().isEmpty ? 'Scanned document' : title.trim(),
+            filePath: pdfPath,
+            pageCount: Value(imagePaths.length),
+            fileSize: Value(pdfBytes.length),
+            createdAt: now,
+            updatedAt: now,
+            sourceType: const Value('scanned'),
+          ),
+        );
+        for (var index = 0; index < imagePaths.length; index++) {
+          await _database.into(_database.documentPages).insert(
+            DocumentPagesCompanion.insert(
+              documentId: documentId,
+              pageIndex: index,
+              sourceImagePath: Value(imagePaths[index]),
+            ),
+          );
+        }
+        return documentId;
+      });
+    } catch (_) {
+      await _fileStorage.deleteFile(pdfPath);
+      for (final path in imagePaths) {
+        await _fileStorage.deleteFile(path);
+      }
+      rethrow;
+    }
+  }
+
   Future<void> updateDocumentMetadata({
     required int documentId,
     required int pageCount,
