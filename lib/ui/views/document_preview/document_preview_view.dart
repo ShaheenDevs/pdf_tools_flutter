@@ -2,18 +2,23 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:pdf_tools_flutter/ui/views/annotation_editor/annotation_editor_view.dart';
 
 class DocumentPreviewView extends StatefulWidget {
   const DocumentPreviewView({
     required this.title,
     required this.filePath,
     required this.isPdf,
+    this.documentId,
+    this.pageCount = 1,
     super.key,
   });
 
   final String title;
   final String filePath;
   final bool isPdf;
+  final int? documentId;
+  final int pageCount;
 
   @override
   State<DocumentPreviewView> createState() => _DocumentPreviewViewState();
@@ -41,7 +46,26 @@ class _DocumentPreviewViewState extends State<DocumentPreviewView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          if (widget.isPdf && widget.documentId != null)
+            IconButton(
+              tooltip: 'Annotate PDF',
+              icon: const Icon(Icons.draw_outlined),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => AnnotationEditorView(
+                    documentId: widget.documentId!,
+                    title: widget.title,
+                    filePath: widget.filePath,
+                    pageCount: widget.pageCount,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
       body: widget.isPdf
           ? PdfView(
               controller: _pdfController!,
