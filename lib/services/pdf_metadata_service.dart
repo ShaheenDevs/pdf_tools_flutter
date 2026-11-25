@@ -29,7 +29,7 @@ class PdfMetadataService {
       firstPage = await document.getPage(1);
       final double targetWidth = 360;
       final double targetHeight =
-          (firstPage.height * targetWidth / firstPage.width).clamp(1, 1200);
+          (firstPage.height * targetWidth / firstPage.width).clamp(1.0, 1200.0).toDouble();
       final PdfPageImage? rendered = await firstPage.render(
         width: targetWidth,
         height: targetHeight,
