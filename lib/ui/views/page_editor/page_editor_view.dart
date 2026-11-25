@@ -173,7 +173,7 @@ class PageEditorView extends StackedView<PageEditorViewModel> {
       PageEditorViewModel(documentId: documentId);
 }
 
-class _PageCard extends StatelessWidget {
+class _PageCard extends StatefulWidget {
   const _PageCard({
     required super.key,
     required this.index,
@@ -194,6 +194,32 @@ class _PageCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
+  State<_PageCard> createState() => _PageCardState();
+}
+
+class _PageCardState extends State<_PageCard> {
+  late Future<Uint8List?> _previewFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _previewFuture = widget.previewLoader();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PageCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldPage = oldWidget.page;
+    final newPage = widget.page;
+    if (oldPage.id != newPage.id ||
+        oldPage.sourceImagePath != newPage.sourceImagePath ||
+        oldPage.rotation != newPage.rotation ||
+        oldPage.cropData != newPage.cropData) {
+      _previewFuture = widget.previewLoader();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -202,7 +228,7 @@ class _PageCard extends StatelessWidget {
         child: Row(
           children: [
             FutureBuilder<Uint8List?>(
-              future: previewLoader(),
+              future: _previewFuture,
               builder: (context, snapshot) {
                 final bytes = snapshot.data;
                 return Container(
@@ -233,12 +259,12 @@ class _PageCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Page ${index + 1}',
+                    'Page ${widget.index + 1}',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    'Rotation: ${page.rotation}°',
+                    'Rotation: ${widget.page.rotation}°',
                     style: const TextStyle(color: Colors.black54, fontSize: 12),
                   ),
                 ],
@@ -246,21 +272,21 @@ class _PageCard extends StatelessWidget {
             ),
             IconButton(
               tooltip: 'Rotate 90 degrees',
-              onPressed: enabled ? onRotate : null,
+              onPressed: widget.enabled ? widget.onRotate : null,
               icon: const Icon(Icons.rotate_right),
             ),
             IconButton(
               tooltip: 'Adjust crop',
-              onPressed: enabled ? onCrop : null,
+              onPressed: widget.enabled ? widget.onCrop : null,
               icon: const Icon(Icons.crop),
             ),
             IconButton(
               tooltip: 'Delete page',
-              onPressed: enabled ? onDelete : null,
+              onPressed: widget.enabled ? widget.onDelete : null,
               icon: const Icon(Icons.delete_outline),
             ),
             ReorderableDragStartListener(
-              index: index,
+              index: widget.index,
               child: const Padding(
                 padding: EdgeInsets.all(8),
                 child: Icon(Icons.drag_handle, color: Colors.black54),
