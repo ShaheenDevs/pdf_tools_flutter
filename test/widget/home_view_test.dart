@@ -18,8 +18,6 @@ void main() {
   });
 
   tearDown(() async {
-    tester.view.resetPhysicalSize();
-    tester.view.resetDevicePixelRatio();
     await database.close();
     if (await storageRoot.exists()) {
       await storageRoot.delete(recursive: true);
@@ -29,6 +27,10 @@ void main() {
   testWidgets('home view displays the document workspace and empty library', (
     WidgetTester tester,
   ) async {
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
     final storage = FileStorageService(rootDirectory: storageRoot);
     final repository = DocumentRepository(
       database: database,
