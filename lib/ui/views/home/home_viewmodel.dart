@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:pdf_tools_flutter/app/app.locator.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
+import 'package:pdf_tools_flutter/services/document_scanner_service.dart';
 import 'package:pdf_tools_flutter/services/file_storage_service.dart';
 import 'package:pdf_tools_flutter/services/image_thumbnail_service.dart';
 import 'package:pdf_tools_flutter/services/pdf_metadata_service.dart';
@@ -16,12 +17,14 @@ class HomeViewModel extends BaseViewModel {
     PdfMetadataService? pdfMetadataService,
     ImageThumbnailService? imageThumbnailService,
     FileStorageService? fileStorage,
+    DocumentScannerService? scannerService,
     bool loadOnCreate = true,
   }) : _repository = repository ?? locator<DocumentRepository>(),
        _pdfMetadataService = pdfMetadataService ?? PdfMetadataService(),
        _imageThumbnailService =
            imageThumbnailService ?? ImageThumbnailService(),
-       _fileStorage = fileStorage ?? locator<FileStorageService>() {
+       _fileStorage = fileStorage ?? locator<FileStorageService>(),
+       _scannerService = scannerService ?? DocumentScannerService() {
     if (loadOnCreate) loadDocuments();
   }
 
@@ -29,6 +32,7 @@ class HomeViewModel extends BaseViewModel {
   final PdfMetadataService _pdfMetadataService;
   final ImageThumbnailService _imageThumbnailService;
   final FileStorageService _fileStorage;
+  final DocumentScannerService _scannerService;
 
   Future<String> absolutePathFor(String relativePath) =>
       _fileStorage.absolutePathFor(relativePath);
@@ -71,6 +75,46 @@ class HomeViewModel extends BaseViewModel {
       errorMessage = 'Could not load documents. Please try again.';
     } finally {
       setBusy(false);
+    }
+  }
+
+  Future<void> scanDocument() async {
+    errorMessage = null;
+    notifyListeners();
+    try {
+      final ScannedDocumentResult? scan =
+          await _scannerService.scanDocuments();
+      if (scan == null) return;
+      final String? pdfPath = scan.pdfPath;
+      if (pdfPath == null || scan.imagePaths.isEmpty) {
+        throw const FormatException('The scanner returned incomplete output.');
+      }
+      final List<int> pdfBytes = await File(pdfPath).readAsBytes();
+      final List<List<int>> pageBytes = [];
+      for (final path in scan.imagePaths) {
+        pageBytes.add(await File(path).readAsBytes());
+      }
+      final int documentId = await _repository.importScannedDocument(
+        title: 'Scan ${DateTime.now().toLocal().toString().substring(0, 16)}',
+        pdfBytes: pdfBytes,
+        pageImageBytes: pageBytes,
+      );
+      try {
+        final thumbnail = await _imageThumbnailService.createThumbnail(
+          pageBytes.first,
+        );
+        await _repository.updateDocumentMetadata(
+          documentId: documentId,
+          pageCount: pageBytes.length,
+          thumbnailBytes: thumbnail,
+        );
+      } catch (_) {
+        // The original PDF and page images remain saved if thumbnailing fails.
+      }
+      await loadDocuments();
+    } catch (error) {
+      errorMessage = 'Scan could not be saved. Please try again.';
+      notifyListeners();
     }
   }
 
