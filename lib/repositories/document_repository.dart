@@ -45,6 +45,52 @@ class DocumentRepository {
     }
   }
 
+
+  Future<void> updatePdfMetadata({
+    required int documentId,
+    required int pageCount,
+    required List<int> thumbnailBytes,
+  }) async {
+    if (pageCount < 1) {
+      throw ArgumentError.value(pageCount, 'pageCount');
+    }
+    if (thumbnailBytes.isEmpty) {
+      throw ArgumentError('Thumbnail data cannot be empty');
+    }
+
+    final Document? existing = await (_database.select(
+      _database.documents,
+    )..where((row) => row.id.equals(documentId))).getSingleOrNull();
+    if (existing == null) {
+      throw StateError('Document $documentId does not exist');
+    }
+
+    final String thumbnailPath = await _fileStorage.saveBytes(
+      folder: StorageFolder.thumbnails,
+      bytes: thumbnailBytes,
+      extension: 'png',
+    );
+    try {
+      await (_database.update(
+        _database.documents,
+      )..where((row) => row.id.equals(documentId))).write(
+        DocumentsCompanion(
+          pageCount: Value(pageCount),
+          thumbnailPath: Value(thumbnailPath),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    } catch (_) {
+      await _fileStorage.deleteFile(thumbnailPath);
+      rethrow;
+    }
+
+    final String? previousThumbnail = existing.thumbnailPath;
+    if (previousThumbnail != null && previousThumbnail != thumbnailPath) {
+      await _fileStorage.deleteFile(previousThumbnail);
+    }
+  }
+
   Future<List<Document>> getDocuments() {
     return (_database.select(
       _database.documents,
