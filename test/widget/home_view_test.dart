@@ -27,11 +27,15 @@ void main() {
   testWidgets('home view displays the document workspace and empty library', (
     WidgetTester tester,
   ) async {
+    final storage = FileStorageService(rootDirectory: storageRoot);
     final repository = DocumentRepository(
       database: database,
-      fileStorage: FileStorageService(rootDirectory: storageRoot),
+      fileStorage: storage,
     );
-    final viewModel = HomeViewModel(repository: repository);
+    final viewModel = HomeViewModel(
+      repository: repository,
+      fileStorage: storage,
+    );
     await tester.pumpWidget(
       MaterialApp(home: HomeView(testViewModel: viewModel)),
     );
