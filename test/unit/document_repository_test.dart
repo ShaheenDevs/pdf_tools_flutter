@@ -171,6 +171,33 @@ void main() {
     expect((await repository.getDocuments()).single.pageCount, 1);
   });
 
+  test('stores, lists, and deletes page annotations', () async {
+    final documentId = await repository.importDocument(
+      title: 'Annotated PDF',
+      bytes: [37, 80, 68, 70],
+      extension: 'pdf',
+      pageCount: 2,
+    );
+    final inkId = await repository.addAnnotation(
+      documentId: documentId,
+      pageIndex: 0,
+      type: 'ink',
+      payload: '{\"points\":[[0.1,0.2],[0.4,0.5]]}',
+    );
+    await repository.addAnnotation(
+      documentId: documentId,
+      pageIndex: 1,
+      type: 'signature',
+      payload: '{\"points\":[[0.2,0.3],[0.5,0.6]]}',
+    );
+    expect(await repository.getAnnotations(documentId: documentId), hasLength(2));
+    expect(await repository.getAnnotations(documentId: documentId, pageIndex: 0), hasLength(1));
+    await repository.deleteAnnotation(inkId);
+    expect(await repository.getAnnotations(documentId: documentId, pageIndex: 0), isEmpty);
+    await repository.deleteDocument(documentId);
+    expect(await repository.getAnnotations(documentId: documentId), isEmpty);
+  });
+
   test('rejects empty document titles', () async {
     expect(
       repository.renameDocument(documentId: 1, title: '   '),
