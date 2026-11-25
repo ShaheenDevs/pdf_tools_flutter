@@ -212,7 +212,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
             children: [
               _toolChoice(MarkupTool.pen, 'Pen', Icons.edit),
               _toolChoice(MarkupTool.highlight, 'Highlight', Icons.highlight),
-              _toolChoice(MarkupTool.signature, 'Signature', Icons.draw),
+              _toolChoice(MarkupTool.signature, 'Draw signature', Icons.draw),
             ],
           ),
           const SizedBox(height: 8),
