@@ -60,5 +60,20 @@ void main() {
     expect(find.text('Recent documents'), findsOneWidget);
     expect(find.text('No documents yet'), findsOneWidget);
     expect(find.text('Import'), findsOneWidget);
+
+    await repository.importDocument(
+      title: 'Travel notes',
+      bytes: [1, 2, 3],
+      extension: 'png',
+      pageCount: 1,
+      sourceType: 'imported_image',
+    );
+    await viewModel.loadDocuments();
+    await tester.pumpAndSettle();
+    expect(find.text('Travel notes'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'missing title');
+    await tester.pumpAndSettle();
+    expect(find.text('No documents match your search.'), findsOneWidget);
   });
 }
