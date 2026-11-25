@@ -73,7 +73,7 @@ Status legend:
 |---|---|---|---|---|
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
-| Local database and file storage | [~] | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests pass in CI; user confirms physical-device testing. CI APK build pipeline fix remains in progress |
+| Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
 | Document library | ☐ | Pending | N/A | Pending |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
@@ -177,6 +177,7 @@ For each feature, follow this flow:
 - [x] Implement app-private file storage with unique names, temporary-write/rename behavior, relative paths, extension validation, and path-traversal protection.
 - [x] Register the database and storage service with Stacked.
 - [x] Add database and storage unit tests; analysis and all seven unit/widget tests passed in GitHub Actions run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086).
+- [x] User confirmed physical-device testing of the app. CI APK packaging compatibility is tracked as a workflow maintenance task.
 - [x] Add a document repository for import, list, rename, and delete, including rollback of a stored file when metadata insertion fails.
 - [~] Complete Android debug APK validation. Run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086) passed analysis and all seven tests but failed at APK build because Flutter 3.50.1 requires Android Gradle Plugin 9.1.1 while the generated project supplied 9.1.0. CI now patches the generated plugin version before building; awaiting validation run.
 
@@ -345,3 +346,9 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Updated the CI patch to search both `.gradle` and `.gradle.kts` files and replace AGP 9.1.0 with 9.1.1.
 - Started Milestone 3: added the file picker dependency, document library list with loading/empty/error/refresh states, PDF/image import to app-private storage, and rename/delete actions. PDF page count extraction, thumbnails, search, and preview remain pending.
 - Milestone 3 implementation commits: `65597a0` (picker dependency), `40ed552` (ViewModel), `4b9d891` (library UI), `68fdbe4` (test injection), `33647fa` (widget test setup).
+
+
+### Milestone 2 closure — 2026-11-25
+- User confirmed they have already tested the app on a physical Android device.
+- Database, storage, and repository behavior are covered by passing unit tests; the home workspace widget test also passed. CI analysis passed.
+- Milestone 2 is considered complete. The CI APK packaging workflow remains under repair due to the Flutter-generated Kotlin Gradle template and is tracked separately from feature acceptance.
