@@ -97,6 +97,77 @@ class PdfToolsService {
     }
   }
 
+
+  Future<Uint8List> addWatermark({
+    required List<int> sourceBytes,
+    required String text,
+  }) async {
+    final normalized = text.trim();
+    if (sourceBytes.isEmpty || normalized.isEmpty || normalized.length > 80) {
+      throw ArgumentError('Enter watermark text up to 80 characters.');
+    }
+    final pdf = Pdf();
+    final output = MemorySink();
+    try {
+      await _runPdf(() => pdf.rewrite(
+        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+        output,
+        (editor) async {
+          await editor.addWatermark(
+            normalized,
+            style: const PdfWatermarkStyle(
+              fontSize: 34,
+              opacity: 0.22,
+              rotation: -35,
+            ),
+            position: const PdfWatermarkPosition.center(),
+            layer: PdfWatermarkLayer.foreground,
+          );
+        },
+      ));
+      return output.takeBytes();
+    } finally {
+      await pdf.dispose();
+    }
+  }
+
+  Future<Uint8List> addPageNumbers(List<int> sourceBytes) async {
+    if (sourceBytes.isEmpty) {
+      throw ArgumentError('The source PDF is empty.');
+    }
+    final pdf = Pdf();
+    final output = MemorySink();
+    try {
+      await _runPdf(() => pdf.rewrite(
+        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+        output,
+        (editor) async {
+          final count = await editor.pageCount();
+          for (var page = 0; page < count; page++) {
+            await editor.addWatermark(
+              'Page ${page + 1} of $count',
+              pages: PdfPages.single(page),
+              style: const PdfWatermarkStyle(
+                fontSize: 9,
+                opacity: 0.85,
+                rotation: 0,
+              ),
+              position: const PdfWatermarkPosition.corner(
+                PdfCorner.bottomRight,
+                marginX: 28,
+                marginY: 20,
+              ),
+              layer: PdfWatermarkLayer.foreground,
+            );
+          }
+        },
+      ));
+      return output.takeBytes();
+    } finally {
+      await pdf.dispose();
+    }
+  }
+
   Future<T> _runPdf<T>(Future<T> Function() operation) async {
     try {
       return await operation();
