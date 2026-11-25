@@ -10,8 +10,9 @@
 import 'package:flutter/material.dart' as _i3;
 import 'package:flutter/material.dart';
 import 'package:pdf_tools_flutter/ui/views/home/home_view.dart' as _i2;
+import 'package:pdf_tools_flutter/ui/views/home/home_viewmodel.dart' as _i4;
 import 'package:stacked/stacked.dart' as _i1;
-import 'package:stacked_services/stacked_services.dart' as _i4;
+import 'package:stacked_services/stacked_services.dart' as _i5;
 
 class Routes {
   static const homeView = '/';
@@ -30,7 +31,8 @@ class StackedRouter extends _i1.RouterBase {
         orElse: () => const HomeViewArguments(),
       );
       return _i3.MaterialPageRoute<dynamic>(
-        builder: (context) => _i2.HomeView(key: args.key),
+        builder: (context) =>
+            _i2.HomeView(key: args.key, testViewModel: args.testViewModel),
         settings: data,
       );
     },
@@ -44,30 +46,33 @@ class StackedRouter extends _i1.RouterBase {
 }
 
 class HomeViewArguments {
-  const HomeViewArguments({this.key});
+  const HomeViewArguments({this.key, this.testViewModel});
 
   final _i3.Key? key;
 
+  final _i4.HomeViewModel? testViewModel;
+
   @override
   String toString() {
-    return '{"key": "$key"}';
+    return '{"key": "$key", "testViewModel": "$testViewModel"}';
   }
 
   @override
   bool operator ==(covariant HomeViewArguments other) {
     if (identical(this, other)) return true;
-    return other.key == key;
+    return other.key == key && other.testViewModel == testViewModel;
   }
 
   @override
   int get hashCode {
-    return key.hashCode;
+    return key.hashCode ^ testViewModel.hashCode;
   }
 }
 
-extension NavigatorStateExtension on _i4.NavigationService {
+extension NavigatorStateExtension on _i5.NavigationService {
   Future<dynamic> navigateToHomeView({
     _i3.Key? key,
+    _i4.HomeViewModel? testViewModel,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -76,7 +81,7 @@ extension NavigatorStateExtension on _i4.NavigationService {
   }) async {
     return navigateTo<dynamic>(
       Routes.homeView,
-      arguments: HomeViewArguments(key: key),
+      arguments: HomeViewArguments(key: key, testViewModel: testViewModel),
       id: routerId,
       preventDuplicates: preventDuplicates,
       parameters: parameters,
@@ -86,6 +91,7 @@ extension NavigatorStateExtension on _i4.NavigationService {
 
   Future<dynamic> replaceWithHomeView({
     _i3.Key? key,
+    _i4.HomeViewModel? testViewModel,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -94,7 +100,7 @@ extension NavigatorStateExtension on _i4.NavigationService {
   }) async {
     return replaceWith<dynamic>(
       Routes.homeView,
-      arguments: HomeViewArguments(key: key),
+      arguments: HomeViewArguments(key: key, testViewModel: testViewModel),
       id: routerId,
       preventDuplicates: preventDuplicates,
       parameters: parameters,
