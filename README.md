@@ -510,3 +510,9 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added a GitHub Actions check immediately after Android project generation to fail validation if the generated release build type uses the debug signing key.
 - This protects the release-signing safeguard against accidental template regeneration. Debug APK validation remains separate from production signing.
 - Commit: `55452b96e3c643f93472d5c18843c616a2d0b6b1`. The new workflow run is pending; its outcome is not yet known.
+
+### 2026-11-25 — Full Flutter and Android debug validation
+- GitHub Actions run [45668430008](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45668430008) on `main` has completed dependency resolution, Stacked/Drift code generation, Flutter analysis, the full Flutter test suite, Android debug APK assembly, and the generated-file commit step successfully.
+- The run is still in its final GitHub Actions cleanup phase at the time of this entry, so the overall workflow conclusion has not yet been reported. The substantive validation and APK steps are all green.
+- The workflow also passed the guard that prevents Android release builds from using the generated debug signing key. Production signing remains intentionally unconfigured until the publisher supplies a protected upload key.
+- No local CLI commands or tests were run. Physical-device acceptance remains based on the user's earlier confirmations; this CI result does not replace the outstanding release-candidate manual QA matrix.
