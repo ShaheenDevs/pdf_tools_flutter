@@ -495,3 +495,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Reclassified the filtering assertion as a ViewModel-level test: it now verifies title filtering, no-match results, and extension filtering directly against `visibleDocuments`, without mounting a populated scrolling widget tree. The empty-workspace rendering remains covered by the separate home widget test.
 - Commit: `e102ecbb5c4faa70184ceb22530e9cbff766fe78`. GitHub Actions run [45667444445](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45667444445) has been queued. Test and APK outcomes are not yet known.
 - No local CLI commands or tests were run.
+
+### 2026-11-25 — CI test suite passes; Android release signing audit
+- GitHub Actions run [45667444445](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45667444445) passed dependency resolution, Stacked/Drift code generation, Flutter analysis, and all Flutter tests. Android debug APK assembly is still running; its result is not yet confirmed.
+- Release configuration review found the generated `android/app/build.gradle.kts` still assigns the debug signing configuration to the release build type. This is not acceptable for distribution. The release signing configuration must be changed to require a publisher-controlled upload key (or remain unsigned until one is configured) before any release AAB/APK is produced. No signing secrets are present in the repository.
+- Existing release checklist remains authoritative: publisher-owned application ID, production signing, artwork, privacy/store metadata, and full release-candidate QA are outstanding.
