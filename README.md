@@ -44,7 +44,7 @@ Status legend:
 | Image to PDF | ☐ | Import local images and generate a PDF |
 | Local annotation and highlighting | ☐ | Add, edit, and persist annotations/highlights locally |
 | Share and export | ☐ | Export generated files through Android share/save flows |
-| Document library | ☐ | Browse, search, rename, and delete locally managed documents |
+| Document library | [~] | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; full import-flow validation remains pending |
 
 ### Premium features
 
@@ -64,8 +64,8 @@ Status legend:
 | Digital signature | ☐ | Create/import a signature and place it on PDF pages |
 | Watermark | ☐ | Add text or image watermarks to selected pages |
 | Page numbers | ☐ | Configure and apply page numbering |
-| PDF preview | ☐ | View document pages and navigate the PDF |
-| Document metadata | ☐ | Persist title, file path, page count, size, timestamps, and related page data |
+| PDF preview | [~] | Offline PDF page navigation and zoomable local image preview |
+| Document metadata | [~] | Persist title, file path, page count, size, timestamps, and generated PDF/image preview thumbnails |
 
 ## C. Development Progress
 
@@ -74,7 +74,7 @@ Status legend:
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
 | Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
-| Document library | [~] | PDF/image import, searchable local list, rename/delete, stored PDF page count and first-page thumbnails, offline preview | N/A | Repository metadata persistence and widget search tests added; full import/preview CI and device validation pending |
+| Document library | [~] | PDF/image import, searchable local list, rename/delete, PDF page counts, PDF/image thumbnails, offline PDF/image preview | N/A | Repository metadata and thumbnail tests, image thumbnail service tests, search widget test, and image preview widget test added; CI and physical-device validation pending |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
 | Compression and annotations | ☐ | Pending | N/A | Pending |
@@ -264,9 +264,9 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## I. Known Issues and Decisions
 
-- [ ] Confirm the latest CI run completes analysis, tests, and Android debug build after the analyzer informational-diagnostic adjustment.
+- [ ] Confirm the latest CI run completes analysis, tests, and Android debug build for the PDF/image import and preview implementation.
 - [x] Generated Android and Stacked files are present on `main`.
-- [ ] PDF engine and camera/scanning package selection must be validated for Android support, licensing, maintenance, and required edit operations.
+- [x] PDF engine selected: PDFx for offline rendering and page navigation; Android CI and device validation for the newly added import/preview flow remain pending.\n- [ ] Camera/scanning package selection must be validated for Android support, licensing, maintenance, and required edit operations.
 - [ ] Premium purchase provider and entitlement verification are not yet selected.
 - [ ] OCR provider, credit model, and privacy policy are not yet selected.
 - [ ] Cloud backup storage and optional backend deployment are not yet designed.
