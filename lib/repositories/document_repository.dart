@@ -46,7 +46,7 @@ class DocumentRepository {
   }
 
 
-  Future<void> updatePdfMetadata({
+  Future<void> updateDocumentMetadata({
     required int documentId,
     required int pageCount,
     required List<int> thumbnailBytes,
