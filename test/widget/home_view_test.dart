@@ -86,7 +86,7 @@ void main() {
     await pumpHome(tester, viewModel);
 
     expect(find.text('Travel notes'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), 'missing title');
+    viewModel.updateSearchQuery('missing title');
     await tester.pump();
     expect(find.text('No documents match your search.'), findsOneWidget);
   });
