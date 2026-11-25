@@ -158,9 +158,11 @@ class DocumentRepository {
         extension: 'png',
       );
       await _database.transaction(() async {
-        await (_database.update(_database.documentPages)
-              ..where((row) => row.documentId.equals(documentId)))
-            .write(const DocumentPagesCompanion(pageIndex: Value(-1)));
+        for (final page in existingPages) {
+          await (_database.update(_database.documentPages)
+                ..where((row) => row.id.equals(page.id)))
+              .write(DocumentPagesCompanion(pageIndex: Value(-page.id)));
+        }
 
         if (deleteIds.isNotEmpty) {
           await (_database.delete(_database.documentPages)
