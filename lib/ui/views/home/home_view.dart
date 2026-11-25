@@ -8,11 +8,7 @@ class HomeView extends StackedView<HomeViewModel> {
   const HomeView({super.key});
 
   @override
-  Widget builder(
-    BuildContext context,
-    HomeViewModel viewModel,
-    Widget? child,
-  ) {
+  Widget builder(BuildContext context, HomeViewModel viewModel, Widget? child) {
     return Scaffold(
       appBar: AppBar(
         title: const Column(
@@ -28,22 +24,22 @@ class HomeView extends StackedView<HomeViewModel> {
             ),
           ],
         ),
-        actions: [
+        actions: const [
           IconButton(
             tooltip: 'Settings will be available in a later milestone',
             onPressed: null,
-            icon: const Icon(Icons.settings_outlined),
+            icon: Icon(Icons.settings_outlined),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-          children: [
+          children: const [
             _WelcomeCard(),
-            const SizedBox(height: 26),
-            const Text(
+            SizedBox(height: 26),
+            Text(
               'Quick tools',
               style: TextStyle(
                 color: AppTheme.ink,
@@ -51,10 +47,10 @@ class HomeView extends StackedView<HomeViewModel> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 12),
-            const _ToolGrid(),
-            const SizedBox(height: 28),
-            const Text(
+            SizedBox(height: 12),
+            _ToolGrid(),
+            SizedBox(height: 28),
+            Text(
               'Recent documents',
               style: TextStyle(
                 color: AppTheme.ink,
@@ -62,8 +58,8 @@ class HomeView extends StackedView<HomeViewModel> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 12),
-            const _EmptyDocuments(),
+            SizedBox(height: 12),
+            _EmptyDocuments(),
           ],
         ),
       ),
@@ -186,10 +182,7 @@ class _EmptyDocuments extends StatelessWidget {
           SizedBox(height: 12),
           Text(
             'No documents yet',
-            style: TextStyle(
-              color: AppTheme.ink,
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(color: AppTheme.ink, fontWeight: FontWeight.w700),
           ),
           SizedBox(height: 5),
           Text(
