@@ -74,7 +74,7 @@ Status legend:
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
 | Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
-| Document library | [~] | PDF/image import, searchable local list, rename/delete, PDF page counts, thumbnails, offline PDF/image preview | N/A | User confirmed PDF/image import and preview were run and tested on a physical Android device; automated tests are present, with CI tracked separately |
+| Document library | ☒ | PDF/image import, searchable local list, rename/delete, PDF page counts, thumbnails, offline PDF/image preview | N/A | User confirmed PDF/image import and preview were run and tested on a physical Android device; automated tests are present, with CI tracked separately |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
 | Compression and annotations | ☐ | Pending | N/A | Pending |
@@ -276,7 +276,12 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## J. Development History
 
-### 2026-11-25 — Milestone 4: native scanner integration\n- Selected `cunning_document_scanner` 3.1.0 (MIT) after checking Android support, multi-page output, automatic cropping, image/PDF output, and API requirements. Declared Android camera permission and set minSdk to 24 as required by the current 3.x package documentation.\n- Added a Stacked ViewModel scan action and connected the Scan document tile. Scanner output is copied from plugin-owned temporary paths into app-private storage; the generated PDF and each source page image are registered with Drift.\n- Added repository test coverage for scanned PDF/page persistence and cleanup. Device verification is pending.\n\n### 2026-11-25 — Milestone 3 accepted on physical device; Milestone 4 started
+### 2026-11-25 — Milestone 4: native scanner integration
+- Selected `cunning_document_scanner` 3.1.0 (MIT) after checking Android support, multi-page output, automatic cropping, image/PDF output, and API requirements. Declared Android camera permission and set minSdk to 24 as required by the current 3.x package documentation.
+- Added a Stacked ViewModel scan action and connected the Scan document tile. Scanner output is copied from plugin-owned temporary paths into app-private storage; the generated PDF and each source page image are registered with Drift.
+- Added repository test coverage for scanned PDF/page persistence and cleanup. Device verification is pending.
+
+### 2026-11-25 — Milestone 3 accepted on physical device; Milestone 4 started
 - User explicitly confirmed that the PDF/image import and preview flows were run and tested on a physical Android device, and asked that CLI execution not block progress. Milestone 3 is accepted on that basis.
 - Automated test/build checks remain a separate quality signal and are not represented as passed by this device confirmation.
 - Started Milestone 4 package evaluation. Selected `cunning_document_scanner` 3.x because its current package documentation describes multi-page scanning, automatic crop, image/PDF outputs, Android support, and an MIT license. Android camera permission and API 24 minimum are being configured.
