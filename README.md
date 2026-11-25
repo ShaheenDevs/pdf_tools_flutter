@@ -405,4 +405,5 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added a Stacked PDF tools ViewModel and screen. The home quick-tool tiles now open the tool screen; file picker inputs are processed locally and generated PDFs are imported into app-private storage with page-count and thumbnail metadata.
 - Split ranges accept semicolon-separated 1-based ranges, for example `1-3; 4-6; 8`, and each group becomes a separate PDF.
 - Added service tests for merge, split, image-to-PDF, compression, and invalid merge input. Per the user's instruction, CLI execution/results are intentionally not used as a progress gate; physical-device validation remains outstanding.
+- Updated the Android CI generated-file commit step to persist the resolved `pubspec.lock` alongside generated Android/Stacked/Drift files, so the new native PDF dependency and its transitive versions are reproducible.
 - Milestone 4 scanner/page-editor device verification remains pending and is not marked complete.
