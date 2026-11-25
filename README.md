@@ -505,3 +505,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Removed the generated template configuration that signed the Android `release` build type with the development debug keystore. The release variant is now intentionally unsigned until the publisher configures a protected production upload key.
 - This prevents accidentally producing a distributable release artifact signed with a debug key. A signed release build remains blocked on publisher-owned signing credentials.
 - Commit: `1dbff09f2cc60ff57944f7a8311491b9cf269845`. GitHub Actions run [45668067429](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45668067429) is pending; no build result is claimed for this change yet.
+
+### 2026-11-25 — CI guard for Android release signing
+- Added a GitHub Actions check immediately after Android project generation to fail validation if the generated release build type uses the debug signing key.
+- This protects the release-signing safeguard against accidental template regeneration. Debug APK validation remains separate from production signing.
+- Commit: `55452b96e3c643f93472d5c18843c616a2d0b6b1`. The new workflow run is pending; its outcome is not yet known.
