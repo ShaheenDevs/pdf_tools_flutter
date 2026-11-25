@@ -147,6 +147,7 @@ class PdfToolsViewModel extends BaseViewModel {
       batchCompleted = 0;
       var succeeded = 0;
       var failed = 0;
+      var previewUnavailable = 0;
       notifyListeners();
 
       for (final file in picked.files) {
@@ -158,12 +159,9 @@ class PdfToolsViewModel extends BaseViewModel {
             title: '${p.basenameWithoutExtension(file.name)}_compressed',
             bytes: compressed,
           );
-          if (saved) {
-            succeeded++;
-          } else {
-            // The PDF is safely stored even when its preview cannot be rendered.
-            succeeded++;
-          }
+          // The PDF is safely stored even when its preview cannot be rendered.
+          succeeded++;
+          if (!saved) previewUnavailable++;
         } catch (_) {
           failed++;
         } finally {
@@ -176,8 +174,13 @@ class PdfToolsViewModel extends BaseViewModel {
       successMessage = cancelled
           ? 'Batch stopped: saved $succeeded, failed $failed, not started ${batchTotal - batchCompleted}.'
           : 'Batch complete: saved $succeeded of $batchTotal PDF(s).';
-      if (failed > 0 || (!cancelled && succeeded == 0)) {
-        errorMessage = '$failed file(s) could not be processed.';
+      final issues = <String>[];
+      if (failed > 0) issues.add('$failed file(s) could not be processed.');
+      if (previewUnavailable > 0) {
+        issues.add('$previewUnavailable saved PDF(s) do not have preview thumbnails yet.');
+      }
+      if (issues.isNotEmpty || (!cancelled && succeeded == 0)) {
+        errorMessage = issues.isEmpty ? 'No files were processed.' : issues.join(' ');
       }
       if (cancelled && succeeded == 0 && failed == 0) {
         successMessage = 'Batch cancelled before processing began.';
