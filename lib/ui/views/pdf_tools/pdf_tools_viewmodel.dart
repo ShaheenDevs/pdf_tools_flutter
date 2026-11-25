@@ -182,6 +182,8 @@ class PdfToolsViewModel extends BaseViewModel {
       if (issues.isNotEmpty || (!cancelled && succeeded == 0)) {
         errorMessage = issues.isEmpty ? 'No files were processed.' : issues.join(' ');
       }
+      batchTotal = 0;
+      batchCompleted = 0;
       if (cancelled && succeeded == 0 && failed == 0) {
         successMessage = 'Batch cancelled before processing began.';
       }
