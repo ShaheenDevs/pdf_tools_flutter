@@ -40,7 +40,7 @@ class DocumentRepository {
             ),
           );
     } catch (_) {
-      await _fileStorage.deleteFile(relativePath);
+      await _deleteFilesBestEffort([relativePath]);
       rethrow;
     }
   }
@@ -96,10 +96,7 @@ class DocumentRepository {
         return documentId;
       });
     } catch (_) {
-      await _fileStorage.deleteFile(pdfPath);
-      for (final path in imagePaths) {
-        await _fileStorage.deleteFile(path);
-      }
+      await _deleteFilesBestEffort([pdfPath, ...imagePaths]);
       rethrow;
     }
   }
@@ -199,10 +196,10 @@ class DocumentRepository {
         );
       });
     } catch (_) {
-      await _fileStorage.deleteFile(pdfPath);
-      if (thumbnailPath != null) {
-        await _fileStorage.deleteFile(thumbnailPath);
-      }
+      await _deleteFilesBestEffort([
+        pdfPath,
+        if (thumbnailPath != null) thumbnailPath,
+      ]);
       rethrow;
     }
 
@@ -211,25 +208,11 @@ class DocumentRepository {
         .map((page) => page.sourceImagePath)
         .whereType<String>()
         .toSet();
-    for (final path in deletedPaths) {
-      try {
-        await _fileStorage.deleteFile(path);
-      } catch (_) {
-        // The database no longer references this page; cleanup can be retried.
-      }
-    }
-    try {
-      await _fileStorage.deleteFile(document.filePath);
-    } catch (_) {
-      // The replacement PDF is already committed and remains usable.
-    }
-    if (document.thumbnailPath != null) {
-      try {
-        await _fileStorage.deleteFile(document.thumbnailPath!);
-      } catch (_) {
-        // The replacement thumbnail is already committed.
-      }
-    }
+    await _deleteFilesBestEffort([
+      ...deletedPaths,
+      document.filePath,
+      if (document.thumbnailPath != null) document.thumbnailPath!,
+    ]);
   }
 
   Future<void> updateDocumentMetadata({
@@ -267,13 +250,13 @@ class DocumentRepository {
         ),
       );
     } catch (_) {
-      await _fileStorage.deleteFile(thumbnailPath);
+      await _deleteFilesBestEffort([thumbnailPath]);
       rethrow;
     }
 
     final String? previousThumbnail = existing.thumbnailPath;
     if (previousThumbnail != null && previousThumbnail != thumbnailPath) {
-      await _fileStorage.deleteFile(previousThumbnail);
+      await _deleteFilesBestEffort([previousThumbnail]);
     }
   }
 
@@ -369,8 +352,19 @@ class DocumentRepository {
       for (final DocumentPage page in pages)
         if (page.sourceImagePath != null) page.sourceImagePath!,
     };
-    for (final String path in storedPaths) {
-      await _fileStorage.deleteFile(path);
+    await _deleteFilesBestEffort(storedPaths);
+  }
+
+  /// Deletes independent files without allowing one failure to block the rest.
+  /// Database changes are already committed (or rolling back), so file cleanup
+  /// must not mask the original error or prevent other paths being attempted.
+  Future<void> _deleteFilesBestEffort(Iterable<String> paths) async {
+    for (final String path in paths.toSet()) {
+      try {
+        await _fileStorage.deleteFile(path);
+      } catch (_) {
+        // A later maintenance pass can remove unreferenced leftovers.
+      }
     }
   }
 }
