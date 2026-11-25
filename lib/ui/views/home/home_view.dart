@@ -141,7 +141,7 @@ class HomeView extends StackedView<HomeViewModel> {
                     onDelete: () => _confirmDelete(context, document, viewModel),
                     onOpen: () => _openDocument(context, document, viewModel),
                     onEditPages: document.sourceType == 'scanned'
-                        ? () => _openPageEditor(context, document)
+                        ? () => _openPageEditor(context, document, viewModel)
                         : null,
                     thumbnailLoader: () =>
                         viewModel.thumbnailBytesFor(document.thumbnailPath),
@@ -188,6 +188,7 @@ class HomeView extends StackedView<HomeViewModel> {
   Future<void> _openPageEditor(
     BuildContext context,
     Document document,
+    HomeViewModel viewModel,
   ) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -199,7 +200,7 @@ class HomeView extends StackedView<HomeViewModel> {
     );
     if (context.mounted) {
       // Reload the library so updated page counts and thumbnails are visible.
-      await testViewModel?.loadDocuments();
+      await viewModel.loadDocuments();
     }
   }
 
