@@ -34,10 +34,10 @@ Status legend:
 
 | Feature | Status | Scope |
 |---|---|---|
-| Camera document scanning | [~] | Multi-page native scanner wired into the workspace; device verification pending |
-| Crop and rotate pages | ☐ | Crop page boundaries and rotate individual pages |
-| Reorder pages | ☐ | Change page sequence and persist the resulting PDF |
-| Delete pages | ☐ | Remove selected pages with confirmation |
+| Camera document scanning | [~] | Multi-page native scanner with local PDF/page-image persistence; device verification pending |
+| Crop and rotate pages | [~] | Persist normalized crop margins and 90° rotations; regenerate the scanned PDF |
+| Reorder pages | [~] | Reorder scanned pages and rebuild the PDF in the selected order |
+| Delete pages | [~] | Delete a scanned page with confirmation, keeping at least one page |
 | Merge PDFs | ☐ | Select multiple local PDFs and combine them in chosen order |
 | Split PDFs | ☐ | Export selected page ranges or individual pages as separate PDFs |
 | Basic PDF compression | ☐ | Provide a local compression workflow where supported |
@@ -75,7 +75,7 @@ Status legend:
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
 | Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
 | Document library | ☒ | PDF/image import, searchable local list, rename/delete, PDF page counts, thumbnails, offline PDF/image preview | N/A | User confirmed PDF/image import and preview were run and tested on a physical Android device; automated tests are present, with CI tracked separately |
-| Camera scanning and page editing | ☐ | Pending | N/A | Pending |
+| Camera scanning and page editing | [~] | Native multi-page scanning, crop/rotate, reorder/delete, PDF regeneration for scanned documents | N/A | Repository and image/PDF service tests added; physical-device validation pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
 | Compression and annotations | ☐ | Pending | N/A | Pending |
 | Signature, watermark, and page numbers | ☐ | Pending | N/A | Pending |
@@ -190,9 +190,10 @@ For each feature, follow this flow:
 
 ### Milestone 4 — Camera scanning and page editing
 - [~] Integrate the native multi-page document scanner; copy scan PDF and source page images into app-private storage and register page records in Drift. Physical-device verification pending.
-- [ ] Add post-capture crop adjustments and persisted page rotation.
-- [ ] Add page reorder and delete.
-- [x] Persist the scanner-generated PDF alongside ordered source page images; regenerate the PDF after page edits remains pending.
+- [x] Add post-capture crop margins and persisted 90° page rotation; render edits from original source images.
+- [x] Add page reorder and confirmed deletion; prevent deleting the final remaining page.
+- [x] Regenerate a multi-page PDF and first-page thumbnail from the edited source images. Save new PDF/thumbnail and page metadata transactionally before cleaning up superseded files.
+- [x] Add service tests for crop/rotation/PDF generation and repository tests for reorder/delete persistence. Physical-device verification of the complete scanner/editor flow remains pending.
 
 ### Milestone 5 — PDF tools
 - [ ] Implement merge and split.
@@ -275,6 +276,12 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - [ ] Digital signature scope (visual signature placement versus certificate-based cryptographic signing) must be explicitly defined before implementation.
 
 ## J. Development History
+
+### 2026-11-25 — Milestone 4: page editor and PDF regeneration
+- Added a Stacked page editor for scanned documents with per-page preview, 90-degree rotation, adjustable crop margins, drag-and-drop reorder, and confirmed deletion (the last remaining page cannot be deleted).
+- Added local rendering with the `image` package and PDF reconstruction with `pdf` 3.13.1. The editor rebuilds the PDF and thumbnail from original page images so edits remain reversible at the source-image level.
+- Repository persistence writes replacement PDF/thumbnail files, updates page metadata/order and document metadata in a Drift transaction, then removes superseded files. Added unit coverage for crop, rotation, PDF generation, page order and deletion.
+- User device validation of scanner and page editor is still pending; CI is a separate quality check.
 
 ### 2026-11-25 — Milestone 4: native scanner integration
 - Selected `cunning_document_scanner` 3.1.0 (MIT) after checking Android support, multi-page output, automatic cropping, image/PDF output, and API requirements. Declared Android camera permission and set minSdk to 24 as required by the current 3.x package documentation.
