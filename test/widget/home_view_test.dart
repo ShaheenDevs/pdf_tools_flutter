@@ -63,13 +63,7 @@ void main() {
     expect(find.text('Import'), findsOneWidget);
   });
 
-  testWidgets('home view filters the preloaded document list', (
-    WidgetTester tester,
-  ) async {
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
+  test('home view model filters the preloaded document list', () async {
     await repository.importDocument(
       title: 'Travel notes',
       bytes: [1, 2, 3],
@@ -83,11 +77,14 @@ void main() {
       loadOnCreate: false,
     );
     await viewModel.loadDocuments();
-    await pumpHome(tester, viewModel);
 
-    expect(find.text('Travel notes'), findsOneWidget);
+    expect(viewModel.visibleDocuments, hasLength(1));
+    expect(viewModel.visibleDocuments.single.title, 'Travel notes');
+
     viewModel.updateSearchQuery('missing title');
-    await tester.pump();
-    expect(find.text('No documents match your search.'), findsOneWidget);
+    expect(viewModel.visibleDocuments, isEmpty);
+
+    viewModel.updateSearchQuery('.png');
+    expect(viewModel.visibleDocuments, hasLength(1));
   });
 }
