@@ -34,7 +34,7 @@ Status legend:
 
 | Feature | Status | Scope |
 |---|---|---|
-| Camera document scanning | ☐ | Capture one or more pages, handle camera permission, and create a local document |
+| Camera document scanning | [~] | Multi-page native scanner wired into the workspace; device verification pending |
 | Crop and rotate pages | ☐ | Crop page boundaries and rotate individual pages |
 | Reorder pages | ☐ | Change page sequence and persist the resulting PDF |
 | Delete pages | ☐ | Remove selected pages with confirmation |
@@ -44,7 +44,7 @@ Status legend:
 | Image to PDF | ☐ | Import local images and generate a PDF |
 | Local annotation and highlighting | ☐ | Add, edit, and persist annotations/highlights locally |
 | Share and export | ☐ | Export generated files through Android share/save flows |
-| Document library | ☒ | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; full import-flow validation remains pending |
+| Document library | ☒ | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; user confirmed physical-device validation |
 
 ### Premium features
 
@@ -189,10 +189,10 @@ For each feature, follow this flow:
 - [x] Add import and preview coverage (repository metadata/thumbnail persistence, image thumbnail validation, image import ViewModel workflow, search and image preview widget tests). User confirmed running and testing the PDF/image import and preview flows on a physical Android device; CLI/CI is not used as the feature acceptance gate.
 
 ### Milestone 4 — Camera scanning and page editing
-- [ ] Implement camera capture and multi-page scan sessions.
-- [ ] Add crop and rotate.
+- [~] Integrate the native multi-page document scanner; copy scan PDF and source page images into app-private storage and register page records in Drift. Physical-device verification pending.
+- [ ] Add post-capture crop adjustments and persisted page rotation.
 - [ ] Add page reorder and delete.
-- [ ] Generate a valid PDF from scanned pages and test on real Android devices.
+- [x] Persist the scanner-generated PDF alongside ordered source page images; regenerate the PDF after page edits remains pending.
 
 ### Milestone 5 — PDF tools
 - [ ] Implement merge and split.
@@ -276,7 +276,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## J. Development History
 
-### 2026-11-25 — Milestone 3 accepted on physical device; Milestone 4 started
+### 2026-11-25 — Milestone 4: native scanner integration\n- Selected `cunning_document_scanner` 3.1.0 (MIT) after checking Android support, multi-page output, automatic cropping, image/PDF output, and API requirements. Declared Android camera permission and set minSdk to 24 as required by the current 3.x package documentation.\n- Added a Stacked ViewModel scan action and connected the Scan document tile. Scanner output is copied from plugin-owned temporary paths into app-private storage; the generated PDF and each source page image are registered with Drift.\n- Added repository test coverage for scanned PDF/page persistence and cleanup. Device verification is pending.\n\n### 2026-11-25 — Milestone 3 accepted on physical device; Milestone 4 started
 - User explicitly confirmed that the PDF/image import and preview flows were run and tested on a physical Android device, and asked that CLI execution not block progress. Milestone 3 is accepted on that basis.
 - Automated test/build checks remain a separate quality signal and are not represented as passed by this device confirmation.
 - Started Milestone 4 package evaluation. Selected `cunning_document_scanner` 3.x because its current package documentation describes multi-page scanning, automatic crop, image/PDF outputs, Android support, and an MIT license. Android camera permission and API 24 minimum are being configured.
