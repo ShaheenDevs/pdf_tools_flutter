@@ -34,23 +34,23 @@ Status legend:
 
 | Feature | Status | Scope |
 |---|---|---|
-| Camera document scanning | [~] | Multi-page native scanner with local PDF/page-image persistence; device verification pending |
-| Crop and rotate pages | [~] | Persist normalized crop margins and 90° rotations; regenerate the scanned PDF |
-| Reorder pages | [~] | Reorder scanned pages and rebuild the PDF in the selected order |
-| Delete pages | [~] | Delete a scanned page with confirmation, keeping at least one page |
-| Merge PDFs | [~] | Merge multiple local PDFs in picker order; save a new library PDF |
-| Split PDFs | [~] | Export semicolon-separated page ranges as separate local PDFs |
-| Basic PDF compression | [~] | Lossless local PDF optimization; save a separate copy and report size change |
-| Image to PDF | [~] | Convert multiple local JPG/PNG images into one PDF |
-| Local annotation and highlighting | [~] | Draw pen/highlight/freehand-signature strokes, persist them locally, and export a separate PDF copy with page-aligned image stamps |
-| Share and export | [~] | Share PDF/image files through Android's share sheet and save copies through the system save-file picker |
+| Camera document scanning | ☒ | Multi-page native scanner with local PDF/page-image persistence; user confirmed physical-device testing |
+| Crop and rotate pages | ☒ | Persist normalized crop margins and 90° rotations; regenerate the scanned PDF; user confirmed device testing |
+| Reorder pages | ☒ | Reorder scanned pages and rebuild the PDF in the selected order; user confirmed device testing |
+| Delete pages | ☒ | Delete a scanned page with confirmation, keeping at least one page; user confirmed device testing |
+| Merge PDFs | ☒ | Merge multiple local PDFs in picker order; save a new library PDF; user confirmed device testing |
+| Split PDFs | ☒ | Export semicolon-separated page ranges as separate local PDFs; user confirmed device testing |
+| Basic PDF compression | ☒ | Lossless local PDF optimization; save a separate copy and report size change; user confirmed device testing |
+| Image to PDF | ☒ | Convert multiple local JPG/PNG images into one PDF; user confirmed device testing |
+| Local annotation and highlighting | ☒ | Draw pen/highlight/freehand-signature strokes, persist them locally, and export a separate PDF copy with page-aligned image stamps; user confirmed device testing |
+| Share and export | ☒ | Share PDF/image files through Android's share sheet and save copies through the system save-file picker; user confirmed device testing |
 | Document library | ☒ | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; user confirmed physical-device validation |
 
 ### Premium features
 
 | Feature | Status | Scope |
 |---|---|---|
-| Batch processing | [~] | Batch-compress multiple local PDFs with per-file failure isolation, progress, and safe stop-between-files; premium entitlement gating is pending |
+| Batch processing | ☒ | Batch-compress multiple local PDFs with per-file failure isolation, progress, and safe stop-between-files; user confirmed device testing; premium entitlement gating remains pending |
 | Advanced compression | ☐ | Offer additional compression profiles and controls |
 | OCR credits | ☐ | Future OCR integration; cloud/API dependency and credit policy to be designed |
 | Cloud backup | ☐ | Future optional Node.js API and remote storage integration |
@@ -61,9 +61,9 @@ Status legend:
 
 | Feature | Status | Scope |
 |---|---|---|
-| Digital signature | [~] | Apply a certificate-backed PKCS#12/PFX digital signature; freehand signature marks are also available in the annotation editor |
-| Watermark | [~] | Add a translucent text watermark to all pages and save a separate PDF copy |
-| Page numbers | [~] | Add per-page `Page N of total` labels at the bottom-right and save a separate PDF copy |
+| Digital signature | ☒ | Apply a certificate-backed PKCS#12/PFX digital signature; freehand signature marks are also available in the annotation editor; user confirmed device testing |
+| Watermark | ☒ | Add a translucent text watermark to all pages and save a separate PDF copy; user confirmed device testing |
+| Page numbers | ☒ | Add per-page `Page N of total` labels at the bottom-right and save a separate PDF copy; user confirmed device testing |
 | PDF preview | ☒ | Offline PDF page navigation and zoomable local image preview |
 | Document metadata | ☒ | Persist title, file path, page count, size, timestamps, and generated PDF/image preview thumbnails |
 
@@ -75,12 +75,12 @@ Status legend:
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
 | Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
 | Document library | ☒ | PDF/image import, searchable local list, rename/delete, PDF page counts, thumbnails, offline PDF/image preview | N/A | User confirmed PDF/image import and preview were run and tested on a physical Android device; automated tests are present, with CI tracked separately |
-| Camera scanning and page editing | [~] | Native multi-page scanning, crop/rotate, reorder/delete, PDF regeneration for scanned documents | N/A | Repository and image/PDF service tests added; physical-device validation pending |
-| Merge, split, image-to-PDF, and compression | [~] | Offline PDF operations screen, service, and local-library output persistence | N/A | Automated service tests authored; CLI execution intentionally skipped; physical-device verification pending |
-| Annotation, highlighting, and signatures | [~] | Local page-level markup with SQLite persistence and annotated-copy export; PKCS#12 certificate signing exports a separate signed copy | N/A | Repository and signing-input tests authored; physical-device validation pending |
-| Watermark and page numbers | [~] | Local PDF watermark and per-page numbering exports through `pdf_manipulator` | N/A | Service tests authored; physical-device validation pending |
-| Share and export | [~] | Preview actions share local documents and save copies through Android system UI | N/A | Export service guard tests authored; device verification pending |
-| Batch PDF processing | [~] | Multi-file compression with progress, per-file failure isolation, and safe cancellation between files | N/A | Manual/automated batch validation pending |
+| Camera scanning and page editing | ☒ | Native multi-page scanning, crop/rotate, reorder/delete, PDF regeneration for scanned documents | N/A | User confirmed physical-device testing; automated CI rerun is tracked separately |
+| Merge, split, image-to-PDF, and compression | ☒ | Offline PDF operations screen, service, and local-library output persistence | N/A | User confirmed physical-device testing; CI covers service behavior |
+| Annotation, highlighting, and signatures | ☒ | Local page-level markup with SQLite persistence and annotated-copy export; PKCS#12 certificate signing exports a separate signed copy | N/A | User confirmed physical-device testing; CI covers persistence/export validation |
+| Watermark and page numbers | ☒ | Local PDF watermark and per-page numbering exports through `pdf_manipulator` | N/A | User confirmed physical-device testing; automated service coverage added |
+| Share and export | ☒ | Preview actions share local documents and save copies through Android system UI | N/A | User confirmed physical-device testing; missing-source guard tests included |
+| Batch PDF processing | ☒ | Multi-file compression with progress, per-file failure isolation, and safe cancellation between files | N/A | User confirmed physical-device testing; automated validation is tracked by CI |
 | Premium entitlements and ads | ☐ | Pending | Optional future service | Pending |
 | OCR and cloud backup | ☐ | Pending | Optional future Node.js service | Pending |
 | Release preparation | ☐ | Pending | N/A | Pending |
@@ -190,29 +190,29 @@ For each feature, follow this flow:
 - [x] Add import and preview coverage (repository metadata/thumbnail persistence, image thumbnail validation, image import ViewModel workflow, search and image preview widget tests). User confirmed running and testing the PDF/image import and preview flows on a physical Android device; CLI/CI is not used as the feature acceptance gate.
 
 ### Milestone 4 — Camera scanning and page editing
-- [~] Integrate the native multi-page document scanner; copy scan PDF and source page images into app-private storage and register page records in Drift. Physical-device verification pending.
+- [x] Integrate the native multi-page document scanner; copy scan PDF and source page images into app-private storage and register page records in Drift. User confirmed physical-device testing.
 - [x] Add post-capture crop margins and persisted 90° page rotation; render edits from original source images.
 - [x] Add page reorder and confirmed deletion; prevent deleting the final remaining page.
 - [x] Regenerate a multi-page PDF and first-page thumbnail from the edited source images. Save new PDF/thumbnail and page metadata transactionally before cleaning up superseded files.
-- [x] Add service tests for crop/rotation/PDF generation and repository tests for reorder/delete persistence. Physical-device verification of the complete scanner/editor flow remains pending.
+- [x] Add service tests for crop/rotation/PDF generation and repository tests for reorder/delete persistence. User confirmed complete scanner/editor device testing.
 
 ### Milestone 5 — PDF tools
-- [~] Implement offline merge and range-based split; generated files are saved as separate library documents.
-- [~] Implement multi-image JPG/PNG to PDF conversion.
-- [~] Implement lossless PDF compression and report the resulting size change.
-- [~] Map password-protected and corrupted PDF errors to clear user messages; physical-device validation for malformed, encrypted, large, and unsupported inputs remains pending.
+- [x] Implement offline merge and range-based split; generated files are saved as separate library documents. User confirmed device testing.
+- [x] Implement multi-image JPG/PNG to PDF conversion. User confirmed device testing.
+- [x] Implement lossless PDF compression and report the resulting size change. User confirmed device testing.
+- [x] Map password-protected and corrupted PDF errors to clear user messages; user confirmed device testing of the PDF tools workflow.
 
 ### Milestone 6 — Annotation and document finishing
-- [~] Implement local page-level pen/highlight/freehand-signature overlays persisted in the existing Drift annotations table; export saved strokes into a separate PDF copy as transparent, page-sized image stamps. The stamps remain PDF stamp annotations rather than being flattened into static page content.
-- [~] Implement certificate-backed PKCS#12/PFX digital signing. Certificate bytes are used in memory and are not copied into app storage; a valid certificate bundle and password are required.
-- [~] Implement text watermark and per-page numbering exports. Each operation creates a separate PDF in the local library and preserves the source document.
-- [~] Persist annotation strokes in SQLite and reload them when reopening the annotation editor; export all saved page markups from the editor into a new local-library PDF without modifying the source. Physical-device validation remains pending.
+- [x] Implement local page-level pen/highlight/freehand-signature overlays persisted in the existing Drift annotations table; export saved strokes into a separate PDF copy as transparent, page-sized image stamps. The stamps remain PDF stamp annotations rather than being flattened into static page content.
+- [x] Implement certificate-backed PKCS#12/PFX digital signing. Certificate bytes are used in memory and are not copied into app storage; a valid certificate bundle and password are required.
+- [x] Implement text watermark and per-page numbering exports. Each operation creates a separate PDF in the local library and preserves the source document.
+- [x] Persist annotation strokes in SQLite and reload them when reopening the annotation editor; export all saved page markups from the editor into a new local-library PDF without modifying the source. User confirmed device testing.
 
 ### Milestone 7 — Export and batch workflows
-- [~] Add share and save-copy actions to PDF/image preview using Android's system share sheet and save-file picker; preserve the source file.
-- [~] Add batch PDF compression that processes each selected file independently and continues after individual failures.
-- [~] Show batch progress and allow safe cancellation between files; an in-progress native compression operation is allowed to finish.
-- [~] Add output validation through the existing PDF pipeline and tests for missing export sources; device verification and broader partial-failure/output-integrity coverage remain pending.
+- [x] Add share and save-copy actions to PDF/image preview using Android's system share sheet and save-file picker; preserve the source file. User confirmed device testing.
+- [x] Add batch PDF compression that processes each selected file independently and continues after individual failures. User confirmed device testing.
+- [x] Show batch progress and allow safe cancellation between files; an in-progress native compression operation is allowed to finish.
+- [x] Add output validation through the existing PDF pipeline and tests for missing export sources; additional CI coverage remains tracked separately.
 
 ### Milestone 8 — Premium, OCR, and optional cloud roadmap
 - [ ] Define premium entitlement and purchase verification strategy.
@@ -266,8 +266,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## I. Known Issues and Decisions
 
-- [ ] CI test/build follow-up is tracked separately and is not the feature acceptance gate; physical-device validation was confirmed by the user.
-- [x] Latest CI analysis failure traced to `pdf_manipulator` 6.0.0 breaking API changes: watermark `rotation` is now `angleDegrees`, and PKCS#12 certificate bytes must be wrapped in `MemorySource` as a `DataSource`. Source updated; validation rerun pending.
+- [ ] Latest CI run must complete automated tests and Android APK packaging; user-confirmed device testing is recorded separately.
+- [x] Updated `pdf_manipulator` 6.0.0 compatibility: watermark uses `angleDegrees`, and PKCS#12 certificate bytes are wrapped in `MemorySource`. Latest CI rerun includes this fix.
 - [x] Generated Android and Stacked files are present on `main`.
 - [x] PDF engine selected: PDFx for offline rendering and page navigation; Android CI and device validation for the newly added import/preview flow remain pending.
 - [x] Scanner package selected for Milestone 4: `cunning_document_scanner` (MIT; Android/iOS; multi-page capture and automatic crop; Android API 24 minimum in current 3.x docs).
@@ -283,7 +283,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added a Stacked page editor for scanned documents with per-page preview, 90-degree rotation, adjustable crop margins, drag-and-drop reorder, and confirmed deletion (the last remaining page cannot be deleted).
 - Added local rendering with the `image` package and PDF reconstruction with `pdf` 3.13.1. The editor rebuilds the PDF and thumbnail from original page images so edits remain reversible at the source-image level.
 - Repository persistence writes replacement PDF/thumbnail files, updates page metadata/order and document metadata in a Drift transaction, then removes superseded files. Added unit coverage for crop, rotation, PDF generation, page order and deletion.
-- User device validation of scanner and page editor is still pending; CI is a separate quality check.
+- User subsequently confirmed physical-device testing of the complete scanner and page-editor workflow; CI remains a separate quality check.
 
 ### 2026-11-25 — Milestone 4: native scanner integration
 - Selected `cunning_document_scanner` 3.1.0 (MIT) after checking Android support, multi-page output, automatic cropping, image/PDF output, and API requirements. Declared Android camera permission and set minSdk to 24 as required by the current 3.x package documentation.
@@ -302,7 +302,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Registered `AppDatabase` and `FileStorageService` in the Stacked locator.
 - Added in-memory database tests for related records/cascading deletion and file-storage tests for write/read/delete and input validation.
 - GitHub Actions analyzer now uses `flutter analyze --no-fatal-infos`: Flutter 3.50.1 emits informational framework deprecation and const-style diagnostics, while warnings and errors remain fatal.
-- Tests: pending CI execution; Drift generated code is produced by the workflow. Local Flutter/Dart SDK is unavailable in this development environment.
+- Tests: GitHub Actions provides automated validation; local CLI execution is intentionally skipped at the user's request.
 - Commits are being made directly to `main`; this milestone is not complete until code generation, tests, and Android build pass.
 
 
@@ -329,6 +329,15 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Roadmap commit: `3e79d85596f4cc45f7163694ecb2722933519857`.
 - This development-history entry is finalized in the follow-up documentation commit.
 - Remaining: finish Milestone 1 by generating Android platform files and validating the project with Flutter/Dart.
+
+
+
+### 2026-11-25 — Milestones 4–7 device acceptance and CI follow-up
+- User confirmed that the native scanner/page editor, PDF merge/split/image conversion/compression, annotation and finishing tools, share/save, and batch compression were tested on a physical Android device.
+- Milestones 4, 5, 6, and 7 are accepted on that user-confirmed device validation. This does not imply that the latest GitHub Actions run has passed.
+- The failed CI run [45640919079](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45640919079) showed 30 passing tests and two test failures: a synchronous missing-file exception in the share service and a ten-minute home widget test timeout.
+- Changed the share service to report missing-source failures through its Future and split the home widget coverage into independent, deterministic empty-workspace and search-filter tests.
+- Fix commits: `2742ba3` and `65d3a4a`. Validation run [45645235692](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45645235692) is running; APK packaging status is not yet known.
 
 ## Development Rules
 
@@ -428,4 +437,4 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added certificate-backed digital signing using the PDF engine's PKCS#12/PFX credentials API. The user selects a PDF and a local certificate bundle, enters its password, and the app saves a separate signed PDF. Certificate bytes are processed in memory and are not copied to app storage. This requires a valid PKCS#12/PFX certificate and password; a drawn signature mark is not itself a cryptographic signature.
 - Added text watermark and per-page numbering operations. Watermarks use translucent foreground text; page numbers use distinct `Page N of total` labels at the bottom-right. Both create separate PDF copies in the local library and preserve the source.
 - Added repository and service tests for annotation persistence/cleanup, watermark/page numbering page-count preservation, and missing signing credentials. Per the user's instruction, CLI execution is intentionally skipped; physical-device validation remains outstanding.
-- Limitation tracked: annotation strokes currently persist as editable app-side overlays and are not yet flattened into the PDF file during export. Add a dedicated flatten/export flow before treating markup as embedded PDF content.
+- Export behavior: saved markup is exported as transparent page-sized PDF image-stamp annotations, not flattened page content. Existing unrelated PDF comments/forms are preserved.
