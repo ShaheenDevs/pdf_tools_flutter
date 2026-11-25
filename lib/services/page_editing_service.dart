@@ -11,7 +11,7 @@ class PageEditingService {
     required int rotation,
     String? cropData,
   }) {
-    final decoded = img.decodeImage(sourceBytes);
+    final decoded = img.decodeImage(Uint8List.fromList(sourceBytes));
     if (decoded == null) {
       throw const FormatException('The scanned page image is invalid.');
     }
