@@ -18,6 +18,8 @@ void main() {
   });
 
   tearDown(() async {
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
     await database.close();
     if (await storageRoot.exists()) {
       await storageRoot.delete(recursive: true);
@@ -35,26 +37,18 @@ void main() {
     final viewModel = HomeViewModel(
       repository: repository,
       fileStorage: storage,
+      loadOnCreate: false,
     );
+    await viewModel.loadDocuments();
+    tester.view.physicalSize = const Size(1200, 2400);
+    tester.view.devicePixelRatio = 1;
     await tester.pumpWidget(
       MaterialApp(home: HomeView(testViewModel: viewModel)),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.text('PDF Tools & Scanner'), findsOneWidget);
     expect(find.text('Quick tools'), findsOneWidget);
-
-    await tester.scrollUntilVisible(
-      find.text('Recent documents'),
-      250,
-      scrollable: find
-          .descendant(
-            of: find.byType(Scaffold),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
-    await tester.pumpAndSettle();
 
     expect(find.text('Scan document'), findsOneWidget);
     expect(find.text('Recent documents'), findsOneWidget);
@@ -69,13 +63,11 @@ void main() {
       sourceType: 'imported_image',
     );
     await viewModel.loadDocuments();
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Travel notes'), findsOneWidget);
 
-    await tester.ensureVisible(find.byType(TextField));
-    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'missing title');
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('No documents match your search.'), findsOneWidget);
   });
 }
