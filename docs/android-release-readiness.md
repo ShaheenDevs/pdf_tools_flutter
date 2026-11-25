@@ -20,7 +20,8 @@
 - [ ] Confirm final app name, support email/site, privacy policy URL, and store listing text.
 - [ ] Review the final target SDK against current Google Play requirements at release time.
 - [ ] Verify camera permission rationale, denial, permanent denial, and returning from Android Settings.
-- [ ] Validate low-storage behavior, interrupted writes, large PDFs/images, malformed/encrypted PDFs, and process recreation.
+- [ ] Validate low-storage behavior, large PDFs/images, malformed/encrypted PDFs, and process recreation.
+- [x] Add best-effort startup cleanup for app-managed `.pending` writes older than 24 hours; physical low-storage and forced-process-death scenarios still require device QA.
 - [ ] Validate share/save behavior across supported Android versions and target apps.
 - [ ] Complete accessibility review: TalkBack labels, text scaling, contrast, focus order, and touch targets.
 - [ ] Review app size, startup time, memory use, and scanner/PDF processing performance on low- and mid-range devices.
