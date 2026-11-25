@@ -212,11 +212,23 @@ class DocumentRepository {
         .whereType<String>()
         .toSet();
     for (final path in deletedPaths) {
-      await _fileStorage.deleteFile(path);
+      try {
+        await _fileStorage.deleteFile(path);
+      } catch (_) {
+        // The database no longer references this page; cleanup can be retried.
+      }
     }
-    await _fileStorage.deleteFile(document.filePath);
+    try {
+      await _fileStorage.deleteFile(document.filePath);
+    } catch (_) {
+      // The replacement PDF is already committed and remains usable.
+    }
     if (document.thumbnailPath != null) {
-      await _fileStorage.deleteFile(document.thumbnailPath!);
+      try {
+        await _fileStorage.deleteFile(document.thumbnailPath!);
+      } catch (_) {
+        // The replacement thumbnail is already committed.
+      }
     }
   }
 
