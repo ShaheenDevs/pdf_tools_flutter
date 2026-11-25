@@ -46,7 +46,7 @@ class PdfToolsViewModel extends BaseViewModel {
       final files = await Future.wait(picked.files.map(_readPickedFile));
       final merged = await _pdfToolsService.mergePdfs(files);
       await _savePdf(
-        title: 'Merged \${DateTime.now().millisecondsSinceEpoch}',
+        title: 'Merged ${DateTime.now().millisecondsSinceEpoch}',
         bytes: merged,
       );
       successMessage = 'Merged PDF saved to your document library.';
@@ -89,14 +89,14 @@ class PdfToolsViewModel extends BaseViewModel {
       for (var index = 0; index < outputs.length; index++) {
         final range = ranges[index];
         final label = range.length == 1
-            ? 'page-\${range.first + 1}'
-            : 'pages-\${range.first + 1}-\${range.last + 1}';
+            ? 'page-${range.first + 1}'
+            : 'pages-${range.first + 1}-${range.last + 1}';
         await _savePdf(
-          title: '\${_splitSourceTitle}_$label',
+          title: '${_splitSourceTitle}_$label',
           bytes: outputs[index],
         );
       }
-      successMessage = 'Created \${outputs.length} split PDF file(s).';
+      successMessage = 'Created ${outputs.length} split PDF file(s).';
       _splitSourceBytes = null;
       splitPageCount = 0;
       splitRangeText = '';
@@ -115,7 +115,7 @@ class PdfToolsViewModel extends BaseViewModel {
       final images = await Future.wait(picked.files.map(_readPickedFile));
       final output = await _pdfToolsService.imagesToPdf(images);
       await _savePdf(
-        title: 'Images \${DateTime.now().millisecondsSinceEpoch}',
+        title: 'Images ${DateTime.now().millisecondsSinceEpoch}',
         bytes: output,
       );
       successMessage = 'Image PDF saved to your document library.';
@@ -135,7 +135,7 @@ class PdfToolsViewModel extends BaseViewModel {
       final source = await _readPickedFile(file);
       final compressed = await _pdfToolsService.compressPdf(source);
       final saved = await _savePdf(
-        title: '\${p.basenameWithoutExtension(file.name)}_compressed',
+        title: '${p.basenameWithoutExtension(file.name)}_compressed',
         bytes: compressed,
       );
       final difference = source.length - compressed.length;
