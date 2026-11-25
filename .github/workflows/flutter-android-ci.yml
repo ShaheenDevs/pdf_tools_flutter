@@ -73,5 +73,7 @@ jobs:
             echo "No generated files changed."
           else
             git commit -m "chore: add generated Android and Stacked files [skip ci]"
+            git fetch origin main
+            git rebase origin/main
             git push origin HEAD:main
           fi
