@@ -44,3 +44,6 @@ The user has confirmed physical-device testing for the scanner/page editor, PDF 
 
 
 Startup cleanup is isolated behind a catch-all best-effort guard. A path-provider/platform failure during optional stale-file recovery does not block app launch; locator and database initialization errors are not swallowed.
+
+
+Repository cleanup now attempts each stored path independently after database changes. A single file-system deletion failure does not stop cleanup of other files or mask the primary repository operation. Regression coverage simulates a failed file deletion. Any remaining orphaned file is limited to the inaccessible path; automated orphan reconciliation is intentionally not enabled because safe cleanup must account for active writes and database references.
