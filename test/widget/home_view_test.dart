@@ -12,8 +12,20 @@ void main() {
 
     expect(find.text('PDF Tools & Scanner'), findsOneWidget);
     expect(find.text('Quick tools'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Scan document'),
+      300,
+      scrollable: find.byType(Scrollable),
+    );
+    expect(find.text('Scan document'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Recent documents'),
+      300,
+      scrollable: find.byType(Scrollable),
+    );
     expect(find.text('Recent documents'), findsOneWidget);
     expect(find.text('No documents yet'), findsOneWidget);
-    expect(find.text('Scan document'), findsOneWidget);
   });
 }
