@@ -168,6 +168,41 @@ class PdfToolsService {
     }
   }
 
+
+  Future<Uint8List> signPdf({
+    required List<int> sourceBytes,
+    required List<int> pkcs12Bytes,
+    required String certificatePassword,
+    String? reason,
+    String? location,
+  }) async {
+    if (sourceBytes.isEmpty || pkcs12Bytes.isEmpty ||
+        certificatePassword.isEmpty) {
+      throw ArgumentError('A PDF, PKCS#12 certificate, and certificate password are required.');
+    }
+    final pdf = Pdf();
+    final output = MemorySink();
+    try {
+      await _runPdf(() => pdf.sign(
+        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+        output,
+        credentials: PdfSigningCredentials.pkcs12(
+          Uint8List.fromList(pkcs12Bytes),
+          certificatePassword,
+        ),
+        reason: reason,
+        location: location,
+      ));
+      final signed = output.takeBytes();
+      if (signed.isEmpty) {
+        throw const FormatException('The signed PDF is empty.');
+      }
+      return signed;
+    } finally {
+      await pdf.dispose();
+    }
+  }
+
   Future<T> _runPdf<T>(Future<T> Function() operation) async {
     try {
       return await operation();
