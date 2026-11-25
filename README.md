@@ -481,3 +481,11 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Changed document tiles to cache their thumbnail Future in widget state and refresh it only when the document's thumbnail path changes. This prevents the FutureBuilder completion from recursively starting new file reads.
 - Fix commits: 9b3d108739b5e18d1d3dd421792945489e32a013 and c5eb8e02f0f262dd9023ee4b38581accbd89cab4. A fresh GitHub Actions validation has been triggered; its final test and APK results remain pending.
 - Physical-device acceptance recorded elsewhere in this README is separate from this automated CI result. No local CLI commands or tests were run.
+
+### 2026-11-25 — Page editor preview and CI search-test hardening
+- Updated page-editor cards to cache their rendered preview Future and reload it only when the page identity, source image, rotation, or crop metadata changes. This avoids starting a new image-render operation on every widget rebuild.
+- Simplified the populated-library filter widget test to update the ViewModel search query directly, then assert the rendered empty-result state. The test still covers the filtering result while avoiding dependence on the platform text-input channel in the test runner.
+- Removed all tracked Kotlin compiler diagnostic logs under `android/.kotlin/errors/`; confirmed no log files remain tracked. The existing `/.kotlin/` ignore rule prevents these machine-generated files from being added again.
+- Changes are on `main`. The latest GitHub Actions run [45653951114](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45653951114) is pending at the time of this update; no new test-suite or APK success is claimed yet.
+- The previous completed run [45650043995](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45650043995) passed analysis and 32 tests but timed out on the populated-library filter widget test, so its APK step was skipped.
+- No local CLI commands or tests were run.
