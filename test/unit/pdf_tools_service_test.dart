@@ -90,6 +90,17 @@ void main() {
     expect(await pageCountOf(result), 3);
   });
 
+  test('requires certificate credentials for digital signing', () async {
+    await expectLater(
+      service.signPdf(
+        sourceBytes: onePagePdf,
+        pkcs12Bytes: const [],
+        certificatePassword: 'password',
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
   test('reports malformed PDF inputs clearly', () async {
     await expectLater(
       service.mergePdfs([
