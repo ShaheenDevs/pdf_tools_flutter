@@ -120,6 +120,56 @@ void main() {
     }
   });
 
+  test('reorders, rotates, crops, and deletes scanned pages atomically', () async {
+    final id = await repository.importScannedDocument(
+      title: 'Editable scan',
+      pdfBytes: [37, 80, 68, 70],
+      pageImageBytes: [
+        [255, 216, 255, 1],
+        [255, 216, 255, 2],
+      ],
+    );
+    final initial = await repository.getDocumentPages(id);
+    final firstPath = initial.first.sourceImagePath!;
+    final secondPath = initial.last.sourceImagePath!;
+
+    await repository.saveScannedPageEdits(
+      documentId: id,
+      orderedPageIds: [initial.last.id, initial.first.id],
+      rotations: {initial.last.id: 90},
+      cropData: {initial.first.id: '{"left":0.1,"top":0,"right":0.1,"bottom":0}'},
+      deletePageIds: const [],
+      pdfBytes: [37, 80, 68, 70, 1],
+      thumbnailBytes: [137, 80, 78, 71],
+    );
+
+    var pages = await repository.getDocumentPages(id);
+    expect(pages.map((page) => page.id), [initial.last.id, initial.first.id]);
+    expect(pages.first.rotation, 90);
+    expect(pages.last.cropData, contains('"left":0.1'));
+    final document = (await repository.getDocuments()).single;
+    expect(await storage.readBytes(document.filePath), [37, 80, 68, 70, 1]);
+
+    await repository.saveScannedPageEdits(
+      documentId: id,
+      orderedPageIds: [pages.first.id],
+      rotations: const {},
+      cropData: const {},
+      deletePageIds: [pages.last.id],
+      pdfBytes: [37, 80, 68, 70, 2],
+      thumbnailBytes: [137, 80, 78, 71, 2],
+    );
+    pages = await repository.getDocumentPages(id);
+    expect(pages, hasLength(1));
+    expect(pages.single.pageIndex, 0);
+    expect(await storage.readBytes(secondPath), [255, 216, 255, 2]);
+    expect(
+      () => storage.readBytes(firstPath),
+      throwsA(isA<FileSystemException>()),
+    );
+    expect((await repository.getDocuments()).single.pageCount, 1);
+  });
+
   test('rejects empty document titles', () async {
     expect(
       repository.renameDocument(documentId: 1, title: '   '),
