@@ -78,7 +78,11 @@ class PageEditingService {
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(18),
           build: (_) => pw.Center(
-            child: pw.Image(image, fit: pw.BoxFit.contain),
+            child: pw.SizedBox(
+              width: PdfPageFormat.a4.width - 36,
+              height: PdfPageFormat.a4.height - 36,
+              child: pw.Image(image, fit: pw.BoxFit.contain),
+            ),
           ),
         ),
       );
