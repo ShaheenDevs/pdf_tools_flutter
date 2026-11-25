@@ -107,7 +107,7 @@ class PdfToolsViewModel extends BaseViewModel {
     await _run(() async {
       final picked = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp', 'heic'],
+        allowedExtensions: ['jpg', 'jpeg', 'png'],
         allowMultiple: true,
         withData: true,
       );
