@@ -16,12 +16,13 @@ class HomeViewModel extends BaseViewModel {
     PdfMetadataService? pdfMetadataService,
     ImageThumbnailService? imageThumbnailService,
     FileStorageService? fileStorage,
+    bool loadOnCreate = true,
   }) : _repository = repository ?? locator<DocumentRepository>(),
        _pdfMetadataService = pdfMetadataService ?? PdfMetadataService(),
        _imageThumbnailService =
            imageThumbnailService ?? ImageThumbnailService(),
        _fileStorage = fileStorage ?? locator<FileStorageService>() {
-    loadDocuments();
+    if (loadOnCreate) loadDocuments();
   }
 
   final DocumentRepository _repository;
