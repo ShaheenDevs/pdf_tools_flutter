@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:pdf_tools_flutter/app/app.locator.dart';
-import 'package:pdf_tools_flutter/database/app_database.dart';
+import 'package:pdf_tools_flutter/database/app_database.dart' as db;
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
 
 enum MarkupTool { pen, highlight, signature }
@@ -354,7 +354,7 @@ class _SavedStroke {
   final int color;
   final String type;
 
-  factory _SavedStroke.fromRow(Annotation row) {
+  factory _SavedStroke.fromRow(db.Annotation row) {
     final payload = jsonDecode(row.payload) as Map<String, dynamic>;
     final points = (payload['points'] as List)
         .map((point) => Offset(
