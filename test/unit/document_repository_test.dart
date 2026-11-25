@@ -81,6 +81,45 @@ void main() {
     );
   });
 
+  test('persists scanned PDF and ordered source page images', () async {
+    final id = await repository.importScannedDocument(
+      title: 'Scan test',
+      pdfBytes: [37, 80, 68, 70],
+      pageImageBytes: [
+        [255, 216, 255, 1],
+        [255, 216, 255, 2],
+      ],
+    );
+
+    final document = (await repository.getDocuments()).single;
+    expect(document.id, id);
+    expect(document.sourceType, 'scanned');
+    expect(document.pageCount, 2);
+    expect(await storage.readBytes(document.filePath), [37, 80, 68, 70]);
+
+    final pages = await (database.select(database.documentPages)
+          ..where((row) => row.documentId.equals(id))
+          ..orderBy([(row) => OrderingTerm.asc(row.pageIndex)]))
+        .get();
+    expect(pages.map((page) => page.pageIndex), [0, 1]);
+    expect(pages.every((page) => page.sourceImagePath != null), isTrue);
+    for (var index = 0; index < pages.length; index++) {
+      expect(
+        await storage.readBytes(pages[index].sourceImagePath!),
+        [255, 216, 255, index + 1],
+      );
+    }
+
+    final storedPaths = pages.map((page) => page.sourceImagePath!).toList();
+    await repository.deleteDocument(id);
+    for (final path in storedPaths) {
+      expect(
+        () => storage.readBytes(path),
+        throwsA(isA<FileSystemException>()),
+      );
+    }
+  });
+
   test('rejects empty document titles', () async {
     expect(
       repository.renameDocument(documentId: 1, title: '   '),
