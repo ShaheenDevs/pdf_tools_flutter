@@ -38,8 +38,8 @@ jobs:
 
       - name: Align Android Gradle Plugin with Flutter
         run: |
-          find android -type f \\( -name '*.gradle' -o -name '*.gradle.kts' \\) -print0 | xargs -0 sed -i 's/9\\.1\\.0/9.1.1/g'
-          grep -R -q '9.1.1' android --include='*.gradle' --include='*.gradle.kts'
+          find android -type f -name '*.gradle*' -exec sed -i 's/9\\.1\\.0/9.1.1/g' {} +
+          grep -R -q '9.1.1' android --include='*.gradle*'
 
       - name: Remove generated Flutter counter test
         run: rm -f test/widget_test.dart
