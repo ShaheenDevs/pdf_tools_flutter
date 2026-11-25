@@ -523,3 +523,10 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Cleanup handles duplicate paths and missing/already-removed files without masking scan-import errors or invalidating the saved app-managed copy. A cancelled scan (null result) remains a no-op.
 - Added unit coverage for deleting temporary PDF/page files and tolerating missing paths. GitHub Actions is triggered by these lib/** and test/** changes; its result is pending and no local CLI tests were run.
 - Commits: service d3dbd37e, ViewModel integration 41dc2151, and cleanup tests 003f5ff3.
+
+
+### 2026-11-25 — Interrupted local-write recovery
+- Added startup recovery for abandoned atomic-write `.pending` files in app-private storage. Cleanup recursively scans only the app-managed storage root and removes pending files older than the 24-hour default age threshold.
+- Recent pending files are preserved to avoid racing active writes; completed document/image/thumbnail files are never selected. Cleanup is best-effort so a recovery issue does not prevent the app from opening.
+- Added tests proving stale pending files are removed while recent pending files and completed files remain, and that invalid negative cleanup ages are rejected.
+- Commits: storage service `9a3911ce`, startup integration `f64dbc90`, and tests `8b9ee5d9`. GitHub Actions validation is pending; no local CLI tests were run.
