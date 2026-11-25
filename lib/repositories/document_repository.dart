@@ -309,6 +309,47 @@ class DocumentRepository {
     }
   }
 
+
+  Future<List<Annotation>> getAnnotations({
+    required int documentId,
+    int? pageIndex,
+  }) {
+    final query = _database.select(_database.annotations)
+      ..where((row) => row.documentId.equals(documentId));
+    if (pageIndex != null) {
+      query.where((row) => row.pageIndex.equals(pageIndex));
+    }
+    query.orderBy([(row) => OrderingTerm.asc(row.createdAt)]);
+    return query.get();
+  }
+
+  Future<int> addAnnotation({
+    required int documentId,
+    required int pageIndex,
+    required String type,
+    required String payload,
+  }) async {
+    if (pageIndex < 0 || type.trim().isEmpty || payload.trim().isEmpty) {
+      throw ArgumentError('Annotation details are incomplete.');
+    }
+    final now = DateTime.now();
+    return _database.into(_database.annotations).insert(
+      AnnotationsCompanion.insert(
+        documentId: documentId,
+        pageIndex: pageIndex,
+        type: type.trim(),
+        payload: payload,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+  }
+
+  Future<void> deleteAnnotation(int annotationId) async {
+    await (_database.delete(_database.annotations)
+      ..where((row) => row.id.equals(annotationId))).go();
+  }
+
   Future<void> deleteDocument(int documentId) async {
     final Document? document = await (_database.select(
       _database.documents,
