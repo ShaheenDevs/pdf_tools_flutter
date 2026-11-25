@@ -50,6 +50,37 @@ void main() {
     expect(() => storage.readBytes(path), throwsA(isA<FileSystemException>()));
   });
 
+  test('stores PDF page metadata and removes its thumbnail on delete', () async {
+    final id = await repository.importDocument(
+      title: 'Metadata test',
+      bytes: [37, 80, 68, 70],
+      extension: 'pdf',
+    );
+
+    await repository.updatePdfMetadata(
+      documentId: id,
+      pageCount: 3,
+      thumbnailBytes: [137, 80, 78, 71],
+    );
+
+    final document = (await repository.getDocuments()).single;
+    expect(document.pageCount, 3);
+    expect(document.thumbnailPath, isNotNull);
+    expect(await storage.readBytes(document.thumbnailPath!), [
+      137,
+      80,
+      78,
+      71,
+    ]);
+
+    final thumbnailPath = document.thumbnailPath!;
+    await repository.deleteDocument(id);
+    expect(
+      () => storage.readBytes(thumbnailPath),
+      throwsA(isA<FileSystemException>()),
+    );
+  });
+
   test('rejects empty document titles', () async {
     expect(
       repository.renameDocument(documentId: 1, title: '   '),
