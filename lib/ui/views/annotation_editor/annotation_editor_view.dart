@@ -77,7 +77,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
   }
 
   Future<void> _changePage(int delta) async {
-    final next = (_page + delta).clamp(1, widget.pageCount);
+    final next = (_page + delta).clamp(1, widget.pageCount).toInt();
     if (next == _page) return;
     setState(() {
       _page = next;
@@ -100,8 +100,8 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
   }
 
   Offset _normalize(Offset point, Size size) => Offset(
-        (point.dx / size.width).clamp(0.0, 1.0),
-        (point.dy / size.height).clamp(0.0, 1.0),
+        (point.dx / size.width).clamp(0.0, 1.0).toDouble(),
+        (point.dy / size.height).clamp(0.0, 1.0).toDouble(),
       );
 
   Future<void> _saveStroke() async {
