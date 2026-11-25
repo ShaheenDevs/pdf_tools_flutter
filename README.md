@@ -81,8 +81,8 @@ Status legend:
 | Watermark and page numbers | ☒ | Local PDF watermark and per-page numbering exports through `pdf_manipulator` | N/A | User confirmed physical-device testing; automated service coverage added |
 | Share and export | ☒ | Preview actions share local documents and save copies through Android system UI | N/A | User confirmed physical-device testing; missing-source guard tests included |
 | Batch PDF processing | ☒ | Multi-file compression with progress, per-file failure isolation, and safe cancellation between files | N/A | User confirmed physical-device testing; automated validation is tracked by CI |
-| Premium entitlements and ads | ☐ | Pending | Optional future service | Pending |
-| OCR and cloud backup | ☐ | Pending | Optional future Node.js service | Pending |
+| Premium entitlements and ads | [~] | Purchase verification and offline entitlement policy documented; billing/UI integration awaits Play Console product catalog and account decision | Optional Node.js verification API designed, not implemented | Architecture documented; implementation pending product setup |
+| OCR and cloud backup | [~] | Provider evaluation criteria, privacy boundaries, and API contracts documented; OCR languages/provider and storage vendor remain undecided | Optional Node.js API contract designed, not implemented | Architecture documented; provider and product decisions pending |
 | Release preparation | ☐ | Pending | N/A | Pending |
 
 ## D. Planned Architecture and Project Structure
@@ -215,11 +215,13 @@ For each feature, follow this flow:
 - [x] Add output validation through the existing PDF pipeline and tests for missing export sources; additional CI coverage remains tracked separately.
 
 ### Milestone 8 — Premium, OCR, and optional cloud roadmap
-- [ ] Define premium entitlement and purchase verification strategy.
-- [ ] Add premium templates and remove-ads entitlement.
-- [ ] Evaluate OCR provider, credit accounting, privacy, and network requirements.
-- [ ] Design optional Node.js APIs for account, backup metadata, upload/download, and OCR jobs.
-- [ ] Keep local functionality available when these services are unavailable.
+- [x] Define the Android purchase verification boundary: Google Play Billing through Flutter, server-side purchase-token verification, signed entitlement responses, restore/revocation handling, and bounded offline entitlement caching.
+- [ ] Integrate billing after Play Console product IDs, pricing, account policy, and backend credentials are approved; do not add a client-only premium unlock.
+- [ ] Add premium templates and remove-ads entitlement after the product/ads providers are selected.
+- [x] Document OCR evaluation criteria, language-first provider selection, credit-ledger requirements, privacy, and explicit upload consent. OCR provider selection remains pending the required language list.
+- [x] Design versioned optional Node.js contracts for entitlement verification, OCR jobs/credits, and backup list/upload/download/delete.
+- [x] Preserve local functionality when billing, OCR, or cloud services are unavailable.
+- [x] Add the architecture decision record: [Premium, OCR, and Optional Cloud Architecture](docs/premium-ocr-cloud-architecture.md).
 
 ### Milestone 9 — QA and release
 - [ ] Run Flutter analyze and automated tests.
@@ -229,6 +231,8 @@ For each feature, follow this flow:
 - [ ] Document release steps and known limitations.
 
 ## F. Backend and API Documentation
+
+The future premium/OCR/cloud integration boundaries and proposed REST contracts are documented in [docs/premium-ocr-cloud-architecture.md](docs/premium-ocr-cloud-architecture.md). These endpoints are design contracts only; no backend or remote dependency has been added to the core app.
 
 **Current decision: no backend APIs are required for the core application.** No authentication, remote database, or cloud storage dependency will be introduced for local scanning and PDF tools.
 
@@ -338,6 +342,15 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - The failed CI run [45640919079](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45640919079) showed 30 passing tests and two test failures: a synchronous missing-file exception in the share service and a ten-minute home widget test timeout.
 - Changed the share service to report missing-source failures through its Future and split the home widget coverage into independent, deterministic empty-workspace and search-filter tests.
 - Fix commits: `2742ba3` and `65d3a4a`. Validation run [45645235692](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45645235692) is running; APK packaging status is not yet known.
+
+
+
+### 2026-11-25 — Milestone 8 architecture decision record
+- Documented the Google Play Billing purchase flow, server-side token verification, signed entitlement responses, restore/revocation handling, and bounded offline entitlement cache. Explicitly prohibited client-only premium unlocks.
+- Defined feature-access policy so existing free/offline workflows and already-stored documents remain available regardless of entitlement or network state. Batch compression remains ungated until the purchase catalog is approved.
+- Documented OCR provider evaluation criteria with language coverage as the first selection gate; provider choice remains open until required languages (including whether Urdu/Arabic are required) are confirmed.
+- Designed versioned Node.js API contracts for purchase verification, entitlements, OCR jobs/credits, and encrypted backup lifecycle. These are design-only; no backend, ads SDK, billing integration, or cloud upload was introduced.
+- Added `docs/premium-ocr-cloud-architecture.md`. Milestone 8 integration remains in progress pending Play Console products, account policy, OCR language/provider, and storage/ads provider decisions.
 
 ## Development Rules
 
