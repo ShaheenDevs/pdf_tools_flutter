@@ -273,7 +273,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - [ ] OCR provider, credit model, and privacy policy are not yet selected.
 - [ ] Cloud backup storage and optional backend deployment are not yet designed.
 - [ ] Minimum Android SDK and supported Android version range will be confirmed during setup.
-- [ ] Digital signature scope (visual signature placement versus certificate-based cryptographic signing) must be explicitly defined before implementation.
+- [x] Digital signature scope defined: certificate-backed PKCS#12/PFX signing creates a cryptographic PDF signature; freehand signature strokes are separate visual annotations.
 
 ## J. Development History
 
@@ -410,7 +410,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ### 2026-11-25 — Milestone 6: annotation and document finishing
 - Added repository APIs to create, list by document/page, and delete local annotations using the existing Drift `annotations` table; no schema migration or remote service is required.
-- Added an annotation editor launched from PDF preview. It renders the PDF with an interactive overlay and supports pen, translucent yellow highlighting, and freehand signature marks. Stroke coordinates are normalized to the page viewport and saved as JSON payloads in SQLite, then reloaded for the selected page.
+- Added an annotation editor launched from PDF preview. It renders the selected PDF page to a fitted image with an exactly aligned interactive overlay and supports pen, translucent yellow highlighting, and freehand signature marks. Stroke coordinates are normalized to the page image and saved as JSON payloads in SQLite, then reloaded for the selected page.
 - Added certificate-backed digital signing using the PDF engine's PKCS#12/PFX credentials API. The user selects a PDF and a local certificate bundle, enters its password, and the app saves a separate signed PDF. Certificate bytes are processed in memory and are not copied to app storage. This requires a valid PKCS#12/PFX certificate and password; a drawn signature mark is not itself a cryptographic signature.
 - Added text watermark and per-page numbering operations. Watermarks use translucent foreground text; page numbers use distinct `Page N of total` labels at the bottom-right. Both create separate PDF copies in the local library and preserve the source.
 - Added repository and service tests for annotation persistence/cleanup, watermark/page numbering page-count preservation, and missing signing credentials. Per the user's instruction, CLI execution is intentionally skipped; physical-device validation remains outstanding.
