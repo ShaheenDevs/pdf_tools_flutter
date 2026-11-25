@@ -26,7 +26,7 @@ Uint8List _createThumbnail(Uint8List sourceBytes) {
       ? decoded.width
       : decoded.height;
   final double scale = 360 / longestSide;
-  final int width = (decoded.width * scale).round().clamp(1, 360);
+  final int width = (decoded.width * scale).round().clamp(1, 360).toInt();
   final int height = (decoded.height * scale).round().clamp(1, 360);
   final img.Image thumbnail = img.copyResize(
     decoded,
