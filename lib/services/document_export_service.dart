@@ -10,9 +10,9 @@ class DocumentExportService {
   Future<ShareResult> shareFile({
     required String filePath,
     required String title,
-  }) {
+  }) async {
     final file = File(filePath);
-    if (!file.existsSync()) {
+    if (!await file.exists()) {
       throw const FileSystemException('The document file is unavailable.');
     }
     return SharePlus.instance.share(
