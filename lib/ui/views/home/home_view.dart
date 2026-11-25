@@ -6,6 +6,7 @@ import 'package:pdf_tools_flutter/app/app_theme.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:pdf_tools_flutter/ui/views/document_preview/document_preview_view.dart';
 import 'package:pdf_tools_flutter/ui/views/page_editor/page_editor_view.dart';
+import 'package:pdf_tools_flutter/ui/views/pdf_tools/pdf_tools_view.dart';
 import 'package:stacked/stacked.dart';
 
 import 'home_viewmodel.dart';
@@ -58,7 +59,10 @@ class HomeView extends StackedView<HomeViewModel> {
                 ),
               ),
               const SizedBox(height: 12),
-              _ToolGrid(onScan: viewModel.isBusy ? null : viewModel.scanDocument),
+              _ToolGrid(
+                onScan: viewModel.isBusy ? null : viewModel.scanDocument,
+                onPdfTools: (tool) => _openPdfTools(context, tool),
+              ),
               const SizedBox(height: 28),
               Row(
                 children: [
@@ -155,6 +159,14 @@ class HomeView extends StackedView<HomeViewModel> {
         onPressed: viewModel.isBusy ? null : viewModel.importDocument,
         icon: const Icon(Icons.file_upload_outlined),
         label: const Text('Import file'),
+      ),
+    );
+  }
+
+  Future<void> _openPdfTools(BuildContext context, String initialTool) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PdfToolsView(initialTool: initialTool),
       ),
     );
   }
@@ -307,9 +319,10 @@ class _WelcomeCard extends StatelessWidget {
 }
 
 class _ToolGrid extends StatelessWidget {
-  const _ToolGrid({this.onScan});
+  const _ToolGrid({this.onScan, this.onPdfTools});
 
   final VoidCallback? onScan;
+  final ValueChanged<String>? onPdfTools;
 
   static const List<_ToolItem> _items = [
     _ToolItem('Scan document', Icons.document_scanner_outlined),
@@ -336,7 +349,11 @@ class _ToolGrid extends StatelessWidget {
         final item = _items[index];
         return InkWell(
           borderRadius: BorderRadius.circular(18),
-          onTap: item.label == 'Scan document' ? onScan : null,
+          onTap: item.label == 'Scan document'
+              ? onScan
+              : onPdfTools == null
+                  ? null
+                  : () => onPdfTools!(item.label),
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
