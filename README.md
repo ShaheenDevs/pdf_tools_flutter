@@ -536,3 +536,12 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Broadened the startup cleanup guard to catch any cleanup failure, including platform/plugin exceptions, rather than only filesystem exceptions. The recovery is optional maintenance; app launch proceeds even if the storage provider is temporarily unavailable.
 - This does not suppress failures from locator setup or database registration; only the isolated cleanup call is guarded.
 - Commit: `3f33124f`. GitHub Actions validation is triggered by the startup change; no local CLI commands or tests were run.
+
+
+### 2026-11-25 — Make repository file cleanup resilient
+- Centralized best-effort cleanup of independent stored paths in `DocumentRepository`. One inaccessible/deleted file no longer prevents attempts to clean remaining files.
+- Applied this to import rollback, scanned-document rollback, page-edit rollback and post-commit cleanup, thumbnail replacement, and document deletion. Cleanup errors do not mask the original database/import error.
+- Added a repository regression test that simulates one file deletion failure and verifies the document metadata is removed and the other stored file is still cleaned.
+- Earlier startup-recovery run #172 passed Flutter analysis and the complete test step, but a newer push cancelled its APK build before completion. The new repository changes trigger a fresh full CI run.
+- Commits: code `fb88c59f`; regression test `094f4315`.
+- No local CLI commands or tests were run.
