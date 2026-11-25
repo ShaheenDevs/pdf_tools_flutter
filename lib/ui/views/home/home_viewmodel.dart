@@ -81,9 +81,9 @@ class HomeViewModel extends BaseViewModel {
   Future<void> scanDocument() async {
     errorMessage = null;
     notifyListeners();
+    ScannedDocumentResult? scan;
     try {
-      final ScannedDocumentResult? scan =
-          await _scannerService.scanDocuments();
+      scan = await _scannerService.scanDocuments();
       if (scan == null) return;
       final String? pdfPath = scan.pdfPath;
       if (pdfPath == null || scan.imagePaths.isEmpty) {
@@ -115,6 +115,10 @@ class HomeViewModel extends BaseViewModel {
     } catch (error) {
       errorMessage = 'Scan could not be saved. Please try again.';
       notifyListeners();
+    } finally {
+      if (scan != null) {
+        await _scannerService.cleanupTemporaryFiles(scan);
+      }
     }
   }
 
