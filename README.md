@@ -314,3 +314,10 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Preserve existing work and never force-push or rewrite history.
 - Never commit secrets or production credentials.
 - Report tests that could not be run and why.
+
+### 2026-11-25 — Milestone 2: CI dependency injection and widget-test fixes
+- Inspected three CI runs after the initial repository registration change. Analysis exposed that the generated Stacked locator attempted to construct `DocumentRepository` without its required constructor arguments. Changed the registration to construct the repository explicitly after locator setup.
+- Updated the CI generated-file commit step to include `lib/database/app_database.g.dart`, which is required because the Drift source imports that generated part.
+- The next CI run passed analysis and all six database, file-storage, and repository unit tests, but the existing home widget test failed because it expected content below the initial ListView viewport to have already been built.
+- Updated the widget test to scroll the lazy list to the relevant content before asserting it. New validation run: [45569578408](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45569578408) — in progress at the time of this entry.
+- No feature is being marked tested or complete based on the failed run. Await the new widget test and Android debug build result before closing Milestone 2.
