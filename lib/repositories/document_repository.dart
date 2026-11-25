@@ -104,6 +104,120 @@ class DocumentRepository {
     }
   }
 
+  Future<List<DocumentPage>> getDocumentPages(int documentId) {
+    return (_database.select(_database.documentPages)
+          ..where((row) => row.documentId.equals(documentId))
+          ..orderBy([(row) => OrderingTerm.asc(row.pageIndex)]))
+        .get();
+  }
+
+  Future<void> saveScannedPageEdits({
+    required int documentId,
+    required List<int> orderedPageIds,
+    required Map<int, int> rotations,
+    required Map<int, String?> cropData,
+    required List<int> deletePageIds,
+    required List<int> pdfBytes,
+    required List<int> thumbnailBytes,
+  }) async {
+    if (orderedPageIds.isEmpty || pdfBytes.isEmpty || thumbnailBytes.isEmpty) {
+      throw ArgumentError('A saved scan must contain at least one valid page.');
+    }
+    if (orderedPageIds.toSet().length != orderedPageIds.length) {
+      throw ArgumentError('Page order contains duplicate IDs.');
+    }
+
+    final document = await (_database.select(_database.documents)
+          ..where((row) => row.id.equals(documentId)))
+        .getSingleOrNull();
+    if (document == null || document.sourceType != 'scanned') {
+      throw StateError('Scanned document was not found.');
+    }
+    final existingPages = await getDocumentPages(documentId);
+    final deleteIds = deletePageIds.toSet();
+    final expectedIds = existingPages
+        .where((page) => !deleteIds.contains(page.id))
+        .map((page) => page.id)
+        .toSet();
+    if (expectedIds.length != orderedPageIds.length ||
+        !expectedIds.containsAll(orderedPageIds) ||
+        deleteIds.any((id) => !existingPages.any((page) => page.id == id))) {
+      throw ArgumentError('The edited page list does not match this document.');
+    }
+
+    final pdfPath = await _fileStorage.saveBytes(
+      folder: StorageFolder.documents,
+      bytes: pdfBytes,
+      extension: 'pdf',
+    );
+    String? thumbnailPath;
+    try {
+      thumbnailPath = await _fileStorage.saveBytes(
+        folder: StorageFolder.thumbnails,
+        bytes: thumbnailBytes,
+        extension: 'png',
+      );
+      await _database.transaction(() async {
+        await (_database.update(_database.documentPages)
+              ..where((row) => row.documentId.equals(documentId)))
+            .write(const DocumentPagesCompanion(pageIndex: Value(-1)));
+
+        if (deleteIds.isNotEmpty) {
+          await (_database.delete(_database.documentPages)
+                ..where((row) => row.id.isIn(deleteIds)))
+              .go();
+        }
+
+        for (var index = 0; index < orderedPageIds.length; index++) {
+          final pageId = orderedPageIds[index];
+          final page = existingPages.firstWhere((item) => item.id == pageId);
+          await (_database.update(_database.documentPages)
+                ..where((row) => row.id.equals(pageId)))
+              .write(
+            DocumentPagesCompanion(
+              pageIndex: Value(index),
+              rotation: Value(rotations[pageId] ?? page.rotation),
+              cropData: Value(cropData.containsKey(pageId)
+                  ? cropData[pageId]
+                  : page.cropData),
+            ),
+          );
+        }
+
+        await (_database.update(_database.documents)
+              ..where((row) => row.id.equals(documentId)))
+            .write(
+          DocumentsCompanion(
+            filePath: Value(pdfPath),
+            thumbnailPath: Value(thumbnailPath),
+            pageCount: Value(orderedPageIds.length),
+            fileSize: Value(pdfBytes.length),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
+      });
+    } catch (_) {
+      await _fileStorage.deleteFile(pdfPath);
+      if (thumbnailPath != null) {
+        await _fileStorage.deleteFile(thumbnailPath);
+      }
+      rethrow;
+    }
+
+    final deletedPaths = existingPages
+        .where((page) => deleteIds.contains(page.id))
+        .map((page) => page.sourceImagePath)
+        .whereType<String>()
+        .toSet();
+    for (final path in deletedPaths) {
+      await _fileStorage.deleteFile(path);
+    }
+    await _fileStorage.deleteFile(document.filePath);
+    if (document.thumbnailPath != null) {
+      await _fileStorage.deleteFile(document.thumbnailPath!);
+    }
+  }
+
   Future<void> updateDocumentMetadata({
     required int documentId,
     required int pageCount,
