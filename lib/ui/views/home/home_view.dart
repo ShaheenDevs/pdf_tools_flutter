@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:pdf_tools_flutter/app/app_theme.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:pdf_tools_flutter/ui/views/document_preview/document_preview_view.dart';
+import 'package:pdf_tools_flutter/ui/views/page_editor/page_editor_view.dart';
 import 'package:stacked/stacked.dart';
 
 import 'home_viewmodel.dart';
@@ -139,6 +140,9 @@ class HomeView extends StackedView<HomeViewModel> {
                     onRename: () => _renameDocument(context, document, viewModel),
                     onDelete: () => _confirmDelete(context, document, viewModel),
                     onOpen: () => _openDocument(context, document, viewModel),
+                    onEditPages: document.sourceType == 'scanned'
+                        ? () => _openPageEditor(context, document)
+                        : null,
                     thumbnailLoader: () =>
                         viewModel.thumbnailBytesFor(document.thumbnailPath),
                   ),
@@ -178,6 +182,24 @@ class HomeView extends StackedView<HomeViewModel> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not open this document.')),
       );
+    }
+  }
+
+  Future<void> _openPageEditor(
+    BuildContext context,
+    Document document,
+  ) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PageEditorView(
+          documentId: document.id,
+          title: document.title,
+        ),
+      ),
+    );
+    if (context.mounted) {
+      // Reload the library so updated page counts and thumbnails are visible.
+      await testViewModel?.loadDocuments();
     }
   }
 
@@ -382,6 +404,7 @@ class _DocumentTile extends StatelessWidget {
     required this.onRename,
     required this.onDelete,
     required this.onOpen,
+    required this.onEditPages,
     required this.thumbnailLoader,
   });
 
@@ -389,6 +412,7 @@ class _DocumentTile extends StatelessWidget {
   final VoidCallback onRename;
   final VoidCallback onDelete;
   final VoidCallback onOpen;
+  final VoidCallback? onEditPages;
   final Future<List<int>?> Function() thumbnailLoader;
 
   @override
@@ -444,10 +468,16 @@ class _DocumentTile extends StatelessWidget {
           onSelected: (value) {
             if (value == 'rename') onRename();
             if (value == 'delete') onDelete();
+            if (value == 'editPages') onEditPages?.call();
           },
-          itemBuilder: (context) => const [
-            PopupMenuItem(value: 'rename', child: Text('Rename')),
-            PopupMenuItem(value: 'delete', child: Text('Delete')),
+          itemBuilder: (context) => [
+            if (onEditPages != null)
+              const PopupMenuItem(
+                value: 'editPages',
+                child: Text('Edit pages'),
+              ),
+            const PopupMenuItem(value: 'rename', child: Text('Rename')),
+            const PopupMenuItem(value: 'delete', child: Text('Delete')),
           ],
         ),
       ),
