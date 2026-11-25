@@ -5,15 +5,20 @@ import 'package:path/path.dart' as p;
 import 'package:pdf_tools_flutter/app/app.locator.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
+import 'package:pdf_tools_flutter/services/pdf_metadata_service.dart';
 import 'package:stacked/stacked.dart';
 
 class HomeViewModel extends BaseViewModel {
-  HomeViewModel({DocumentRepository? repository})
-    : _repository = repository ?? locator<DocumentRepository>() {
+  HomeViewModel({
+    DocumentRepository? repository,
+    PdfMetadataService? pdfMetadataService,
+  }) : _repository = repository ?? locator<DocumentRepository>(),
+       _pdfMetadataService = pdfMetadataService ?? PdfMetadataService() {
     loadDocuments();
   }
 
   final DocumentRepository _repository;
+  final PdfMetadataService _pdfMetadataService;
   List<Document> documents = [];
   String? errorMessage;
 
@@ -53,13 +58,26 @@ class HomeViewModel extends BaseViewModel {
       }
       final bool isPdf = extension == 'pdf';
       final String title = p.basenameWithoutExtension(picked.name).trim();
-      await _repository.importDocument(
+      final int documentId = await _repository.importDocument(
         title: title.isEmpty ? 'Imported document' : title,
         bytes: bytes,
         extension: extension,
         pageCount: isPdf ? 0 : 1,
         sourceType: isPdf ? 'imported_pdf' : 'imported_image',
       );
+      if (isPdf) {
+        try {
+          final PdfMetadata metadata = await _pdfMetadataService.inspect(bytes);
+          await _repository.updatePdfMetadata(
+            documentId: documentId,
+            pageCount: metadata.pageCount,
+            thumbnailBytes: metadata.firstPageThumbnail,
+          );
+        } catch (error) {
+          errorMessage =
+              'PDF imported, but its preview could not be generated. The original file is safe.';
+        }
+      }
       await loadDocuments();
     } catch (error) {
       errorMessage = 'Import failed. Check the file and available storage.';
