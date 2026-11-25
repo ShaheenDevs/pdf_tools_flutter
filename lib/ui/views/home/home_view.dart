@@ -351,9 +351,11 @@ class _ToolGrid extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           onTap: item.label == 'Scan document'
               ? onScan
-              : onPdfTools == null
-                  ? null
-                  : () => onPdfTools!(item.label),
+              : const ['Merge PDFs', 'Split PDF', 'Images to PDF', 'Compress PDF']
+                      .contains(item.label) &&
+                  onPdfTools != null
+                  ? () => onPdfTools!(item.label)
+                  : null,
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
