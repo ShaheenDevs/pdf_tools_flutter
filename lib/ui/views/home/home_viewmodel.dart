@@ -6,18 +6,19 @@ import 'package:pdf_tools_flutter/app/app.locator.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
 import 'package:pdf_tools_flutter/services/file_storage_service.dart';
-import 'package:pdf_tools_flutter/services/pdf_metadata_service.dart';
 import 'package:pdf_tools_flutter/services/image_thumbnail_service.dart';
+import 'package:pdf_tools_flutter/services/pdf_metadata_service.dart';
 import 'package:stacked/stacked.dart';
 
 class HomeViewModel extends BaseViewModel {
   HomeViewModel({
     DocumentRepository? repository,
     PdfMetadataService? pdfMetadataService,
+    ImageThumbnailService? imageThumbnailService,
     FileStorageService? fileStorage,
   }) : _repository = repository ?? locator<DocumentRepository>(),
        _pdfMetadataService = pdfMetadataService ?? PdfMetadataService(),
-       _imageThumbnailService = ImageThumbnailService(),
+       _imageThumbnailService = imageThumbnailService ?? ImageThumbnailService(),
        _fileStorage = fileStorage ?? locator<FileStorageService>() {
     loadDocuments();
   }
@@ -38,6 +39,7 @@ class HomeViewModel extends BaseViewModel {
       return null;
     }
   }
+
   List<Document> documents = [];
   String searchQuery = '';
   String? errorMessage;
@@ -83,7 +85,10 @@ class HomeViewModel extends BaseViewModel {
       if (result == null || result.files.isEmpty) return;
 
       final PlatformFile picked = result.files.single;
-      final String extension = p.extension(picked.name).replaceFirst('.', '').toLowerCase();
+      final String extension = p
+          .extension(picked.name)
+          .replaceFirst('.', '')
+          .toLowerCase();
       final List<int> bytes = picked.bytes ??
           (picked.path != null
               ? await File(picked.path!).readAsBytes()
