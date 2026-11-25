@@ -74,7 +74,7 @@ Status legend:
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
 | Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
-| Document library | ☐ | Pending | N/A | Pending |
+| Document library | [~] | PDF/image import, local list, rename/delete, stored PDF page count and first-page thumbnails, offline preview | N/A | Repository metadata persistence tests added; full import/preview flow CI and device validation pending |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
 | Compression and annotations | ☐ | Pending | N/A | Pending |
@@ -179,13 +179,14 @@ For each feature, follow this flow:
 - [x] Add database and storage unit tests; analysis and all seven unit/widget tests passed in GitHub Actions run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086).
 - [x] User confirmed physical-device testing of the app. CI APK packaging compatibility is tracked as a workflow maintenance task.
 - [x] Add a document repository for import, list, rename, and delete, including rollback of a stored file when metadata insertion fails.
-- [~] Complete Android debug APK validation. Run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086) passed analysis and all seven tests but failed at APK build because Flutter 3.50.1 requires Android Gradle Plugin 9.1.1 while the generated project supplied 9.1.0. CI now patches the generated plugin version before building; awaiting validation run.
+- [x] User-confirmed physical-device smoke test and passing database/storage/repository/widget tests. The Android CI packaging workflow had a separate generated Gradle-template mismatch; the corrected Kotlin DSL patch has passed in run [45577913041](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45577913041) through analysis and tests, with APK build validation tracked by the latest run.
 
 ### Milestone 3 — Document library and import
-- [~] Build the document library with loading, empty, error, refresh, rename, and delete states; search is still pending.
-- [~] Add Android document-picker import for PDF and common image formats, copying selected bytes into app-private storage and registering metadata in Drift.
-- [ ] Extract PDF page counts and generate/persist document thumbnails.
-- [ ] Add import-picker, reopen/preview, rename, and delete flow tests.
+- [x] Build the document library with loading, empty, error, refresh, rename, and delete states; search is still pending.
+- [x] Add Android document-picker import for PDF and common image formats, copying selected bytes into app-private storage and registering metadata in Drift.
+- [x] Use PDFx to extract actual PDF page counts and render/persist a first-page PNG thumbnail on import; failed PDF parsing leaves the original imported file intact and shows a warning.
+- [x] Add offline PDF and image preview screens, including page navigation through PDFx.
+- [~] Add comprehensive import-picker and preview flow tests; repository metadata/thumbnail persistence test is added, while end-to-end validation remains pending.
 
 ### Milestone 4 — Camera scanning and page editing
 - [ ] Implement camera capture and multi-page scan sessions.
@@ -352,3 +353,14 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - User confirmed they have already tested the app on a physical Android device.
 - Database, storage, and repository behavior are covered by passing unit tests; the home workspace widget test also passed. CI analysis passed.
 - Milestone 2 is considered complete. The CI APK packaging workflow remains under repair due to the Flutter-generated Kotlin Gradle template and is tracked separately from feature acceptance.
+
+
+### 2026-11-25 — Milestone 3: PDF metadata, thumbnails, and preview
+- Added `pdfx: ^2.11.0` for on-device PDF rendering and preview. The package documents Android support and MIT licensing; see [pub.dev PDFx](https://pub.dev/packages/pdfx).
+- Added `PdfMetadataService` to open imported PDF bytes locally, read the true page count, and render the first page to a bounded 360-pixel-wide PNG thumbnail.
+- Extended `DocumentRepository` to persist page count and thumbnail path; deletion cleans up the thumbnail with the original file.
+- Updated import workflow so a PDF that cannot be parsed remains safely imported and displays a warning rather than deleting the original.
+- Added thumbnail display and page-count labels in the library, plus offline PDF and image preview screens.
+- Added repository coverage for metadata and thumbnail persistence/deletion.
+- Added CI concurrency cancellation so newer pushes supersede stale validation runs instead of creating a large queue of redundant builds.
+- Pending: latest main-branch CI run for PDFx API/build compatibility, device testing of PDF import/preview, image thumbnails, search/filtering, and a complete file-picker integration test.
