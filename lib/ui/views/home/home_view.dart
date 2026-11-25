@@ -343,7 +343,7 @@ class _DocumentTile extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          '${isPdf ? 'PDF' : 'Image'} • $size',
+          '${isPdf ? 'PDF' : 'Image'} • $size${document.pageCount > 0 ? ' • ${document.pageCount} pages' : ''}',
           style: const TextStyle(fontSize: 12),
         ),
         trailing: PopupMenuButton<String>(
