@@ -44,7 +44,7 @@ Status legend:
 | Image to PDF | ☐ | Import local images and generate a PDF |
 | Local annotation and highlighting | ☐ | Add, edit, and persist annotations/highlights locally |
 | Share and export | ☐ | Export generated files through Android share/save flows |
-| Document library | [~] | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; full import-flow validation remains pending |
+| Document library | ☒ | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; full import-flow validation remains pending |
 
 ### Premium features
 
@@ -64,8 +64,8 @@ Status legend:
 | Digital signature | ☐ | Create/import a signature and place it on PDF pages |
 | Watermark | ☐ | Add text or image watermarks to selected pages |
 | Page numbers | ☐ | Configure and apply page numbering |
-| PDF preview | [~] | Offline PDF page navigation and zoomable local image preview |
-| Document metadata | [~] | Persist title, file path, page count, size, timestamps, and generated PDF/image preview thumbnails |
+| PDF preview | ☒ | Offline PDF page navigation and zoomable local image preview |
+| Document metadata | ☒ | Persist title, file path, page count, size, timestamps, and generated PDF/image preview thumbnails |
 
 ## C. Development Progress
 
@@ -74,7 +74,7 @@ Status legend:
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
 | Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
-| Document library | [~] | PDF/image import, searchable local list, rename/delete, PDF page counts, PDF/image thumbnails, offline PDF/image preview | N/A | Repository metadata and thumbnail tests, image thumbnail service tests, search widget test, and image preview widget test added; CI and physical-device validation pending |
+| Document library | [~] | PDF/image import, searchable local list, rename/delete, PDF page counts, thumbnails, offline PDF/image preview | N/A | User confirmed PDF/image import and preview were run and tested on a physical Android device; automated tests are present, with CI tracked separately |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
 | Compression and annotations | ☐ | Pending | N/A | Pending |
@@ -186,7 +186,7 @@ For each feature, follow this flow:
 - [x] Add Android document-picker import for PDF and common image formats, copying selected bytes into app-private storage and registering metadata in Drift.
 - [x] Use PDFx to extract actual PDF page counts and render/persist a first-page PNG thumbnail on import; failed PDF parsing leaves the original imported file intact and shows a warning.
 - [x] Add offline PDF and image preview screens, including page navigation through PDFx.
-- [~] Add comprehensive import-picker and preview flow tests; repository metadata/thumbnail persistence test is added, while end-to-end validation remains pending.
+- [x] Add import and preview coverage (repository metadata/thumbnail persistence, image thumbnail validation, image import ViewModel workflow, search and image preview widget tests). User confirmed running and testing the PDF/image import and preview flows on a physical Android device; CLI/CI is not used as the feature acceptance gate.
 
 ### Milestone 4 — Camera scanning and page editing
 - [ ] Implement camera capture and multi-page scan sessions.
@@ -264,9 +264,9 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## I. Known Issues and Decisions
 
-- [ ] Confirm the latest CI run completes analysis, all tests, and Android debug build for the PDF/image import and preview implementation.
+- [ ] CI test/build follow-up is tracked separately and is not the feature acceptance gate; physical-device validation was confirmed by the user.
 - [x] Generated Android and Stacked files are present on `main`.
-- [x] PDF engine selected: PDFx for offline rendering and page navigation; Android CI and device validation for the newly added import/preview flow remain pending.\n- [ ] Camera/scanning package selection must be validated for Android support, licensing, maintenance, and required edit operations.
+- [x] PDF engine selected: PDFx for offline rendering and page navigation; Android CI and device validation for the newly added import/preview flow remain pending.\n- [x] Scanner package selected for Milestone 4: `cunning_document_scanner` (MIT; Android/iOS; multi-page capture and automatic crop; Android API 24 minimum in current 3.x docs).
 - [ ] Premium purchase provider and entitlement verification are not yet selected.
 - [ ] OCR provider, credit model, and privacy policy are not yet selected.
 - [ ] Cloud backup storage and optional backend deployment are not yet designed.
@@ -275,7 +275,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## J. Development History
 
-### 2026-11-25 — Milestone 2: local database and file storage started
+### 2026-11-25 — Milestone 3 accepted on physical device; Milestone 4 started\n- User explicitly confirmed that the PDF/image import and preview flows were run and tested on a physical Android device, and asked that CLI execution not block progress. Milestone 3 is accepted on that basis.\n- Automated test/build checks remain a separate quality signal and are not represented as passed by this device confirmation.\n- Started Milestone 4 package evaluation. Selected `cunning_document_scanner` 3.x because its current package documentation describes multi-page scanning, automatic crop, image/PDF outputs, Android support, and an MIT license. Android camera permission and API 24 minimum are being configured.\n\n### 2026-11-25 — Milestone 2: local database and file storage started
 - Added Drift and SQLite dependencies plus an app-support-directory database connection.
 - Added schema v1 for documents, document pages, and annotations, including cascading foreign keys and unique page ordering per document.
 - Added app-private file storage for documents, images, thumbnails, and temporary files. Writes use a pending file followed by rename; APIs return relative paths and reject unsafe extensions/path traversal.
