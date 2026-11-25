@@ -73,7 +73,7 @@ Status legend:
 |---|---|---|---|---|
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main; user confirmed it runs on a physical Android device | N/A | Physical-device launch confirmed by user; CI analyzer policy adjusted, full CI rerun pending |
-| Local database and file storage | [~] | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and unit tests added; generated Drift code and CI validation pending | N/A | Awaiting GitHub Actions analyze, database/storage tests, and Android build |
+| Local database and file storage | [~] | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests pass in CI; Android APK build is being fixed for generated AGP compatibility |
 | Document library | ☐ | Pending | N/A | Pending |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
@@ -176,8 +176,9 @@ For each feature, follow this flow:
 - [x] Add document, page, and annotation tables with document foreign keys and cascading deletion.
 - [x] Implement app-private file storage with unique names, temporary-write/rename behavior, relative paths, extension validation, and path-traversal protection.
 - [x] Register the database and storage service with Stacked.
-- [~] Add database and storage unit tests; CI execution and generated Drift code validation are pending.
+- [x] Add database and storage unit tests; analysis and all seven unit/widget tests passed in GitHub Actions run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086).
 - [x] Add a document repository for import, list, rename, and delete, including rollback of a stored file when metadata insertion fails.
+- [~] Complete Android debug APK validation. Run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086) passed analysis and all seven tests but failed at APK build because Flutter 3.50.1 requires Android Gradle Plugin 9.1.1 while the generated project supplied 9.1.0. CI now patches the generated plugin version before building; awaiting validation run.
 
 ### Milestone 3 — Document library and import
 - [ ] Build the document library, empty/loading/error states, search, rename, and delete.
@@ -328,3 +329,11 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Updated the home widget test to explicitly select the page's scrollable ancestor before scrolling to the recent-documents section.
 - Fix commit: `a30c4db2168ddd6566f8a007ff99d1a98f09c187`.
 - Validation run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086) has been queued; final analysis, test, and APK build status is still pending. Milestone 2 remains in progress.
+
+
+### 2026-11-25 — Milestone 2: test suite green; Android build compatibility fix
+- GitHub Actions run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086) passed Flutter analysis and all seven tests (six database/storage/repository unit tests plus the home widget test).
+- The Android debug APK step failed before compilation because the generated Android settings used Android Gradle Plugin 9.1.0, below Flutter 3.50.1's minimum supported 9.1.1.
+- Updated CI to patch the generated `android/settings.gradle` plugin version to 9.1.1 and verify the replacement before continuing.
+- CI workflow fix commit: `659298db00704e0ffdd5b1db6bc42a8ec41de8e9`.
+- Milestone 2 remains in progress until the new CI run completes the Android debug build and generated-file commit.
