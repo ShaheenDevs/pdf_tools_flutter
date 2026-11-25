@@ -513,6 +513,6 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ### 2026-11-25 — Full Flutter and Android debug validation
 - GitHub Actions run [45668430008](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45668430008) on `main` has completed dependency resolution, Stacked/Drift code generation, Flutter analysis, the full Flutter test suite, Android debug APK assembly, and the generated-file commit step successfully.
-- The run is still in its final GitHub Actions cleanup phase at the time of this entry, so the overall workflow conclusion has not yet been reported. The substantive validation and APK steps are all green.
+- The overall GitHub Actions run has now completed with conclusion `success`; all substantive validation, APK assembly, generated-file commit, and final cleanup steps passed.
 - The workflow also passed the guard that prevents Android release builds from using the generated debug signing key. Production signing remains intentionally unconfigured until the publisher supplies a protected upload key.
 - No local CLI commands or tests were run. Physical-device acceptance remains based on the user's earlier confirmations; this CI result does not replace the outstanding release-candidate manual QA matrix.
