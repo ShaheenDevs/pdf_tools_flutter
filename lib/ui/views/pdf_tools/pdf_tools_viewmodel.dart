@@ -28,6 +28,9 @@ class PdfToolsViewModel extends BaseViewModel {
   String _splitSourceTitle = 'Document';
   int splitPageCount = 0;
   String splitRangeText = '';
+  int batchTotal = 0;
+  int batchCompleted = 0;
+  bool _cancelBatchRequested = false;
 
   bool get hasSplitSource => _splitSourceBytes != null;
 
@@ -125,6 +128,66 @@ class PdfToolsViewModel extends BaseViewModel {
       successMessage = 'Image PDF saved to your document library.';
       if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
     });
+  }
+
+  /// Compresses each selected PDF independently so one bad file does not
+  /// prevent the remaining documents from being processed.
+  Future<void> batchCompressPdfs() async {
+    await _run(() async {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        allowMultiple: true,
+        withData: true,
+      );
+      if (picked == null || picked.files.isEmpty) return;
+
+      _cancelBatchRequested = false;
+      batchTotal = picked.files.length;
+      batchCompleted = 0;
+      var succeeded = 0;
+      var failed = 0;
+      notifyListeners();
+
+      for (final file in picked.files) {
+        if (_cancelBatchRequested) break;
+        try {
+          final source = await _readPickedFile(file);
+          final compressed = await _pdfToolsService.compressPdf(source);
+          final saved = await _savePdf(
+            title: '${p.basenameWithoutExtension(file.name)}_compressed',
+            bytes: compressed,
+          );
+          if (saved) {
+            succeeded++;
+          } else {
+            // The PDF is safely stored even when its preview cannot be rendered.
+            succeeded++;
+          }
+        } catch (_) {
+          failed++;
+        } finally {
+          batchCompleted++;
+          notifyListeners();
+        }
+      }
+
+      final cancelled = _cancelBatchRequested;
+      successMessage = cancelled
+          ? 'Batch stopped: saved $succeeded, failed $failed, not started ${batchTotal - batchCompleted}.'
+          : 'Batch complete: saved $succeeded of $batchTotal PDF(s).';
+      if (failed > 0 || (!cancelled && succeeded == 0)) {
+        errorMessage = '$failed file(s) could not be processed.';
+      }
+      if (cancelled && succeeded == 0 && failed == 0) {
+        successMessage = 'Batch cancelled before processing began.';
+      }
+    });
+  }
+
+  void cancelBatch() {
+    _cancelBatchRequested = true;
+    notifyListeners();
   }
 
   Future<void> compressPdf() async {
