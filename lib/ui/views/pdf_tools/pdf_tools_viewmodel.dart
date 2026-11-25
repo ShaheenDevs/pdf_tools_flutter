@@ -157,6 +157,41 @@ class PdfToolsViewModel extends BaseViewModel {
   }
 
 
+
+  Future<void> signPdf(String certificatePassword) async {
+    await _run(() async {
+      final pdfPick = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        allowMultiple: false,
+        withData: true,
+      );
+      if (pdfPick == null || pdfPick.files.isEmpty) return;
+      final certificatePick = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['p12', 'pfx'],
+        allowMultiple: false,
+        withData: true,
+      );
+      if (certificatePick == null || certificatePick.files.isEmpty) return;
+      final source = await _readPickedFile(pdfPick.files.single);
+      final certificate = await _readPickedFile(certificatePick.files.single);
+      final signed = await _pdfToolsService.signPdf(
+        sourceBytes: source,
+        pkcs12Bytes: certificate,
+        certificatePassword: certificatePassword,
+        reason: 'Digitally signed',
+      );
+      final file = pdfPick.files.single;
+      final previewReady = await _savePdf(
+        title: '${p.basenameWithoutExtension(file.name)}_signed',
+        bytes: signed,
+      );
+      successMessage = 'Digitally signed PDF saved as a separate library document.';
+      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
+    });
+  }
+
   Future<void> watermarkPdf(String watermarkText) async {
     await _run(() async {
       final picked = await FilePicker.platform.pickFiles(
