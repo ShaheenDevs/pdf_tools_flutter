@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 import 'package:pdf_tools_flutter/app/app_theme.dart';
+import 'package:pdf_tools_flutter/database/app_database.dart';
 import 'package:stacked/stacked.dart';
 
 import 'home_viewmodel.dart';
@@ -24,46 +26,149 @@ class HomeView extends StackedView<HomeViewModel> {
             ),
           ],
         ),
-        actions: const [
+        actions: [
           IconButton(
-            tooltip: 'Settings will be available in a later milestone',
-            onPressed: null,
-            icon: Icon(Icons.settings_outlined),
+            tooltip: 'Import PDF or image',
+            onPressed: viewModel.isBusy ? null : viewModel.importDocument,
+            icon: const Icon(Icons.add_rounded),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-          children: const [
-            _WelcomeCard(),
-            SizedBox(height: 26),
-            Text(
-              'Quick tools',
-              style: TextStyle(
-                color: AppTheme.ink,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+        child: RefreshIndicator(
+          onRefresh: viewModel.loadDocuments,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+            children: [
+              const _WelcomeCard(),
+              const SizedBox(height: 26),
+              const Text(
+                'Quick tools',
+                style: TextStyle(
+                  color: AppTheme.ink,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            SizedBox(height: 12),
-            _ToolGrid(),
-            SizedBox(height: 28),
-            Text(
-              'Recent documents',
-              style: TextStyle(
-                color: AppTheme.ink,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+              const SizedBox(height: 12),
+              const _ToolGrid(),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Recent documents',
+                      style: TextStyle(
+                        color: AppTheme.ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: viewModel.isBusy ? null : viewModel.importDocument,
+                    icon: const Icon(Icons.file_open_outlined, size: 18),
+                    label: const Text('Import'),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 12),
-            _EmptyDocuments(),
-          ],
+              const SizedBox(height: 8),
+              if (viewModel.errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Material(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(viewModel.errorMessage!),
+                    ),
+                  ),
+                ),
+              if (viewModel.isBusy && viewModel.documents.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(28),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (viewModel.documents.isEmpty)
+                const _EmptyDocuments()
+              else
+                ...viewModel.documents.map(
+                  (document) => _DocumentTile(
+                    document: document,
+                    onRename: () => _renameDocument(context, document, viewModel),
+                    onDelete: () => _confirmDelete(context, document, viewModel),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: viewModel.isBusy ? null : viewModel.importDocument,
+        icon: const Icon(Icons.file_upload_outlined),
+        label: const Text('Import file'),
+      ),
     );
+  }
+
+  Future<void> _renameDocument(
+    BuildContext context,
+    Document document,
+    HomeViewModel viewModel,
+  ) async {
+    final controller = TextEditingController(text: document.title);
+    final String? title = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Rename document'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 255,
+          decoration: const InputDecoration(labelText: 'Document name'),
+          onSubmitted: (value) => Navigator.pop(dialogContext, value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (title != null) await viewModel.renameDocument(document.id, title);
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    Document document,
+    HomeViewModel viewModel,
+  ) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete document?'),
+        content: Text('“${document.title}” will be removed from this device.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await viewModel.deleteDocument(document.id);
   }
 
   @override
@@ -186,11 +291,68 @@ class _EmptyDocuments extends StatelessWidget {
           ),
           SizedBox(height: 5),
           Text(
-            'Your scanned and imported PDFs will appear here.',
+            'Import a PDF or image to see it in your local library.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.black54, fontSize: 12),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DocumentTile extends StatelessWidget {
+  const _DocumentTile({
+    required this.document,
+    required this.onRename,
+    required this.onDelete,
+  });
+
+  final Document document;
+  final VoidCallback onRename;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isPdf = p.extension(document.filePath).toLowerCase() == '.pdf';
+    final String size = document.fileSize < 1024 * 1024
+        ? '${(document.fileSize / 1024).toStringAsFixed(0)} KB'
+        : '${(document.fileSize / (1024 * 1024)).toStringAsFixed(1)} MB';
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFE9ECF3)),
+      ),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: AppTheme.primary.withValues(alpha: 0.10),
+          child: Icon(
+            isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
+            color: AppTheme.primary,
+          ),
+        ),
+        title: Text(
+          document.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          '${isPdf ? 'PDF' : 'Image'} • $size',
+          style: const TextStyle(fontSize: 12),
+        ),
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) {
+            if (value == 'rename') onRename();
+            if (value == 'delete') onDelete();
+          },
+          itemBuilder: (context) => const [
+            PopupMenuItem(value: 'rename', child: Text('Rename')),
+            PopupMenuItem(value: 'delete', child: Text('Delete')),
+          ],
+        ),
       ),
     );
   }
