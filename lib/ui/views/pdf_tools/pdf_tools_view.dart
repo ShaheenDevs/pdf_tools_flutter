@@ -93,6 +93,22 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
               onPressed: viewModel.imagesToPdf,
             ),
             _ToolCard(
+              icon: Icons.branding_watermark_outlined,
+              title: 'Add watermark',
+              description: 'Add custom translucent text to every page and save a copy.',
+              buttonLabel: 'Choose PDF',
+              busy: viewModel.isBusy,
+              onPressed: () => _requestWatermark(context, viewModel),
+            ),
+            _ToolCard(
+              icon: Icons.format_list_numbered_rounded,
+              title: 'Add page numbers',
+              description: 'Place page numbers at the bottom-right of each page.',
+              buttonLabel: 'Choose PDF',
+              busy: viewModel.isBusy,
+              onPressed: viewModel.addPageNumbers,
+            ),
+            _ToolCard(
               icon: Icons.compress_rounded,
               title: 'Compress PDF',
               description: 'Optimize a PDF locally and save a separate compressed copy.',
@@ -109,6 +125,44 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
         ),
       ),
     );
+  }
+
+
+  Future<void> _requestWatermark(
+    BuildContext context,
+    PdfToolsViewModel viewModel,
+  ) async {
+    final controller = TextEditingController();
+    final text = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Watermark text'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 80,
+          decoration: const InputDecoration(
+            hintText: 'e.g. CONFIDENTIAL',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (value) => Navigator.pop(dialogContext, value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (text != null && text.trim().isNotEmpty) {
+      await viewModel.watermarkPdf(text);
+    }
   }
 
   @override
