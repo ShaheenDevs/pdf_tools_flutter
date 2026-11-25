@@ -36,6 +36,11 @@ jobs:
       - name: Generate Android platform files
         run: flutter create --platforms=android .
 
+      - name: Align Android Gradle Plugin with Flutter
+        run: |
+          sed -i 's/9\\.1\\.0/9.1.1/g' android/settings.gradle
+          grep -q '9.1.1' android/settings.gradle
+
       - name: Remove generated Flutter counter test
         run: rm -f test/widget_test.dart
 
