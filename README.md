@@ -489,3 +489,9 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Changes are on `main`. The latest GitHub Actions run [45653951114](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45653951114) is pending at the time of this update; no new test-suite or APK success is claimed yet.
 - The previous completed run [45650043995](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45650043995) passed analysis and 32 tests but timed out on the populated-library filter widget test, so its APK step was skipped.
 - No local CLI commands or tests were run.
+
+### 2026-11-25 — Move document filtering coverage to a ViewModel test
+- The completed run [45653951114](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45653951114) again passed Flutter analysis and 32 tests, but the populated-library widget test still timed out after ten minutes. The Android debug APK step was skipped.
+- Reclassified the filtering assertion as a ViewModel-level test: it now verifies title filtering, no-match results, and extension filtering directly against `visibleDocuments`, without mounting a populated scrolling widget tree. The empty-workspace rendering remains covered by the separate home widget test.
+- Commit: `e102ecbb5c4faa70184ceb22530e9cbff766fe78`. GitHub Actions run [45667444445](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45667444445) has been queued. Test and APK outcomes are not yet known.
+- No local CLI commands or tests were run.
