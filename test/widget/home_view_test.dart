@@ -13,10 +13,18 @@ void main() {
     expect(find.text('PDF Tools & Scanner'), findsOneWidget);
     expect(find.text('Quick tools'), findsOneWidget);
 
-    // ensureVisible walks the actual scrollable ancestors. This avoids
-    // ambiguously selecting the outer ListView and the nested GridView's
-    // Scrollable when using scrollUntilVisible.
-    await tester.ensureVisible(find.text('No documents yet'));
+    final pageScrollable = find
+        .descendant(
+          of: find.byType(Scaffold),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+
+    await tester.scrollUntilVisible(
+      find.text('Recent documents'),
+      250,
+      scrollable: pageScrollable,
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Scan document'), findsOneWidget);
