@@ -191,6 +191,8 @@ class HomeView extends StackedView<HomeViewModel> {
             title: document.title,
             filePath: path,
             isPdf: isPdf,
+            documentId: document.id,
+            pageCount: document.pageCount,
           ),
         ),
       );
