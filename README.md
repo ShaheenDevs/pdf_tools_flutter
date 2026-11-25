@@ -500,3 +500,8 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - GitHub Actions run [45667444445](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45667444445) passed dependency resolution, Stacked/Drift code generation, Flutter analysis, and all Flutter tests. Android debug APK assembly is still running; its result is not yet confirmed.
 - Release configuration review found the generated `android/app/build.gradle.kts` still assigns the debug signing configuration to the release build type. This is not acceptable for distribution. The release signing configuration must be changed to require a publisher-controlled upload key (or remain unsigned until one is configured) before any release AAB/APK is produced. No signing secrets are present in the repository.
 - Existing release checklist remains authoritative: publisher-owned application ID, production signing, artwork, privacy/store metadata, and full release-candidate QA are outstanding.
+
+### 2026-11-25 — Remove debug-key signing from Android release variant
+- Removed the generated template configuration that signed the Android `release` build type with the development debug keystore. The release variant is now intentionally unsigned until the publisher configures a protected production upload key.
+- This prevents accidentally producing a distributable release artifact signed with a debug key. A signed release build remains blocked on publisher-owned signing credentials.
+- Commit: `1dbff09f2cc60ff57944f7a8311491b9cf269845`. GitHub Actions run [45668067429](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45668067429) is pending; no build result is claimed for this change yet.
