@@ -70,6 +70,16 @@ void main() {
     expect(result.length, lessThanOrEqualTo(onePagePdf.length));
   });
 
+  test('reports malformed PDF inputs clearly', () async {
+    await expectLater(
+      service.mergePdfs([
+        [1, 2, 3],
+        [4, 5, 6],
+      ]),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('rejects invalid merge input', () {
     expect(
       () => service.mergePdfs([
