@@ -38,10 +38,10 @@ Status legend:
 | Crop and rotate pages | [~] | Persist normalized crop margins and 90° rotations; regenerate the scanned PDF |
 | Reorder pages | [~] | Reorder scanned pages and rebuild the PDF in the selected order |
 | Delete pages | [~] | Delete a scanned page with confirmation, keeping at least one page |
-| Merge PDFs | ☐ | Select multiple local PDFs and combine them in chosen order |
-| Split PDFs | ☐ | Export selected page ranges or individual pages as separate PDFs |
-| Basic PDF compression | ☐ | Provide a local compression workflow where supported |
-| Image to PDF | ☐ | Import local images and generate a PDF |
+| Merge PDFs | [~] | Merge multiple local PDFs in picker order; save a new library PDF |
+| Split PDFs | [~] | Export semicolon-separated page ranges as separate local PDFs |
+| Basic PDF compression | [~] | Lossless local PDF optimization; save a separate copy and report size change |
+| Image to PDF | [~] | Convert multiple local JPG/PNG images into one PDF |
 | Local annotation and highlighting | ☐ | Add, edit, and persist annotations/highlights locally |
 | Share and export | ☐ | Export generated files through Android share/save flows |
 | Document library | ☒ | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; user confirmed physical-device validation |
@@ -76,7 +76,7 @@ Status legend:
 | Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
 | Document library | ☒ | PDF/image import, searchable local list, rename/delete, PDF page counts, thumbnails, offline PDF/image preview | N/A | User confirmed PDF/image import and preview were run and tested on a physical Android device; automated tests are present, with CI tracked separately |
 | Camera scanning and page editing | [~] | Native multi-page scanning, crop/rotate, reorder/delete, PDF regeneration for scanned documents | N/A | Repository and image/PDF service tests added; physical-device validation pending |
-| Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
+| Merge, split, image-to-PDF, and compression | [~] | Offline PDF operations screen, service, and local-library output persistence | N/A | Automated service tests authored; CLI execution intentionally skipped; physical-device verification pending |
 | Compression and annotations | ☐ | Pending | N/A | Pending |
 | Signature, watermark, and page numbers | ☐ | Pending | N/A | Pending |
 | Share and export | ☐ | Pending | N/A | Pending |
@@ -196,10 +196,10 @@ For each feature, follow this flow:
 - [x] Add service tests for crop/rotation/PDF generation and repository tests for reorder/delete persistence. Physical-device verification of the complete scanner/editor flow remains pending.
 
 ### Milestone 5 — PDF tools
-- [ ] Implement merge and split.
-- [ ] Implement image-to-PDF conversion.
-- [ ] Implement basic compression and measure output size/quality.
-- [ ] Validate malformed, encrypted, large, and unsupported PDFs with clear errors.
+- [~] Implement offline merge and range-based split; generated files are saved as separate library documents.
+- [~] Implement multi-image JPG/PNG to PDF conversion.
+- [~] Implement lossless PDF compression and report the resulting size change.
+- [ ] Validate malformed, encrypted, large, and unsupported PDFs on device; handle unsupported/encrypted inputs with clear errors.
 
 ### Milestone 6 — Annotation and document finishing
 - [ ] Implement local annotation and highlighting.
@@ -398,3 +398,11 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - The widget test used an asynchronously loading ViewModel and an unbounded scroll-to-visible operation, making the test susceptible to waiting indefinitely on the loading/scroll state.
 - Added a `loadOnCreate` constructor option to `HomeViewModel` so widget tests can await initial data loading deterministically, and adjusted the home widget test to use a fixed viewport and finite pumps instead of an unbounded scroll/settle sequence.
 - Fix commits: `a16f0057` and `73c3feb9`. A fresh CI run is expected from the latest commit. Milestone 3 remains in progress; device validation of PDF and image import/preview is still required.
+
+### 2026-11-25 — Milestone 5: offline PDF tools implementation
+- Selected and pinned `pdf_manipulator: 6.0.0` (MIT) as the native PDF engine. Its current package documentation covers PDF merge, page-range editing/splitting, image-to-PDF generation, and compression; Android native support is documented from API 21. The package requires Dart 3.10, so the app's lower SDK constraint was raised to `>=3.10.0`. Reference: [pdf_manipulator on pub.dev](https://pub.dev/packages/pdf_manipulator).
+- Added `PdfToolsService` for in-memory/offline merge, multiple selected page-range exports, JPG/PNG image-to-PDF, and lossless compression. PDF work is handled by the native engine and does not require an app backend or network service after dependency installation.
+- Added a Stacked PDF tools ViewModel and screen. The home quick-tool tiles now open the tool screen; file picker inputs are processed locally and generated PDFs are imported into app-private storage with page-count and thumbnail metadata.
+- Split ranges accept semicolon-separated 1-based ranges, for example `1-3; 4-6; 8`, and each group becomes a separate PDF.
+- Added service tests for merge, split, image-to-PDF, compression, and invalid merge input. Per the user's instruction, CLI execution/results are intentionally not used as a progress gate; physical-device validation remains outstanding.
+- Milestone 4 scanner/page-editor device verification remains pending and is not marked complete.
