@@ -227,6 +227,7 @@ For each feature, follow this flow:
 - [x] Set the Android launcher label to **PDF Tools & Scanner**.
 - [x] Keep the Android manifest limited to the camera permission needed by scanning; use the platform file picker rather than broad storage permission.
 - [x] Add a release-readiness checklist documenting the current offline data policy and production blockers: [Android Release Readiness](docs/android-release-readiness.md).
+- [x] Add a repeatable physical-device QA matrix for install/permissions, import/library, scanner/editor, PDF tools, annotation/export, batch, stress/recovery, and accessibility: [Manual Android QA Matrix](docs/manual-android-qa-matrix.md).
 - [ ] Complete current GitHub Actions analysis, automated tests, and Android debug APK build.
 - [ ] Verify Android permission denial/recovery, lifecycle/process recreation, low-storage, large-file, malformed/encrypted PDF, and offline scenarios.
 - [ ] Finish accessibility, performance, and app-size review on representative devices.
@@ -237,7 +238,7 @@ For each feature, follow this flow:
 
 The future premium/OCR/cloud integration boundaries and proposed REST contracts are documented in [docs/premium-ocr-cloud-architecture.md](docs/premium-ocr-cloud-architecture.md). These endpoints are design contracts only; no backend or remote dependency has been added to the core app.
 
-Android launch blockers and permission/data-policy review are tracked in [docs/android-release-readiness.md](docs/android-release-readiness.md).
+Android launch blockers and permission/data-policy review are tracked in [docs/android-release-readiness.md](docs/android-release-readiness.md). The repeatable physical-device validation cases and per-case evidence fields are in [docs/manual-android-qa-matrix.md](docs/manual-android-qa-matrix.md).
 
 **Current decision: no backend APIs are required for the core application.** No authentication, remote database, or cloud storage dependency will be introduced for local scanning and PDF tools.
 
@@ -365,6 +366,13 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added `docs/android-release-readiness.md` with the publisher-owned application ID, production signing, app artwork, privacy/store metadata, permission/lifecycle/large-file/offline QA, accessibility, performance, and signed AAB gates.
 - Updated GitHub Actions path filters so changes under `android/**` trigger Android validation.
 - Production application ID remains `com.example.pdf_tools_flutter` until the publisher supplies a verified unique identifier; debug signing is not a production release configuration.
+
+
+
+### 2026-11-25 — Milestone 9: repeatable physical-device QA matrix
+- Added `docs/manual-android-qa-matrix.md` with 40+ repeatable cases across install/permissions, offline behavior, library/import, scanning/page edits, PDF operations, annotations, sharing/batch, stress/recovery, and accessibility.
+- Recorded only the broad device-testing confirmation supplied by the user; individual outcomes not explicitly confirmed remain unrecorded/pending. Device model, Android version, release candidate, and date remain blank rather than inferred.
+- Linked the matrix from the README and release checklist. Production release gates remain open.
 
 ## Development Rules
 
