@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -8,6 +9,8 @@ import 'package:pdfx/pdfx.dart';
 import 'package:pdf_tools_flutter/app/app.locator.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart' as db;
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
+import 'package:pdf_tools_flutter/services/pdf_metadata_service.dart';
+import 'package:pdf_tools_flutter/services/pdf_tools_service.dart';
 
 enum MarkupTool { pen, highlight, signature }
 
@@ -31,6 +34,8 @@ class AnnotationEditorView extends StatefulWidget {
 
 class _AnnotationEditorViewState extends State<AnnotationEditorView> {
   final DocumentRepository _repository = locator<DocumentRepository>();
+  final PdfToolsService _pdfToolsService = PdfToolsService();
+  final PdfMetadataService _metadataService = PdfMetadataService();
   final List<Offset> _currentStroke = [];
   PdfDocument? _document;
   Uint8List? _pageImage;
@@ -185,6 +190,70 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
     }
   }
 
+  Future<void> _exportAnnotatedCopy() async {
+    setState(() {
+      _saving = true;
+      _message = null;
+    });
+    try {
+      final rows = await _repository.getAnnotations(documentId: widget.documentId);
+      final grouped = <int, List<PdfAnnotationStroke>>{};
+      for (final row in rows) {
+        final payload = jsonDecode(row.payload) as Map<String, dynamic>;
+        final rawPoints = payload['points'] as List?;
+        if (rawPoints == null || rawPoints.length < 2) continue;
+        final points = rawPoints.map((point) {
+          final pair = point as List;
+          if (pair.length != 2) {
+            throw const FormatException('A saved markup point is invalid.');
+          }
+          final x = (pair[0] as num).toDouble();
+          final y = (pair[1] as num).toDouble();
+          if (!x.isFinite || !y.isFinite || x < 0 || x > 1 || y < 0 || y > 1) {
+            throw const FormatException('A saved markup point is outside the page.');
+          }
+          return Offset(x, y);
+        }).toList(growable: false);
+        grouped.putIfAbsent(row.pageIndex, () => []).add(
+          PdfAnnotationStroke(
+            points: points,
+            color: payload['color'] as int? ?? 0xFF172554,
+            type: row.type,
+          ),
+        );
+      }
+      final sourceBytes = await File(widget.filePath).readAsBytes();
+      final annotated = await _pdfToolsService.exportAnnotatedPdf(
+        sourceBytes: sourceBytes,
+        annotationsByPage: grouped,
+      );
+      final metadata = await _metadataService.inspect(annotated);
+      final newId = await _repository.importDocument(
+        title: '${widget.title}_annotated',
+        bytes: annotated,
+        extension: 'pdf',
+        pageCount: metadata.pageCount,
+        sourceType: 'annotated_export',
+      );
+      await _repository.updateDocumentMetadata(
+        documentId: newId,
+        pageCount: metadata.pageCount,
+        thumbnailBytes: metadata.firstPageThumbnail,
+      );
+      if (mounted) {
+        setState(() => _message = 'Annotated PDF copy saved to your document library.');
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() => _message = error is ArgumentError || error is FormatException
+            ? error.toString().replaceFirst('FormatException: ', '')
+            : 'Could not export the annotated PDF. Your original document is safe.');
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   Future<void> _clearPageMarkups() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -225,7 +294,16 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Annotate: ${widget.title}')),
+      appBar: AppBar(
+        title: Text('Annotate: ${widget.title}'),
+        actions: [
+          IconButton(
+            tooltip: 'Export annotated copy',
+            onPressed: _saving || _loading ? null : _exportAnnotatedCopy,
+            icon: const Icon(Icons.file_download_outlined),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
