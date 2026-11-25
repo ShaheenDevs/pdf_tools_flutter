@@ -115,7 +115,7 @@ class PdfToolsService {
         (editor) async {
           await editor.addWatermark(
             normalized,
-            style: const PdfWatermarkStyle(
+            style: PdfWatermarkStyle(
               fontSize: 34,
               opacity: 0.22,
               rotation: -35,
