@@ -50,14 +50,14 @@ void main() {
     expect(() => storage.readBytes(path), throwsA(isA<FileSystemException>()));
   });
 
-  test('stores PDF page metadata and removes its thumbnail on delete', () async {
+  test('stores document preview metadata and removes its thumbnail on delete', () async {
     final id = await repository.importDocument(
       title: 'Metadata test',
       bytes: [37, 80, 68, 70],
       extension: 'pdf',
     );
 
-    await repository.updatePdfMetadata(
+    await repository.updateDocumentMetadata(
       documentId: id,
       pageCount: 3,
       thumbnailBytes: [137, 80, 78, 71],
