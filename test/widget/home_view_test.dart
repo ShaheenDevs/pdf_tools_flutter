@@ -72,6 +72,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Travel notes'), findsOneWidget);
 
+    await tester.ensureVisible(find.byType(TextField));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'missing title');
     await tester.pumpAndSettle();
     expect(find.text('No documents match your search.'), findsOneWidget);
