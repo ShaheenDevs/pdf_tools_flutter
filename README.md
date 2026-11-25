@@ -74,7 +74,7 @@ Status legend:
 | Repository analysis | [~] | Reference and target repositories inspected | Reference inspected; no target backend | Not applicable |
 | Project setup | ☒ | Flutter app, Android scaffolding, Stacked shell, and generated files are on main | N/A | User confirms they have tested the app on a physical Android device |
 | Local database and file storage | ☒ | Drift schema, SQLite connection, app-private atomic file storage, Stacked registrations, and repository operations implemented; generated Drift code is present on main | N/A | Analysis and all seven tests passed in CI; user confirms physical-device testing |
-| Document library | [~] | PDF/image import, local list, rename/delete, stored PDF page count and first-page thumbnails, offline preview | N/A | Repository metadata persistence tests added; full import/preview flow CI and device validation pending |
+| Document library | [~] | PDF/image import, searchable local list, rename/delete, stored PDF page count and first-page thumbnails, offline preview | N/A | Repository metadata persistence and widget search tests added; full import/preview CI and device validation pending |
 | Camera scanning and page editing | ☐ | Pending | N/A | Pending |
 | Merge, split, and image-to-PDF | ☐ | Pending | N/A | Pending |
 | Compression and annotations | ☐ | Pending | N/A | Pending |
@@ -182,7 +182,7 @@ For each feature, follow this flow:
 - [x] User-confirmed physical-device smoke test and passing database/storage/repository/widget tests. The Android CI packaging workflow had a separate generated Gradle-template mismatch; the corrected Kotlin DSL patch has passed in run [45577913041](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45577913041) through analysis and tests, with APK build validation tracked by the latest run.
 
 ### Milestone 3 — Document library and import
-- [x] Build the document library with loading, empty, error, refresh, rename, and delete states; search is still pending.
+- [x] Build the document library with loading, empty, error, refresh, rename, delete, and local title/type search states.
 - [x] Add Android document-picker import for PDF and common image formats, copying selected bytes into app-private storage and registering metadata in Drift.
 - [x] Use PDFx to extract actual PDF page counts and render/persist a first-page PNG thumbnail on import; failed PDF parsing leaves the original imported file intact and shows a warning.
 - [x] Add offline PDF and image preview screens, including page navigation through PDFx.
@@ -363,4 +363,5 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added thumbnail display and page-count labels in the library, plus offline PDF and image preview screens.
 - Added repository coverage for metadata and thumbnail persistence/deletion.
 - Added CI concurrency cancellation so newer pushes supersede stale validation runs instead of creating a large queue of redundant builds.
-- Pending: latest main-branch CI run for PDFx API/build compatibility, device testing of PDF import/preview, image thumbnails, search/filtering, and a complete file-picker integration test.
+- Added local search by document title, source type, and file extension, with a clear-search control and no-results state; widget test now covers filtering.
+- Pending: latest main-branch CI run for PDFx API/build compatibility, device testing of PDF import/preview, image thumbnails, and a complete file-picker integration test.
