@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 
@@ -14,11 +12,8 @@ class ImageThumbnailService {
 }
 
 Uint8List _createThumbnail(Uint8List sourceBytes) {
-  final img.Image? decoded = img.decodeImage(
-    sourceBytes,
-    maxPixels: 40 * 1000 * 1000,
-  );
-  if (decoded == null || decoded.width < 1 || decoded.height < 1) {
+  // Bound compressed input before decoding; reject excessive dimensions immediately after.\n  if (sourceBytes.length > 30 * 1024 * 1024) {\n    throw const FormatException('The selected image is too large to preview.');\n  }\n  final img.Image? decoded = img.decodeImage(sourceBytes);
+  if (decoded == null || decoded.width < 1 || decoded.height < 1 ||\n      decoded.width * decoded.height > 40 * 1000 * 1000) {
     throw const FormatException('The selected image could not be decoded.');
   }
 
