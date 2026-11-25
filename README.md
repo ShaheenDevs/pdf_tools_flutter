@@ -321,3 +321,10 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - The next CI run passed analysis and all six database, file-storage, and repository unit tests, but the existing home widget test failed because it expected content below the initial ListView viewport to have already been built.
 - Updated the widget test to scroll the lazy list to the relevant content before asserting it. New validation run: [45569578408](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45569578408) — in progress at the time of this entry.
 - No feature is being marked tested or complete based on the failed run. Await the new widget test and Android debug build result before closing Milestone 2.
+
+
+### 2026-11-25 — Milestone 2: widget-test follow-up
+- Run [45569578408](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45569578408) completed with failure: analysis passed and all six database, file-storage, and repository unit tests passed, but the home widget test failed because `scrollUntilVisible` was given an ambiguous scrollable finder (multiple nested scrollables matched). Android APK build and generated-file commit were skipped after the test failure.
+- Updated the home widget test to explicitly select the page's scrollable ancestor before scrolling to the recent-documents section.
+- Fix commit: `a30c4db2168ddd6566f8a007ff99d1a98f09c187`.
+- Validation run [45570778086](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45570778086) has been queued; final analysis, test, and APK build status is still pending. Milestone 2 remains in progress.
