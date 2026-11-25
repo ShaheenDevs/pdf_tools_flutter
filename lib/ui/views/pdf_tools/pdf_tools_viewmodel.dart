@@ -45,11 +45,12 @@ class PdfToolsViewModel extends BaseViewModel {
       }
       final files = await Future.wait(picked.files.map(_readPickedFile));
       final merged = await _pdfToolsService.mergePdfs(files);
-      await _savePdf(
+      final previewReady = await _savePdf(
         title: 'Merged ${DateTime.now().millisecondsSinceEpoch}',
         bytes: merged,
       );
       successMessage = 'Merged PDF saved to your document library.';
+      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
     });
   }
 
@@ -91,10 +92,13 @@ class PdfToolsViewModel extends BaseViewModel {
         final label = range.length == 1
             ? 'page-${range.first + 1}'
             : 'pages-${range.first + 1}-${range.last + 1}';
-        await _savePdf(
+        final previewReady = await _savePdf(
           title: '${_splitSourceTitle}_$label',
           bytes: outputs[index],
         );
+        if (!previewReady) {
+          errorMessage = 'A split PDF was saved, but its preview is unavailable.';
+        }
       }
       successMessage = 'Created ${outputs.length} split PDF file(s).';
       _splitSourceBytes = null;
@@ -114,11 +118,12 @@ class PdfToolsViewModel extends BaseViewModel {
       if (picked == null || picked.files.isEmpty) return;
       final images = await Future.wait(picked.files.map(_readPickedFile));
       final output = await _pdfToolsService.imagesToPdf(images);
-      await _savePdf(
+      final previewReady = await _savePdf(
         title: 'Images ${DateTime.now().millisecondsSinceEpoch}',
         bytes: output,
       );
       successMessage = 'Image PDF saved to your document library.';
+      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
     });
   }
 
