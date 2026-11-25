@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:pdf_tools_flutter/app/app_theme.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart';
+import 'package:pdf_tools_flutter/ui/views/document_preview/document_preview_view.dart';
 import 'package:stacked/stacked.dart';
 
 import 'home_viewmodel.dart';
@@ -101,6 +102,7 @@ class HomeView extends StackedView<HomeViewModel> {
                     document: document,
                     onRename: () => _renameDocument(context, document, viewModel),
                     onDelete: () => _confirmDelete(context, document, viewModel),
+                    onOpen: () => _openDocument(context, document, viewModel),
                   ),
                 ),
             ],
@@ -113,6 +115,32 @@ class HomeView extends StackedView<HomeViewModel> {
         label: const Text('Import file'),
       ),
     );
+  }
+
+  Future<void> _openDocument(
+    BuildContext context,
+    Document document,
+    HomeViewModel viewModel,
+  ) async {
+    try {
+      final String path = await viewModel.absolutePathFor(document.filePath);
+      if (!context.mounted) return;
+      final bool isPdf = p.extension(document.filePath).toLowerCase() == '.pdf';
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => DocumentPreviewView(
+            title: document.title,
+            filePath: path,
+            isPdf: isPdf,
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open this document.')),
+      );
+    }
   }
 
   Future<void> _renameDocument(
@@ -309,11 +337,13 @@ class _DocumentTile extends StatelessWidget {
     required this.document,
     required this.onRename,
     required this.onDelete,
+    required this.onOpen,
   });
 
   final Document document;
   final VoidCallback onRename;
   final VoidCallback onDelete;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -329,6 +359,7 @@ class _DocumentTile extends StatelessWidget {
         side: const BorderSide(color: Color(0xFFE9ECF3)),
       ),
       child: ListTile(
+        onTap: onOpen,
         leading: CircleAvatar(
           backgroundColor: AppTheme.primary.withValues(alpha: 0.10),
           child: Icon(
