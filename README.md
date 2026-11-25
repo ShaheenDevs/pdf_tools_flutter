@@ -43,7 +43,7 @@ Status legend:
 | Basic PDF compression | [~] | Lossless local PDF optimization; save a separate copy and report size change |
 | Image to PDF | [~] | Convert multiple local JPG/PNG images into one PDF |
 | Local annotation and highlighting | [~] | Draw pen/highlight/freehand-signature strokes, persist them locally, and export a separate PDF copy with page-aligned image stamps |
-| Share and export | ☐ | Export generated files through Android share/save flows |
+| Share and export | [~] | Share PDF/image files through Android's share sheet and save copies through the system save-file picker |
 | Document library | ☒ | Browse, import, search, preview, rename, and delete locally managed PDF/image documents; user confirmed physical-device validation |
 
 ### Premium features
@@ -79,7 +79,7 @@ Status legend:
 | Merge, split, image-to-PDF, and compression | [~] | Offline PDF operations screen, service, and local-library output persistence | N/A | Automated service tests authored; CLI execution intentionally skipped; physical-device verification pending |
 | Annotation, highlighting, and signatures | [~] | Local page-level markup with SQLite persistence and annotated-copy export; PKCS#12 certificate signing exports a separate signed copy | N/A | Repository and signing-input tests authored; physical-device validation pending |
 | Watermark and page numbers | [~] | Local PDF watermark and per-page numbering exports through `pdf_manipulator` | N/A | Service tests authored; physical-device validation pending |
-| Share and export | ☐ | Pending | N/A | Pending |
+| Share and export | [~] | Preview actions share local documents and save copies through Android system UI | N/A | Export service guard tests authored; device verification pending |
 | Premium entitlements and ads | ☐ | Pending | Optional future service | Pending |
 | OCR and cloud backup | ☐ | Pending | Optional future Node.js service | Pending |
 | Release preparation | ☐ | Pending | N/A | Pending |
@@ -208,10 +208,10 @@ For each feature, follow this flow:
 - [~] Persist annotation strokes in SQLite and reload them when reopening the annotation editor; export all saved page markups from the editor into a new local-library PDF without modifying the source. Physical-device validation remains pending.
 
 ### Milestone 7 — Export and batch workflows
-- [ ] Implement share/export and Android save destinations.
-- [ ] Implement premium batch processing.
-- [ ] Add operation progress, cancellation where safe, and partial-failure handling.
-- [ ] Test output integrity and temporary-file cleanup.
+- [~] Add share and save-copy actions to PDF/image preview using Android's system share sheet and save-file picker; preserve the source file.
+- [~] Add batch PDF compression that processes each selected file independently and continues after individual failures.
+- [~] Show batch progress and allow safe cancellation between files; an in-progress native compression operation is allowed to finish.
+- [~] Add output validation through the existing PDF pipeline and tests for missing export sources; device verification and broader partial-failure/output-integrity coverage remain pending.
 
 ### Milestone 8 — Premium, OCR, and optional cloud roadmap
 - [ ] Define premium entitlement and purchase verification strategy.
@@ -407,6 +407,12 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added service tests for merge, split, image-to-PDF, compression, and invalid merge input. Per the user's instruction, CLI execution/results are intentionally not used as a progress gate; physical-device validation remains outstanding.
 - Updated the Android CI generated-file commit step to persist the resolved `pubspec.lock` alongside generated Android/Stacked/Drift files, so the new native PDF dependency and its transitive versions are reproducible.
 - Milestone 4 scanner/page-editor device verification remains pending and is not marked complete.
+
+### 2026-11-25 — Milestone 7: share, save, and batch processing
+- Added a document export service that shares existing local files through the Android platform share sheet and writes a user-selected copy through the system save-file picker. Added Share and Save a copy actions to PDF/image preview; the app-managed original is not moved or overwritten.
+- Added batch PDF compression for multiple selected files. Each file is handled independently, so a malformed/unreadable file does not stop later files; progress is reported and the user can stop before the next file begins.
+- Added guard tests for missing export source files. The current test suite and Android build have not yet been confirmed by CI; no local CLI tests were run per the user's instruction.
+- Premium entitlement gating is intentionally not added because the purchase/entitlement provider is still undecided. Physical-device validation of share/save and batch flows remains pending.
 
 ### 2026-11-25 — Milestone 6: annotated PDF export
 - Added an annotation export action to the editor. It loads all saved page-level strokes, validates their normalized coordinates, renders transparent page-sized PNG overlays, and stamps them onto the corresponding pages in a newly generated PDF copy.
