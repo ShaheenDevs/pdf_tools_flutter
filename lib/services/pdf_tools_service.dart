@@ -96,6 +96,7 @@ class PdfToolsService {
       await pdf.dispose();
     }
   }
+
   Future<T> _runPdf<T>(Future<T> Function() operation) async {
     try {
       return await operation();
