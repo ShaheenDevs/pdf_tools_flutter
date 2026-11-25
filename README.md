@@ -365,3 +365,10 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Added CI concurrency cancellation so newer pushes supersede stale validation runs instead of creating a large queue of redundant builds.
 - Added local search by document title, source type, and file extension, with a clear-search control and no-results state; widget test now covers filtering.
 - Pending: latest main-branch CI run for PDFx API/build compatibility, device testing of PDF import/preview, image thumbnails, and a complete file-picker integration test.
+
+
+### 2026-11-25 — CI Android build and generated-file push repair
+- Confirmed run [45577913041](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45577913041) passed Android platform generation, dependency resolution, code generation, Flutter analysis, all tests, and the Android debug APK build.
+- The only failing step was committing generated Android/Stacked/Drift files: a newer source commit reached `main` while that older workflow run was still executing, so GitHub rejected its non-fast-forward push.
+- Updated the workflow to fetch and rebase onto the latest `origin/main` before pushing generated files. Branch-level concurrency cancellation is also enabled to prevent stale validation runs from racing newer pushes.
+- New validation is running against the current source. No force-push or history rewrite was used.
