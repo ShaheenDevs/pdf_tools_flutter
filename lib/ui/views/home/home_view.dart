@@ -79,6 +79,31 @@ class HomeView extends StackedView<HomeViewModel> {
                 ],
               ),
               const SizedBox(height: 8),
+              TextField(
+                onChanged: viewModel.updateSearchQuery,
+                decoration: InputDecoration(
+                  hintText: 'Search documents',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: viewModel.searchQuery.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: 'Clear search',
+                          onPressed: () => viewModel.updateSearchQuery(''),
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: Color(0xFFE9ECF3)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: Color(0xFFE9ECF3)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               if (viewModel.errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -98,8 +123,17 @@ class HomeView extends StackedView<HomeViewModel> {
                 )
               else if (viewModel.documents.isEmpty)
                 const _EmptyDocuments()
+              else if (viewModel.visibleDocuments.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'No documents match your search.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                )
               else
-                ...viewModel.documents.map(
+                ...viewModel.visibleDocuments.map(
                   (document) => _DocumentTile(
                     document: document,
                     onRename: () => _renameDocument(context, document, viewModel),
