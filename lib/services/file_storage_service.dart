@@ -59,6 +59,9 @@ class FileStorageService {
     if (await file.exists()) await file.delete();
   }
 
+  Future<String> absolutePathFor(String relativePath) async =>
+      (await _resolve(relativePath)).path;
+
   Future<File> _resolve(String relativePath) async {
     if (p.isAbsolute(relativePath))
       throw ArgumentError.value(relativePath, 'relativePath');
