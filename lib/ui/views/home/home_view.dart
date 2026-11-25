@@ -57,7 +57,7 @@ class HomeView extends StackedView<HomeViewModel> {
                 ),
               ),
               const SizedBox(height: 12),
-              const _ToolGrid(),
+              _ToolGrid(onScan: viewModel.isBusy ? null : viewModel.scanDocument),
               const SizedBox(height: 28),
               Row(
                 children: [
@@ -284,7 +284,9 @@ class _WelcomeCard extends StatelessWidget {
 }
 
 class _ToolGrid extends StatelessWidget {
-  const _ToolGrid();
+  const _ToolGrid({this.onScan});
+
+  final VoidCallback? onScan;
 
   static const List<_ToolItem> _items = [
     _ToolItem('Scan document', Icons.document_scanner_outlined),
@@ -309,7 +311,10 @@ class _ToolGrid extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final item = _items[index];
-        return Container(
+        return InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: item.label == 'Scan document' ? onScan : null,
+          child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -331,6 +336,7 @@ class _ToolGrid extends StatelessWidget {
                 ),
               ),
             ],
+          ),
           ),
         );
       },
