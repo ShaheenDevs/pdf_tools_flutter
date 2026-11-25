@@ -199,7 +199,7 @@ For each feature, follow this flow:
 - [~] Implement offline merge and range-based split; generated files are saved as separate library documents.
 - [~] Implement multi-image JPG/PNG to PDF conversion.
 - [~] Implement lossless PDF compression and report the resulting size change.
-- [ ] Validate malformed, encrypted, large, and unsupported PDFs on device; handle unsupported/encrypted inputs with clear errors.
+- [~] Map password-protected and corrupted PDF errors to clear user messages; physical-device validation for malformed, encrypted, large, and unsupported inputs remains pending.
 
 ### Milestone 6 — Annotation and document finishing
 - [ ] Implement local annotation and highlighting.
