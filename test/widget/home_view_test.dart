@@ -6,9 +6,7 @@ void main() {
   testWidgets('home view displays the initial document workspace', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: HomeView()),
-    );
+    await tester.pumpWidget(const MaterialApp(home: HomeView()));
 
     expect(find.text('PDF Tools & Scanner'), findsOneWidget);
     expect(find.text('Quick tools'), findsOneWidget);

@@ -20,18 +20,22 @@ class Documents extends Table {
 
 class DocumentPages extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get documentId => integer().references(Documents, #id, onDelete: KeyAction.cascade)();
+  IntColumn get documentId =>
+      integer().references(Documents, #id, onDelete: KeyAction.cascade)();
   IntColumn get pageIndex => integer()();
   TextColumn get sourceImagePath => text().nullable()();
   IntColumn get rotation => integer().withDefault(const Constant(0))();
   TextColumn get cropData => text().nullable()();
   @override
-  List<Set<Column<Object>>> get uniqueKeys => [{documentId, pageIndex}];
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {documentId, pageIndex},
+  ];
 }
 
 class Annotations extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get documentId => integer().references(Documents, #id, onDelete: KeyAction.cascade)();
+  IntColumn get documentId =>
+      integer().references(Documents, #id, onDelete: KeyAction.cascade)();
   IntColumn get pageIndex => integer()();
   TextColumn get type => text()();
   TextColumn get payload => text()();

@@ -6,13 +6,17 @@ import 'package:path_provider/path_provider.dart';
 enum StorageFolder { documents, images, thumbnails, temporary }
 
 class FileStorageService {
-  FileStorageService({Directory? rootDirectory}) : _providedRoot = rootDirectory;
+  FileStorageService({Directory? rootDirectory})
+    : _providedRoot = rootDirectory;
   final Directory? _providedRoot;
   final Random _random = Random.secure();
 
   Future<Directory> get _root async {
-    final Directory root = _providedRoot ??
-        Directory(p.join((await getApplicationSupportDirectory()).path, 'pdf_tools'));
+    final Directory root =
+        _providedRoot ??
+        Directory(
+          p.join((await getApplicationSupportDirectory()).path, 'pdf_tools'),
+        );
     await root.create(recursive: true);
     return root;
   }
@@ -45,7 +49,8 @@ class FileStorageService {
 
   Future<List<int>> readBytes(String relativePath) async {
     final File file = await _resolve(relativePath);
-    if (!await file.exists()) throw FileSystemException('Stored file does not exist', file.path);
+    if (!await file.exists())
+      throw FileSystemException('Stored file does not exist', file.path);
     return file.readAsBytes();
   }
 
@@ -55,14 +60,18 @@ class FileStorageService {
   }
 
   Future<File> _resolve(String relativePath) async {
-    if (p.isAbsolute(relativePath)) throw ArgumentError.value(relativePath, 'relativePath');
+    if (p.isAbsolute(relativePath))
+      throw ArgumentError.value(relativePath, 'relativePath');
     final String normalized = p.normalize(relativePath);
-    if (normalized == '.' || normalized == '..' || normalized.startsWith('..${p.separator}')) {
+    if (normalized == '.' ||
+        normalized == '..' ||
+        normalized.startsWith('..${p.separator}')) {
       throw ArgumentError.value(relativePath, 'relativePath');
     }
     final String root = p.normalize((await _root).absolute.path);
     final String candidate = p.normalize(p.join(root, normalized));
-    if (!p.isWithin(root, candidate)) throw ArgumentError.value(relativePath, 'relativePath');
+    if (!p.isWithin(root, candidate))
+      throw ArgumentError.value(relativePath, 'relativePath');
     return File(candidate);
   }
 }

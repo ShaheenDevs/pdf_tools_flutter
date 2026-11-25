@@ -15,7 +15,9 @@ void main() {
 
   test('writes, reads, and deletes a relative file', () async {
     final path = await storage.saveBytes(
-      folder: StorageFolder.documents, bytes: [1, 2, 3], extension: '.pdf',
+      folder: StorageFolder.documents,
+      bytes: [1, 2, 3],
+      extension: '.pdf',
     );
     expect(path.startsWith('documents'), isTrue);
     expect(await storage.readBytes(path), [1, 2, 3]);
@@ -24,9 +26,17 @@ void main() {
   });
 
   test('rejects path traversal and unsafe extensions', () async {
-    expect(() => storage.readBytes('../outside.txt'), throwsA(isA<ArgumentError>()));
-    expect(() => storage.saveBytes(
-      folder: StorageFolder.images, bytes: [1], extension: '../pdf',
-    ), throwsA(isA<ArgumentError>()));
+    expect(
+      () => storage.readBytes('../outside.txt'),
+      throwsA(isA<ArgumentError>()),
+    );
+    expect(
+      () => storage.saveBytes(
+        folder: StorageFolder.images,
+        bytes: [1],
+        extension: '../pdf',
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
   });
 }

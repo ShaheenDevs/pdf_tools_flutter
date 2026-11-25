@@ -33,7 +33,12 @@ void main() {
     expect(documents, hasLength(1));
     expect(documents.single.title, 'Contract');
     expect(documents.single.fileSize, 4);
-    expect(await storage.readBytes(documents.single.filePath), [37, 80, 68, 70]);
+    expect(await storage.readBytes(documents.single.filePath), [
+      37,
+      80,
+      68,
+      70,
+    ]);
 
     await repository.renameDocument(documentId: id, title: 'Signed contract');
     documents = await repository.getDocuments();

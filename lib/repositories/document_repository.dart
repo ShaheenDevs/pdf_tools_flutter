@@ -6,8 +6,8 @@ class DocumentRepository {
   DocumentRepository({
     required AppDatabase database,
     required FileStorageService fileStorage,
-  })  : _database = database,
-        _fileStorage = fileStorage;
+  }) : _database = database,
+       _fileStorage = fileStorage;
 
   final AppDatabase _database;
   final FileStorageService _fileStorage;
@@ -26,7 +26,9 @@ class DocumentRepository {
     );
     final DateTime now = DateTime.now();
     try {
-      return await _database.into(_database.documents).insert(
+      return await _database
+          .into(_database.documents)
+          .insert(
             DocumentsCompanion.insert(
               title: title.trim(),
               filePath: relativePath,
@@ -44,9 +46,9 @@ class DocumentRepository {
   }
 
   Future<List<Document>> getDocuments() {
-    return (_database.select(_database.documents)
-          ..orderBy([(row) => OrderingTerm.desc(row.updatedAt)]))
-        .get();
+    return (_database.select(
+      _database.documents,
+    )..orderBy([(row) => OrderingTerm.desc(row.updatedAt)])).get();
   }
 
   Future<void> renameDocument({
@@ -55,31 +57,38 @@ class DocumentRepository {
   }) async {
     final String normalizedTitle = title.trim();
     if (normalizedTitle.isEmpty || normalizedTitle.length > 255) {
-      throw ArgumentError.value(title, 'title', 'Title must be 1–255 characters');
+      throw ArgumentError.value(
+        title,
+        'title',
+        'Title must be 1–255 characters',
+      );
     }
-    final int updated = await (_database.update(_database.documents)
-          ..where((row) => row.id.equals(documentId)))
-        .write(DocumentsCompanion(
-      title: Value(normalizedTitle),
-      updatedAt: Value(DateTime.now()),
-    ));
+    final int updated =
+        await (_database.update(
+          _database.documents,
+        )..where((row) => row.id.equals(documentId))).write(
+          DocumentsCompanion(
+            title: Value(normalizedTitle),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
     if (updated == 0) {
       throw StateError('Document $documentId does not exist');
     }
   }
 
   Future<void> deleteDocument(int documentId) async {
-    final Document? document = await (_database.select(_database.documents)
-          ..where((row) => row.id.equals(documentId)))
-        .getSingleOrNull();
+    final Document? document = await (_database.select(
+      _database.documents,
+    )..where((row) => row.id.equals(documentId))).getSingleOrNull();
     if (document == null) return;
 
-    final List<DocumentPage> pages = await (_database.select(_database.documentPages)
-          ..where((row) => row.documentId.equals(documentId)))
-        .get();
-    await (_database.delete(_database.documents)
-          ..where((row) => row.id.equals(documentId)))
-        .go();
+    final List<DocumentPage> pages = await (_database.select(
+      _database.documentPages,
+    )..where((row) => row.documentId.equals(documentId))).get();
+    await (_database.delete(
+      _database.documents,
+    )..where((row) => row.id.equals(documentId))).go();
 
     final Set<String> storedPaths = {
       document.filePath,
