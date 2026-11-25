@@ -49,6 +49,23 @@ class PageEditingService {
     return Uint8List.fromList(img.encodeJpg(page, quality: 92));
   }
 
+  Uint8List renderPagePng({
+    required List<int> sourceBytes,
+    required int rotation,
+    String? cropData,
+  }) {
+    final jpeg = renderPage(
+      sourceBytes: sourceBytes,
+      rotation: rotation,
+      cropData: cropData,
+    );
+    final decoded = img.decodeImage(jpeg);
+    if (decoded == null) {
+      throw const FormatException('The edited page could not be rendered.');
+    }
+    return Uint8List.fromList(img.encodePng(decoded));
+  }
+
   Future<Uint8List> buildPdf(List<Uint8List> pageImages) async {
     if (pageImages.isEmpty) {
       throw ArgumentError('At least one page is required.');
