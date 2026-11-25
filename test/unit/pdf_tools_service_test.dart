@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -88,6 +89,40 @@ void main() {
     final result = await service.addPageNumbers(source);
     expect(String.fromCharCodes(result.take(4)), '%PDF');
     expect(await pageCountOf(result), 3);
+  });
+
+  test('exports normalized markup as an image stamp in a PDF copy', () async {
+    final result = await service.exportAnnotatedPdf(
+      sourceBytes: onePagePdf,
+      annotationsByPage: {
+        0: [
+          PdfAnnotationStroke(
+            points: const [ui.Offset(0.2, 0.3), ui.Offset(0.7, 0.6)],
+            color: 0xFF172554,
+            type: 'ink',
+          ),
+          PdfAnnotationStroke(
+            points: const [ui.Offset(0.25, 0.7), ui.Offset(0.8, 0.7)],
+            color: 0x66FFCC00,
+            type: 'highlight',
+          ),
+        ],
+      },
+    );
+
+    expect(String.fromCharCodes(result.take(4)), '%PDF');
+    expect(await pageCountOf(result), 1);
+    expect(await pageCountOf(onePagePdf), 1);
+  });
+
+  test('requires at least one markup for annotated export', () async {
+    await expectLater(
+      service.exportAnnotatedPdf(
+        sourceBytes: onePagePdf,
+        annotationsByPage: const {},
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
   });
 
   test('requires certificate credentials for digital signing', () async {
