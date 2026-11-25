@@ -1,5 +1,7 @@
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
+import 'package:flutter/painting.dart';
 import 'package:pdf_manipulator/pdf_manipulator.dart';
 
 /// Offline PDF operations backed by the native Rust PDF engine.
@@ -203,6 +205,108 @@ class PdfToolsService {
     }
   }
 
+  /// Embeds saved normalized markup strokes into a separate PDF copy as
+  /// transparent page-sized image stamps. The source PDF is never modified.
+  Future<Uint8List> exportAnnotatedPdf({
+    required List<int> sourceBytes,
+    required Map<int, List<PdfAnnotationStroke>> annotationsByPage,
+  }) async {
+    if (sourceBytes.isEmpty) {
+      throw ArgumentError('The source PDF is empty.');
+    }
+    if (annotationsByPage.isEmpty ||
+        annotationsByPage.values.every((strokes) => strokes.isEmpty)) {
+      throw ArgumentError('Add at least one markup before exporting.');
+    }
+
+    final pdf = Pdf();
+    final output = MemorySink();
+    try {
+      await _runPdf(() => pdf.rewrite(
+        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+        output,
+        (editor) async {
+          final pageInfo = await editor.pageInfo();
+          for (final entry in annotationsByPage.entries) {
+            final pageIndex = entry.key;
+            if (pageIndex < 0 || pageIndex >= pageInfo.length) {
+              throw ArgumentError('Markup refers to a page outside this PDF.');
+            }
+            if (entry.value.isEmpty) continue;
+            final info = pageInfo[pageIndex];
+            final overlayBytes = await _renderMarkupOverlay(
+              entry.value,
+              widthPoints: info.effectiveWidth,
+              heightPoints: info.effectiveHeight,
+            );
+            await editor.addImageStamp(
+              MemorySource(overlayBytes),
+              bounds: PdfRect(
+                x: 0,
+                y: 0,
+                width: info.effectiveWidth,
+                height: info.effectiveHeight,
+              ),
+              pages: PdfPages.single(pageIndex),
+            );
+          }
+        },
+      ));
+      final result = output.takeBytes();
+      if (result.isEmpty) {
+        throw const FormatException('The annotated PDF could not be generated.');
+      }
+      return result;
+    } finally {
+      await pdf.dispose();
+    }
+  }
+
+  Future<Uint8List> _renderMarkupOverlay(
+    List<PdfAnnotationStroke> strokes, {
+    required double widthPoints,
+    required double heightPoints,
+  }) async {
+    if (widthPoints <= 0 || heightPoints <= 0) {
+      throw const FormatException('The PDF page has invalid dimensions.');
+    }
+    const pixelsPerPoint = 2.0;
+    final width = (widthPoints * pixelsPerPoint).round().clamp(1, 2400);
+    final height = (heightPoints * pixelsPerPoint).round().clamp(1, 3200);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    canvas.scale(width.toDouble(), height.toDouble());
+
+    for (final stroke in strokes) {
+      if (stroke.points.length < 2) continue;
+      final paint = ui.Paint()
+        ..color = Color(stroke.color)
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (stroke.type == 'highlight' ? 18.0 : 3.0) / 350.0;
+      final path = ui.Path()
+        ..moveTo(stroke.points.first.dx, stroke.points.first.dy);
+      for (final point in stroke.points.skip(1)) {
+        path.lineTo(point.dx, point.dy);
+      }
+      canvas.drawPath(path, paint);
+    }
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(width, height);
+    picture.dispose();
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) {
+        throw const FormatException('Could not encode the markup overlay.');
+      }
+      return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    } finally {
+      image.dispose();
+    }
+  }
+
   Future<T> _runPdf<T>(Future<T> Function() operation) async {
     try {
       return await operation();
@@ -218,4 +322,18 @@ class PdfToolsService {
       throw FormatException('PDF operation failed: ${error.message}');
     }
   }
+}
+
+/// One saved pen, highlight, or freehand-signature stroke in page coordinates.
+class PdfAnnotationStroke {
+  const PdfAnnotationStroke({
+    required this.points,
+    required this.color,
+    required this.type,
+  });
+
+  /// Points normalized to the visible page bounds (0.0–1.0).
+  final List<ui.Offset> points;
+  final int color;
+  final String type;
 }
