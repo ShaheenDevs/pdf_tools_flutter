@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:pdf_tools_flutter/app/app.locator.dart';
 import 'package:pdf_tools_flutter/app/app_theme.dart';
@@ -16,6 +18,11 @@ Future<void> main() async {
       fileStorage: locator<FileStorageService>(),
     ),
   );
+  try {
+    await locator<FileStorageService>().cleanupStalePendingFiles();
+  } on FileSystemException {
+    // Startup recovery is best-effort; existing documents remain accessible.
+  }
   runApp(const PdfToolsApp());
 }
 
