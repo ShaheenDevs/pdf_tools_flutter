@@ -478,7 +478,7 @@ class _DocumentTileState extends State<_DocumentTile> {
         side: const BorderSide(color: Color(0xFFE9ECF3)),
       ),
       child: ListTile(
-        onTap: onOpen,
+        onTap: widget.onOpen,
         leading: FutureBuilder<List<int>?>(
           future: _thumbnailFuture,
           builder: (context, snapshot) {
@@ -515,12 +515,12 @@ class _DocumentTileState extends State<_DocumentTile> {
         ),
         trailing: PopupMenuButton<String>(
           onSelected: (value) {
-            if (value == 'rename') onRename();
-            if (value == 'delete') onDelete();
-            if (value == 'editPages') onEditPages?.call();
+            if (value == 'rename') widget.onRename();
+            if (value == 'delete') widget.onDelete();
+            if (value == 'editPages') widget.onEditPages?.call();
           },
           itemBuilder: (context) => [
-            if (onEditPages != null)
+            if (widget.onEditPages != null)
               const PopupMenuItem(
                 value: 'editPages',
                 child: Text('Edit pages'),
