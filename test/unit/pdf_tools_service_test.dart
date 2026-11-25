@@ -70,6 +70,26 @@ void main() {
     expect(result.length, lessThanOrEqualTo(onePagePdf.length));
   });
 
+  test('adds a watermark without changing the page count', () async {
+    final result = await service.addWatermark(
+      sourceBytes: onePagePdf,
+      text: 'CONFIDENTIAL',
+    );
+    expect(String.fromCharCodes(result.take(4)), '%PDF');
+    expect(await pageCountOf(result), 1);
+  });
+
+  test('adds distinct page numbers to every page', () async {
+    final source = await PageEditingService().buildPdf([
+      imageBytes,
+      imageBytes,
+      imageBytes,
+    ]);
+    final result = await service.addPageNumbers(source);
+    expect(String.fromCharCodes(result.take(4)), '%PDF');
+    expect(await pageCountOf(result), 3);
+  });
+
   test('reports malformed PDF inputs clearly', () async {
     await expectLater(
       service.mergePdfs([
