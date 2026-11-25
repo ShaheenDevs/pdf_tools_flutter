@@ -7,7 +7,9 @@ import 'package:stacked/stacked.dart';
 import 'home_viewmodel.dart';
 
 class HomeView extends StackedView<HomeViewModel> {
-  const HomeView({super.key});
+  const HomeView({super.key, this.testViewModel});
+
+  final HomeViewModel? testViewModel;
 
   @override
   Widget builder(BuildContext context, HomeViewModel viewModel, Widget? child) {
@@ -172,7 +174,8 @@ class HomeView extends StackedView<HomeViewModel> {
   }
 
   @override
-  HomeViewModel viewModelBuilder(BuildContext context) => HomeViewModel();
+  HomeViewModel viewModelBuilder(BuildContext context) =>
+      testViewModel ?? HomeViewModel();
 }
 
 class _WelcomeCard extends StatelessWidget {
