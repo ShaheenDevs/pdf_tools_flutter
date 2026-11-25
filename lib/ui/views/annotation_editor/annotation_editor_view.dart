@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
@@ -27,12 +30,14 @@ class AnnotationEditorView extends StatefulWidget {
 }
 
 class _AnnotationEditorViewState extends State<AnnotationEditorView> {
-  late final PdfController _pdfController;
   final DocumentRepository _repository = locator<DocumentRepository>();
   final List<Offset> _currentStroke = [];
+  PdfDocument? _document;
+  Uint8List? _pageImage;
   List<_SavedStroke> _savedStrokes = [];
   MarkupTool _tool = MarkupTool.pen;
   int _page = 1;
+  double _pageAspectRatio = 0.707;
   bool _loading = true;
   bool _saving = false;
   String? _message;
@@ -40,39 +45,80 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
   @override
   void initState() {
     super.initState();
-    _pdfController = PdfController(
-      document: PdfDocument.openFile(widget.filePath),
-      initialPage: 1,
-    );
-    _loadPageAnnotations();
+    _openDocument();
   }
 
   @override
   void dispose() {
-    _pdfController.dispose();
+    final document = _document;
+    if (document != null && !document.isClosed) {
+      unawaited(document.close());
+    }
     super.dispose();
   }
 
-  Future<void> _loadPageAnnotations() async {
-    setState(() => _loading = true);
+  Future<void> _openDocument() async {
     try {
+      final document = await PdfDocument.openFile(widget.filePath);
+      if (!mounted) {
+        await document.close();
+        return;
+      }
+      _document = document;
+      await _loadPage();
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _message = 'Could not open this PDF for annotation.';
+        });
+      }
+    }
+  }
+
+  Future<void> _loadPage() async {
+    final document = _document;
+    if (document == null) return;
+    setState(() {
+      _loading = true;
+      _pageImage = null;
+      _currentStroke.clear();
+    });
+    PdfPage? page;
+    try {
+      page = await document.getPage(_page);
+      final ratio = page.width / page.height;
+      const width = 1400.0;
+      final height = (width / ratio).roundToDouble();
+      final rendered = await page.render(
+        width: width,
+        height: height,
+        format: PdfPageImageFormat.png,
+        quality: 95,
+      );
+      if (rendered == null || rendered.bytes.isEmpty) {
+        throw const FormatException('Could not render the selected PDF page.');
+      }
       final rows = await _repository.getAnnotations(
         documentId: widget.documentId,
         pageIndex: _page - 1,
       );
-      final strokes = rows.map(_SavedStroke.fromRow).toList();
       if (!mounted) return;
       setState(() {
-        _savedStrokes = strokes;
-        _currentStroke.clear();
+        _pageAspectRatio = ratio;
+        _pageImage = rendered.bytes;
+        _savedStrokes = rows.map(_SavedStroke.fromRow).toList();
         _loading = false;
       });
     } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _message = 'Could not load saved markups.';
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _message = 'Could not load this page or its saved markups.';
+        });
+      }
+    } finally {
+      if (page != null && !page.isClosed) await page.close();
     }
   }
 
@@ -83,8 +129,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
       _page = next;
       _message = null;
     });
-    _pdfController.jumpToPage(next);
-    await _loadPageAnnotations();
+    await _loadPage();
   }
 
   void _startStroke(DragStartDetails details, Size size) {
@@ -129,7 +174,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
         type: type,
         payload: payload,
       );
-      await _loadPageAnnotations();
+      await _loadPage();
       if (mounted) setState(() => _message = 'Markup saved on this device.');
     } catch (_) {
       if (mounted) {
@@ -168,8 +213,10 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
       for (final row in rows) {
         await _repository.deleteAnnotation(row.id);
       }
-      await _loadPageAnnotations();
+      await _loadPage();
       if (mounted) setState(() => _message = 'Page markups cleared.');
+    } catch (_) {
+      if (mounted) setState(() => _message = 'Could not clear page markups.');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -187,7 +234,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
               children: [
                 IconButton(
                   tooltip: 'Previous page',
-                  onPressed: _page > 1 ? () => _changePage(-1) : null,
+                  onPressed: _page > 1 && !_loading ? () => _changePage(-1) : null,
                   icon: const Icon(Icons.chevron_left),
                 ),
                 Expanded(
@@ -199,7 +246,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
                 ),
                 IconButton(
                   tooltip: 'Next page',
-                  onPressed: _page < widget.pageCount
+                  onPressed: _page < widget.pageCount && !_loading
                       ? () => _changePage(1)
                       : null,
                   icon: const Icon(Icons.chevron_right),
@@ -219,47 +266,45 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final size = Size(constraints.maxWidth, constraints.maxHeight);
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    PdfView(
-                      controller: _pdfController,
-                      builders: PdfViewBuilders<DefaultBuilderOptions>(
-                        options: const DefaultBuilderOptions(),
-                        documentLoaderBuilder: (_) =>
-                            const Center(child: CircularProgressIndicator()),
-                        pageLoaderBuilder: (_) =>
-                            const Center(child: CircularProgressIndicator()),
-                        errorBuilder: (_, error) => const Center(
-                          child: Text('Could not display this PDF page.'),
+                final width = math.min(
+                  constraints.maxWidth,
+                  constraints.maxHeight * _pageAspectRatio,
+                );
+                final height = width / _pageAspectRatio;
+                final size = Size(width, height);
+                return Center(
+                  child: _pageImage == null
+                      ? const CircularProgressIndicator()
+                      : SizedBox(
+                          width: width,
+                          height: height,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.memory(_pageImage!, fit: BoxFit.fill),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onPanStart: (details) => _startStroke(details, size),
+                                onPanUpdate: (details) => _extendStroke(details, size),
+                                onPanEnd: (_) => _saveStroke(),
+                                child: CustomPaint(
+                                  painter: _MarkupPainter(
+                                    strokes: _savedStrokes,
+                                    current: _currentStroke,
+                                    currentTool: _tool,
+                                  ),
+                                  size: size,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                    GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onPanStart: (details) => _startStroke(details, size),
-                      onPanUpdate: (details) => _extendStroke(details, size),
-                      onPanEnd: (_) => _saveStroke(),
-                      child: CustomPaint(
-                        painter: _MarkupPainter(
-                          strokes: _savedStrokes,
-                          current: _currentStroke,
-                          currentTool: _tool,
-                        ),
-                        size: size,
-                      ),
-                    ),
-                    if (_loading || _saving)
-                      const Align(
-                        alignment: Alignment.topCenter,
-                        child: LinearProgressIndicator(),
-                      ),
-                  ],
                 );
               },
             ),
           ),
+          if (_loading || _saving)
+            const LinearProgressIndicator(),
           if (_message != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -270,13 +315,13 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
             child: Row(
               children: [
                 OutlinedButton.icon(
-                  onPressed: _saving ? null : _clearPageMarkups,
+                  onPressed: _saving || _loading ? null : _clearPageMarkups,
                   icon: const Icon(Icons.delete_outline),
                   label: const Text('Clear page'),
                 ),
                 const Spacer(),
                 FilledButton.icon(
-                  onPressed: _saving ? null : _saveStroke,
+                  onPressed: _saving || _loading ? null : _saveStroke,
                   icon: const Icon(Icons.save_outlined),
                   label: const Text('Save markup'),
                 ),
