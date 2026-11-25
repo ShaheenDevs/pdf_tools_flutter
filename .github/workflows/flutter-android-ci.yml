@@ -68,11 +68,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add android lib/app/app.locator.dart lib/app/app.router.dart lib/database/app_database.g.dart
+          git add android pubspec.lock lib/app/app.locator.dart lib/app/app.router.dart lib/database/app_database.g.dart
           if git diff --cached --quiet; then
             echo "No generated files changed."
           else
-            git commit -m "chore: add generated Android and Stacked files [skip ci]"
+            git commit -m "chore: persist generated Android, dependency lock, and Stacked files [skip ci]"
             git fetch origin main
             git rebase origin/main
             git push origin HEAD:main
