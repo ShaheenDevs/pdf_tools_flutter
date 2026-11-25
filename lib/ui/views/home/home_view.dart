@@ -425,7 +425,7 @@ class _EmptyDocuments extends StatelessWidget {
   }
 }
 
-class _DocumentTile extends StatelessWidget {
+class _DocumentTile extends StatefulWidget {
   const _DocumentTile({
     required this.document,
     required this.onRename,
@@ -443,7 +443,29 @@ class _DocumentTile extends StatelessWidget {
   final Future<List<int>?> Function() thumbnailLoader;
 
   @override
+  State<_DocumentTile> createState() => _DocumentTileState();
+}
+
+class _DocumentTileState extends State<_DocumentTile> {
+  late Future<List<int>?> _thumbnailFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _thumbnailFuture = widget.thumbnailLoader();
+  }
+
+  @override
+  void didUpdateWidget(covariant _DocumentTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.document.thumbnailPath != widget.document.thumbnailPath) {
+      _thumbnailFuture = widget.thumbnailLoader();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final document = widget.document;
     final bool isPdf = p.extension(document.filePath).toLowerCase() == '.pdf';
     final String size = document.fileSize < 1024 * 1024
         ? '${(document.fileSize / 1024).toStringAsFixed(0)} KB'
@@ -458,7 +480,7 @@ class _DocumentTile extends StatelessWidget {
       child: ListTile(
         onTap: onOpen,
         leading: FutureBuilder<List<int>?>(
-          future: thumbnailLoader(),
+          future: _thumbnailFuture,
           builder: (context, snapshot) {
             final bytes = snapshot.data;
             if (bytes != null && bytes.isNotEmpty) {
