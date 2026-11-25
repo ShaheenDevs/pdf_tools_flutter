@@ -83,12 +83,25 @@ class HomeViewModel extends BaseViewModel {
         withData: true,
       );
       if (result == null || result.files.isEmpty) return;
+      await importPlatformFile(result.files.single);
+    } catch (error) {
+      errorMessage = 'Import failed. Check the file and available storage.';
+      notifyListeners();
+    }
+  }
 
-      final PlatformFile picked = result.files.single;
+  /// Imports a selected picker file; kept separate so the file workflow can be tested.
+  Future<void> importPlatformFile(PlatformFile picked) async {
+    errorMessage = null;
+    notifyListeners();
+    try {
       final String extension = p
           .extension(picked.name)
           .replaceFirst('.', '')
           .toLowerCase();
+      if (!['pdf', 'jpg', 'jpeg', 'png', 'webp'].contains(extension)) {
+        throw const FormatException('Unsupported document format.');
+      }
       final List<int> bytes = picked.bytes ??
           (picked.path != null
               ? await File(picked.path!).readAsBytes()
@@ -106,27 +119,25 @@ class HomeViewModel extends BaseViewModel {
         sourceType: isPdf ? 'imported_pdf' : 'imported_image',
       );
       String? importWarning;
-      if (isPdf || ['jpg', 'jpeg', 'png', 'webp'].contains(extension)) {
-        try {
-          final List<int> thumbnailBytes;
-          final int pageCount;
-          if (isPdf) {
-            final PdfMetadata metadata = await _pdfMetadataService.inspect(bytes);
-            thumbnailBytes = metadata.firstPageThumbnail;
-            pageCount = metadata.pageCount;
-          } else {
-            thumbnailBytes = await _imageThumbnailService.createThumbnail(bytes);
-            pageCount = 1;
-          }
-          await _repository.updateDocumentMetadata(
-            documentId: documentId,
-            pageCount: pageCount,
-            thumbnailBytes: thumbnailBytes,
-          );
-        } catch (error) {
-          importWarning =
-              'File imported, but its preview could not be generated. The original file is safe.';
+      try {
+        final List<int> thumbnailBytes;
+        final int pageCount;
+        if (isPdf) {
+          final PdfMetadata metadata = await _pdfMetadataService.inspect(bytes);
+          thumbnailBytes = metadata.firstPageThumbnail;
+          pageCount = metadata.pageCount;
+        } else {
+          thumbnailBytes = await _imageThumbnailService.createThumbnail(bytes);
+          pageCount = 1;
         }
+        await _repository.updateDocumentMetadata(
+          documentId: documentId,
+          pageCount: pageCount,
+          thumbnailBytes: thumbnailBytes,
+        );
+      } catch (error) {
+        importWarning =
+            'File imported, but its preview could not be generated. The original file is safe.';
       }
       await loadDocuments();
       errorMessage = importWarning;
