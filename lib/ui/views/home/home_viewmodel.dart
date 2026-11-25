@@ -18,7 +18,8 @@ class HomeViewModel extends BaseViewModel {
     FileStorageService? fileStorage,
   }) : _repository = repository ?? locator<DocumentRepository>(),
        _pdfMetadataService = pdfMetadataService ?? PdfMetadataService(),
-       _imageThumbnailService = imageThumbnailService ?? ImageThumbnailService(),
+       _imageThumbnailService =
+           imageThumbnailService ?? ImageThumbnailService(),
        _fileStorage = fileStorage ?? locator<FileStorageService>() {
     loadDocuments();
   }
@@ -102,7 +103,8 @@ class HomeViewModel extends BaseViewModel {
       if (!['pdf', 'jpg', 'jpeg', 'png', 'webp'].contains(extension)) {
         throw const FormatException('Unsupported document format.');
       }
-      final List<int> bytes = picked.bytes ??
+      final List<int> bytes =
+          picked.bytes ??
           (picked.path != null
               ? await File(picked.path!).readAsBytes()
               : <int>[]);
@@ -153,7 +155,8 @@ class HomeViewModel extends BaseViewModel {
       await _repository.renameDocument(documentId: id, title: title);
       await loadDocuments();
     } catch (error) {
-      errorMessage = 'Could not rename this document. Use a title of 1–255 characters.';
+      errorMessage =
+          'Could not rename this document. Use a title of 1–255 characters.';
       notifyListeners();
     }
   }

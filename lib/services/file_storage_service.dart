@@ -49,8 +49,9 @@ class FileStorageService {
 
   Future<List<int>> readBytes(String relativePath) async {
     final File file = await _resolve(relativePath);
-    if (!await file.exists())
+    if (!await file.exists()) {
       throw FileSystemException('Stored file does not exist', file.path);
+    }
     return file.readAsBytes();
   }
 
@@ -63,8 +64,9 @@ class FileStorageService {
       (await _resolve(relativePath)).path;
 
   Future<File> _resolve(String relativePath) async {
-    if (p.isAbsolute(relativePath))
+    if (p.isAbsolute(relativePath)) {
       throw ArgumentError.value(relativePath, 'relativePath');
+    }
     final String normalized = p.normalize(relativePath);
     if (normalized == '.' ||
         normalized == '..' ||
@@ -73,8 +75,9 @@ class FileStorageService {
     }
     final String root = p.normalize((await _root).absolute.path);
     final String candidate = p.normalize(p.join(root, normalized));
-    if (!p.isWithin(root, candidate))
+    if (!p.isWithin(root, candidate)) {
       throw ArgumentError.value(relativePath, 'relativePath');
+    }
     return File(candidate);
   }
 }
