@@ -264,7 +264,7 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 
 ## I. Known Issues and Decisions
 
-- [ ] Confirm the latest CI run completes analysis, tests, and Android debug build for the PDF/image import and preview implementation.
+- [ ] Confirm the latest CI run completes analysis, all tests, and Android debug build for the PDF/image import and preview implementation.
 - [x] Generated Android and Stacked files are present on `main`.
 - [x] PDF engine selected: PDFx for offline rendering and page navigation; Android CI and device validation for the newly added import/preview flow remain pending.\n- [ ] Camera/scanning package selection must be validated for Android support, licensing, maintenance, and required edit operations.
 - [ ] Premium purchase provider and entitlement verification are not yet selected.
@@ -372,3 +372,11 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - The only failing step was committing generated Android/Stacked/Drift files: a newer source commit reached `main` while that older workflow run was still executing, so GitHub rejected its non-fast-forward push.
 - Updated the workflow to fetch and rebase onto the latest `origin/main` before pushing generated files. Branch-level concurrency cancellation is also enabled to prevent stale validation runs from racing newer pushes.
 - New validation is running against the current source. No force-push or history rewrite was used.
+
+
+### 2026-11-25 — Milestone 3: home widget test timeout investigation
+- CI run [45582124903](https://github.com/ShaheenDevs/pdf_tools_flutter/actions/runs/45582124903) passed Android platform generation, Gradle compatibility, dependency resolution, Stacked/Drift code generation, and Flutter analysis.
+- Twelve tests passed, including image thumbnail generation, image import through the HomeViewModel, repository metadata persistence, and local image preview. The home workspace widget test timed out after ten minutes; the APK build was skipped.
+- The widget test used an asynchronously loading ViewModel and an unbounded scroll-to-visible operation, making the test susceptible to waiting indefinitely on the loading/scroll state.
+- Added a `loadOnCreate` constructor option to `HomeViewModel` so widget tests can await initial data loading deterministically, and adjusted the home widget test to use a fixed viewport and finite pumps instead of an unbounded scroll/settle sequence.
+- Fix commits: `a16f0057` and `73c3feb9`. A fresh CI run is expected from the latest commit. Milestone 3 remains in progress; device validation of PDF and image import/preview is still required.
