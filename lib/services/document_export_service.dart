@@ -23,7 +23,7 @@ class DocumentExportService {
     );
   }
 
-  Future<Uri?> saveCopy({
+  Future<String?> saveCopy({
     required String filePath,
     required String suggestedFileName,
   }) async {
