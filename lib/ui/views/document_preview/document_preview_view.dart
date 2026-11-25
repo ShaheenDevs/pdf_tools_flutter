@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:pdf_tools_flutter/ui/views/annotation_editor/annotation_editor_view.dart';
 import 'package:pdf_tools_flutter/services/document_export_service.dart';
 
