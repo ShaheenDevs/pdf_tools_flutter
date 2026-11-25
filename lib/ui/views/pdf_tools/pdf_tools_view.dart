@@ -117,6 +117,14 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
               onPressed: viewModel.addPageNumbers,
             ),
             _ToolCard(
+              icon: Icons.library_add_check_outlined,
+              title: 'Batch compress PDFs',
+              description: 'Compress several PDFs independently; one failed file will not stop the rest.',
+              buttonLabel: 'Choose multiple PDFs',
+              busy: viewModel.isBusy,
+              onPressed: viewModel.batchCompressPdfs,
+            ),
+            _ToolCard(
               icon: Icons.compress_rounded,
               title: 'Compress PDF',
               description: 'Optimize a PDF locally and save a separate compressed copy.',
@@ -124,7 +132,29 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
               busy: viewModel.isBusy,
               onPressed: viewModel.compressPdf,
             ),
-            if (viewModel.isBusy)
+            if (viewModel.isBusy && viewModel.batchTotal > 0) ...[
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: viewModel.batchTotal == 0
+                    ? null
+                    : viewModel.batchCompleted / viewModel.batchTotal,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Processed ${viewModel.batchCompleted} of ${viewModel.batchTotal}',
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: viewModel.cancelBatch,
+                    icon: const Icon(Icons.stop_circle_outlined),
+                    label: const Text('Stop after current file'),
+                  ),
+                ],
+              ),
+            ] else if (viewModel.isBusy)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 18),
                 child: Center(child: CircularProgressIndicator()),
