@@ -45,7 +45,13 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
   MarkupTool _tool = MarkupTool.pen;
   Color _inkColor = const Color(0xFF1E3A8A);
   double _strokeWidth = 3;
-  static const List<Color> _palette = [Color(0xFF1E3A8A), Color(0xFFEF4444), Color(0xFF059669), Color(0xFFFBBF24), Color(0xFF111827)];
+  static const List<Color> _palette = [
+    Color(0xFF1E3A8A),
+    Color(0xFFEF4444),
+    Color(0xFF059669),
+    Color(0xFFFBBF24),
+    Color(0xFF111827),
+  ];
   int _page = 1;
   double _pageAspectRatio = 0.707;
   bool _loading = true;
@@ -171,7 +177,9 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
         MarkupTool.highlight => 'highlight',
         MarkupTool.signature => 'signature',
       };
-      final color = _tool == MarkupTool.highlight ? 0x66FFCC00 : _inkColor.toARGB32();
+      final color = _tool == MarkupTool.highlight
+          ? 0x66FFCC00
+          : _inkColor.toARGB32();
       final payload = jsonEncode({
         'color': color,
         'width': _strokeWidth,
@@ -196,6 +204,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _exportAnnotatedCopy() async {
     setState(() {
       _saving = true;
@@ -320,19 +329,27 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
       appBar: AppBar(
         title: Text('Annotate: ${widget.title}'),
         actions: [
-          IconButton(tooltip: 'Share PDF', onPressed: _saving || _loading ? null : _shareDocument, icon: const Icon(Icons.share_outlined)),
-          IconButton(tooltip: 'Save a copy', onPressed: _saving || _loading ? null : _saveDocumentCopy, icon: const Icon(Icons.file_download_outlined)),
           IconButton(
-            tooltip: 'Export annotated copy',
-            onPressed: _saving || _loading ? null : _exportAnnotatedCopy,
+            tooltip: 'Share PDF',
+            onPressed: _saving || _loading ? null : _shareDocument,
+            icon: const Icon(Icons.share_outlined),
+          ),
+          IconButton(
+            tooltip: 'Save a copy',
+            onPressed: _saving || _loading ? null : _saveDocumentCopy,
             icon: const Icon(Icons.file_download_outlined),
           ),
+          // IconButton(
+          //   tooltip: 'Export annotated copy',
+          //   onPressed: _saving || _loading ? null : _exportAnnotatedCopy,
+          //   icon: const Icon(Icons.file_download_outlined),
+          // ),
         ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
                 IconButton(
@@ -363,45 +380,91 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Row(children: [
-                _toolChoice(MarkupTool.pen, 'Pen', Icons.edit),
-                const SizedBox(width: 8),
-                _toolChoice(MarkupTool.highlight, 'Highlight', Icons.wb_sunny_outlined),
-                const SizedBox(width: 8),
-                _toolChoice(MarkupTool.signature, 'Signature', Icons.gesture),
-              ]),
+              child: Row(
+                children: [
+                  _toolChoice(MarkupTool.pen, 'Pen', Icons.edit),
+                  const SizedBox(width: 8),
+                  _toolChoice(
+                    MarkupTool.highlight,
+                    'Highlight',
+                    Icons.wb_sunny_outlined,
+                  ),
+                  const SizedBox(width: 8),
+                  _toolChoice(MarkupTool.signature, 'Signature', Icons.gesture),
+                ],
+              ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Row(children: [
-              Text('Color:', style: TextStyle(color: Theme.of(context).hintColor)),
-              const SizedBox(width: 8),
-              ..._palette.map((color) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => setState(() => _inkColor = color),
-                  child: Container(
-                    width: 34, height: 34,
-                    decoration: BoxDecoration(
-                      color: color, shape: BoxShape.circle,
-                      border: Border.all(color: _inkColor == color ? Theme.of(context).colorScheme.primary : Colors.white, width: _inkColor == color ? 3 : 1),
+            child: Row(
+              children: [
+                Text(
+                  'Color:',
+                  style: TextStyle(color: Theme.of(context).hintColor),
+                ),
+                const SizedBox(width: 4),
+                ..._palette.map(
+                  (color) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => setState(() => _inkColor = color),
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _inkColor == color
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.white,
+                            width: _inkColor == color ? 3 : 1,
+                          ),
+                        ),
+                        child: _inkColor == color
+                            ? const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 16,
+                              )
+                            : null,
+                      ),
                     ),
-                    child: _inkColor == color ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
                   ),
                 ),
-              )),
-              const Spacer(),
-              Text('Stroke:', style: TextStyle(color: Theme.of(context).hintColor)),
-              const SizedBox(width: 6),
-              DropdownButton<double>(
-                value: _strokeWidth,
-                underline: const SizedBox.shrink(),
-                items: const [2.0, 3.0, 5.0, 8.0].map((v) => DropdownMenuItem(value: v, child: Text('${v.toInt()}'))).toList(),
-                onChanged: (v) { if (v != null) setState(() => _strokeWidth = v); },
-              ),
-            ]),
+                const Spacer(),
+                Text(
+                  'Stroke:',
+                  style: TextStyle(color: Theme.of(context).hintColor),
+                ),
+                const SizedBox(width: 6),
+                ...[2.0, 3.0, 5.0, 8.0].map(
+                  (strokeWidth) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => setState(() => _strokeWidth = strokeWidth),
+                      child: Container(
+                        width: strokeWidth + 12,
+                        height: strokeWidth + 12,
+                        decoration: BoxDecoration(
+                          color: Colors.grey,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _strokeWidth == strokeWidth
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.white,
+                            width: _strokeWidth == strokeWidth ? 3 : 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const Divider(height: 1),
           Expanded(
@@ -469,10 +532,18 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
                 ),
                 const SizedBox(width: 22),
                 Expanded(
-                  child: FilledButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: _saving || _loading ? null : _saveStroke,
                     icon: const Icon(Icons.save_outlined),
-                    label: const Text('Save markup'),
+                    label: const Text('Save'),
+                    style: const ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll<Color>(
+                        Color(0xFF1E3A8A),
+                      ),
+                      foregroundColor: WidgetStatePropertyAll<Color>(
+                        Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -485,7 +556,10 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
 
   Future<void> _shareDocument() async {
     try {
-      await _exportService.shareFile(filePath: widget.filePath, title: widget.title);
+      await _exportService.shareFile(
+        filePath: widget.filePath,
+        title: widget.title,
+      );
     } catch (_) {
       if (mounted) setState(() => _message = 'Could not share this PDF.');
     }
@@ -495,9 +569,13 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
     try {
       final saved = await _exportService.saveCopy(
         filePath: widget.filePath,
-        suggestedFileName: widget.title.toLowerCase().endsWith('.pdf') ? widget.title : '\${widget.title}.pdf',
+        suggestedFileName: widget.title.toLowerCase().endsWith('.pdf')
+            ? widget.title
+            : '${widget.title}.pdf',
       );
-      if (mounted && saved != null) setState(() => _message = 'PDF copy saved.');
+      if (mounted && saved != null) {
+        setState(() => _message = 'PDF copy saved.');
+      }
     } catch (_) {
       if (mounted) setState(() => _message = 'Could not save a PDF copy.');
     }
@@ -561,7 +639,14 @@ class _MarkupPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final stroke in strokes) {
-      _draw(canvas, size, stroke.points, stroke.color, stroke.type, stroke.width);
+      _draw(
+        canvas,
+        size,
+        stroke.points,
+        stroke.color,
+        stroke.type,
+        stroke.width,
+      );
     }
     final type = switch (currentTool) {
       MarkupTool.pen => 'ink',

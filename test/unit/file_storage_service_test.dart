@@ -25,28 +25,34 @@ void main() {
     expect(storage.readBytes(path), throwsA(isA<FileSystemException>()));
   });
 
-  test('removes only stale pending writes and preserves recent/completed files', () async {
-    final oldPending = File('${root.path}/documents/old.pdf.pending')
-      ..createSync(recursive: true);
-    final recentPending = File('${root.path}/documents/recent.pdf.pending')
-      ..createSync(recursive: true);
-    final completed = File('${root.path}/documents/complete.pdf')
-      ..createSync(recursive: true);
-    final now = DateTime(2026, 11, 25, 12);
-    await oldPending.setLastModified(now.subtract(const Duration(hours: 25)));
-    await recentPending.setLastModified(now.subtract(const Duration(minutes: 5)));
+  test(
+    'removes only stale pending writes and preserves recent/completed files',
+    () async {
+      final oldPending = File('${root.path}/documents/old.pdf.pending')
+        ..createSync(recursive: true);
+      final recentPending = File('${root.path}/documents/recent.pdf.pending')
+        ..createSync(recursive: true);
+      final completed = File('${root.path}/documents/complete.pdf')
+        ..createSync(recursive: true);
+      final now = DateTime(2026, 11, 25, 12);
+      await oldPending.setLastModified(now.subtract(const Duration(hours: 25)));
+      await recentPending.setLastModified(
+        now.subtract(const Duration(minutes: 5)),
+      );
 
-    final removed = await storage.cleanupStalePendingFiles(now: now);
+      final removed = await storage.cleanupStalePendingFiles(now: now);
 
-    expect(removed, 1);
-    expect(await oldPending.exists(), isFalse);
-    expect(await recentPending.exists(), isTrue);
-    expect(await completed.exists(), isTrue);
-  });
+      expect(removed, 1);
+      expect(await oldPending.exists(), isFalse);
+      expect(await recentPending.exists(), isTrue);
+      expect(await completed.exists(), isTrue);
+    },
+  );
 
   test('rejects negative stale-file cleanup age', () async {
     expect(
-      () => storage.cleanupStalePendingFiles(maxAge: const Duration(seconds: -1)),
+      () =>
+          storage.cleanupStalePendingFiles(maxAge: const Duration(seconds: -1)),
       throwsA(isA<ArgumentError>()),
     );
   });

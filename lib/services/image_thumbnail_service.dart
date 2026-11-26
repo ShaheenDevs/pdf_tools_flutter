@@ -17,7 +17,9 @@ Uint8List _createThumbnail(Uint8List sourceBytes) {
     throw const FormatException('The selected image is too large to preview.');
   }
   final img.Image? decoded = img.decodeImage(sourceBytes);
-  if (decoded == null || decoded.width < 1 || decoded.height < 1 ||
+  if (decoded == null ||
+      decoded.width < 1 ||
+      decoded.height < 1 ||
       decoded.width * decoded.height > 40 * 1000 * 1000) {
     throw const FormatException('The selected image could not be decoded.');
   }

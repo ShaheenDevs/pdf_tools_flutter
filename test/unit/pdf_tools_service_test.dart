@@ -96,13 +96,13 @@ void main() {
       sourceBytes: onePagePdf,
       annotationsByPage: {
         0: [
-          PdfAnnotationStroke(
-            points: const [ui.Offset(0.2, 0.3), ui.Offset(0.7, 0.6)],
+          const PdfAnnotationStroke(
+            points: [ui.Offset(0.2, 0.3), ui.Offset(0.7, 0.6)],
             color: 0xFF172554,
             type: 'ink',
           ),
-          PdfAnnotationStroke(
-            points: const [ui.Offset(0.25, 0.7), ui.Offset(0.8, 0.7)],
+          const PdfAnnotationStroke(
+            points: [ui.Offset(0.25, 0.7), ui.Offset(0.8, 0.7)],
             color: 0x66FFCC00,
             type: 'highlight',
           ),

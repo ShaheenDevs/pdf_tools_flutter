@@ -33,13 +33,7 @@ class PageEditingService {
       if (width < 16 || height < 16) {
         throw const FormatException('The crop area is too small.');
       }
-      page = img.copyCrop(
-        decoded,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-      );
+      page = img.copyCrop(decoded, x: x, y: y, width: width, height: height);
     }
 
     final normalizedRotation = ((rotation % 360) + 360) % 360;

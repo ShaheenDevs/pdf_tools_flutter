@@ -8,20 +8,26 @@ void main() {
 
   setUp(() => service = DocumentExportService());
 
-  test('sharing a missing document fails before opening the share sheet', () async {
-    await expectLater(
-      service.shareFile(filePath: '/missing/document.pdf', title: 'Document'),
-      throwsA(isA<FileSystemException>()),
-    );
-  });
+  test(
+    'sharing a missing document fails before opening the share sheet',
+    () async {
+      await expectLater(
+        service.shareFile(filePath: '/missing/document.pdf', title: 'Document'),
+        throwsA(isA<FileSystemException>()),
+      );
+    },
+  );
 
-  test('saving a missing document fails before opening the save picker', () async {
-    await expectLater(
-      service.saveCopy(
-        filePath: '/missing/document.pdf',
-        suggestedFileName: 'document.pdf',
-      ),
-      throwsA(isA<FileSystemException>()),
-    );
-  });
+  test(
+    'saving a missing document fails before opening the save picker',
+    () async {
+      await expectLater(
+        service.saveCopy(
+          filePath: '/missing/document.pdf',
+          suggestedFileName: 'document.pdf',
+        ),
+        throwsA(isA<FileSystemException>()),
+      );
+    },
+  );
 }

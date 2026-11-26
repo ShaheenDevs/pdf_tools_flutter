@@ -77,7 +77,9 @@ class HomeView extends StackedView<HomeViewModel> {
                     ),
                   ),
                   TextButton.icon(
-                    onPressed: viewModel.isBusy ? null : viewModel.importDocument,
+                    onPressed: viewModel.isBusy
+                        ? null
+                        : viewModel.importDocument,
                     icon: const Icon(Icons.file_open_outlined, size: 18),
                     label: const Text('Import'),
                   ),
@@ -141,8 +143,10 @@ class HomeView extends StackedView<HomeViewModel> {
                 ...viewModel.visibleDocuments.map(
                   (document) => _DocumentTile(
                     document: document,
-                    onRename: () => _renameDocument(context, document, viewModel),
-                    onDelete: () => _confirmDelete(context, document, viewModel),
+                    onRename: () =>
+                        _renameDocument(context, document, viewModel),
+                    onDelete: () =>
+                        _confirmDelete(context, document, viewModel),
                     onOpen: () => _openDocument(context, document, viewModel),
                     onEditPages: document.sourceType == 'scanned'
                         ? () => _openPageEditor(context, document, viewModel)
@@ -211,10 +215,8 @@ class HomeView extends StackedView<HomeViewModel> {
   ) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PageEditorView(
-          documentId: document.id,
-          title: document.title,
-        ),
+        builder: (_) =>
+            PageEditorView(documentId: document.id, title: document.title),
       ),
     );
     if (context.mounted) {
@@ -358,11 +360,15 @@ class _ToolGrid extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           onTap: item.label == 'Scan document'
               ? onScan
-              : const ['Merge PDFs', 'Split PDF', 'Images to PDF', 'Compress PDF']
-                      .contains(item.label) &&
-                  onPdfTools != null
-                  ? () => onPdfTools!(item.label)
-                  : null,
+              : const [
+                      'Merge PDFs',
+                      'Split PDF',
+                      'Images to PDF',
+                      'Compress PDF',
+                    ].contains(item.label) &&
+                    onPdfTools != null
+              ? () => onPdfTools!(item.label)
+              : null,
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(

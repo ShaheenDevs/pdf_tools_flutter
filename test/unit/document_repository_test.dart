@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_string_escapes
+
 import 'dart:io';
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter_test/flutter_test.dart';
@@ -67,36 +69,39 @@ void main() {
     expect(() => storage.readBytes(path), throwsA(isA<FileSystemException>()));
   });
 
-  test('stores document preview metadata and removes its thumbnail on delete', () async {
-    final id = await repository.importDocument(
-      title: 'Metadata test',
-      bytes: [37, 80, 68, 70],
-      extension: 'pdf',
-    );
+  test(
+    'stores document preview metadata and removes its thumbnail on delete',
+    () async {
+      final id = await repository.importDocument(
+        title: 'Metadata test',
+        bytes: [37, 80, 68, 70],
+        extension: 'pdf',
+      );
 
-    await repository.updateDocumentMetadata(
-      documentId: id,
-      pageCount: 3,
-      thumbnailBytes: [137, 80, 78, 71],
-    );
+      await repository.updateDocumentMetadata(
+        documentId: id,
+        pageCount: 3,
+        thumbnailBytes: [137, 80, 78, 71],
+      );
 
-    final document = (await repository.getDocuments()).single;
-    expect(document.pageCount, 3);
-    expect(document.thumbnailPath, isNotNull);
-    expect(await storage.readBytes(document.thumbnailPath!), [
-      137,
-      80,
-      78,
-      71,
-    ]);
+      final document = (await repository.getDocuments()).single;
+      expect(document.pageCount, 3);
+      expect(document.thumbnailPath, isNotNull);
+      expect(await storage.readBytes(document.thumbnailPath!), [
+        137,
+        80,
+        78,
+        71,
+      ]);
 
-    final thumbnailPath = document.thumbnailPath!;
-    await repository.deleteDocument(id);
-    expect(
-      () => storage.readBytes(thumbnailPath),
-      throwsA(isA<FileSystemException>()),
-    );
-  });
+      final thumbnailPath = document.thumbnailPath!;
+      await repository.deleteDocument(id);
+      expect(
+        () => storage.readBytes(thumbnailPath),
+        throwsA(isA<FileSystemException>()),
+      );
+    },
+  );
 
   test('persists scanned PDF and ordered source page images', () async {
     final id = await repository.importScannedDocument(
@@ -114,17 +119,20 @@ void main() {
     expect(document.pageCount, 2);
     expect(await storage.readBytes(document.filePath), [37, 80, 68, 70]);
 
-    final pages = await (database.select(database.documentPages)
-          ..where((row) => row.documentId.equals(id))
-          ..orderBy([(row) => OrderingTerm.asc(row.pageIndex)]))
-        .get();
+    final pages =
+        await (database.select(database.documentPages)
+              ..where((row) => row.documentId.equals(id))
+              ..orderBy([(row) => OrderingTerm.asc(row.pageIndex)]))
+            .get();
     expect(pages.map((page) => page.pageIndex), [0, 1]);
     expect(pages.every((page) => page.sourceImagePath != null), isTrue);
     for (var index = 0; index < pages.length; index++) {
-      expect(
-        await storage.readBytes(pages[index].sourceImagePath!),
-        [255, 216, 255, index + 1],
-      );
+      expect(await storage.readBytes(pages[index].sourceImagePath!), [
+        255,
+        216,
+        255,
+        index + 1,
+      ]);
     }
 
     final storedPaths = pages.map((page) => page.sourceImagePath!).toList();
@@ -137,55 +145,60 @@ void main() {
     }
   });
 
-  test('reorders, rotates, crops, and deletes scanned pages atomically', () async {
-    final id = await repository.importScannedDocument(
-      title: 'Editable scan',
-      pdfBytes: [37, 80, 68, 70],
-      pageImageBytes: [
-        [255, 216, 255, 1],
-        [255, 216, 255, 2],
-      ],
-    );
-    final initial = await repository.getDocumentPages(id);
-    final firstPath = initial.first.sourceImagePath!;
-    final secondPath = initial.last.sourceImagePath!;
+  test(
+    'reorders, rotates, crops, and deletes scanned pages atomically',
+    () async {
+      final id = await repository.importScannedDocument(
+        title: 'Editable scan',
+        pdfBytes: [37, 80, 68, 70],
+        pageImageBytes: [
+          [255, 216, 255, 1],
+          [255, 216, 255, 2],
+        ],
+      );
+      final initial = await repository.getDocumentPages(id);
+      final firstPath = initial.first.sourceImagePath!;
+      final secondPath = initial.last.sourceImagePath!;
 
-    await repository.saveScannedPageEdits(
-      documentId: id,
-      orderedPageIds: [initial.last.id, initial.first.id],
-      rotations: {initial.last.id: 90},
-      cropData: {initial.first.id: '{"left":0.1,"top":0,"right":0.1,"bottom":0}'},
-      deletePageIds: const [],
-      pdfBytes: [37, 80, 68, 70, 1],
-      thumbnailBytes: [137, 80, 78, 71],
-    );
+      await repository.saveScannedPageEdits(
+        documentId: id,
+        orderedPageIds: [initial.last.id, initial.first.id],
+        rotations: {initial.last.id: 90},
+        cropData: {
+          initial.first.id: '{"left":0.1,"top":0,"right":0.1,"bottom":0}',
+        },
+        deletePageIds: const [],
+        pdfBytes: [37, 80, 68, 70, 1],
+        thumbnailBytes: [137, 80, 78, 71],
+      );
 
-    var pages = await repository.getDocumentPages(id);
-    expect(pages.map((page) => page.id), [initial.last.id, initial.first.id]);
-    expect(pages.first.rotation, 90);
-    expect(pages.last.cropData, contains('"left":0.1'));
-    final document = (await repository.getDocuments()).single;
-    expect(await storage.readBytes(document.filePath), [37, 80, 68, 70, 1]);
+      var pages = await repository.getDocumentPages(id);
+      expect(pages.map((page) => page.id), [initial.last.id, initial.first.id]);
+      expect(pages.first.rotation, 90);
+      expect(pages.last.cropData, contains('"left":0.1'));
+      final document = (await repository.getDocuments()).single;
+      expect(await storage.readBytes(document.filePath), [37, 80, 68, 70, 1]);
 
-    await repository.saveScannedPageEdits(
-      documentId: id,
-      orderedPageIds: [pages.first.id],
-      rotations: const {},
-      cropData: const {},
-      deletePageIds: [pages.last.id],
-      pdfBytes: [37, 80, 68, 70, 2],
-      thumbnailBytes: [137, 80, 78, 71, 2],
-    );
-    pages = await repository.getDocumentPages(id);
-    expect(pages, hasLength(1));
-    expect(pages.single.pageIndex, 0);
-    expect(await storage.readBytes(secondPath), [255, 216, 255, 2]);
-    expect(
-      () => storage.readBytes(firstPath),
-      throwsA(isA<FileSystemException>()),
-    );
-    expect((await repository.getDocuments()).single.pageCount, 1);
-  });
+      await repository.saveScannedPageEdits(
+        documentId: id,
+        orderedPageIds: [pages.first.id],
+        rotations: const {},
+        cropData: const {},
+        deletePageIds: [pages.last.id],
+        pdfBytes: [37, 80, 68, 70, 2],
+        thumbnailBytes: [137, 80, 78, 71, 2],
+      );
+      pages = await repository.getDocumentPages(id);
+      expect(pages, hasLength(1));
+      expect(pages.single.pageIndex, 0);
+      expect(await storage.readBytes(secondPath), [255, 216, 255, 2]);
+      expect(
+        () => storage.readBytes(firstPath),
+        throwsA(isA<FileSystemException>()),
+      );
+      expect((await repository.getDocuments()).single.pageCount, 1);
+    },
+  );
 
   test('stores, lists, and deletes page annotations', () async {
     final documentId = await repository.importDocument(
@@ -206,39 +219,54 @@ void main() {
       type: 'signature',
       payload: '{\"points\":[[0.2,0.3],[0.5,0.6]]}',
     );
-    expect(await repository.getAnnotations(documentId: documentId), hasLength(2));
-    expect(await repository.getAnnotations(documentId: documentId, pageIndex: 0), hasLength(1));
+    expect(
+      await repository.getAnnotations(documentId: documentId),
+      hasLength(2),
+    );
+    expect(
+      await repository.getAnnotations(documentId: documentId, pageIndex: 0),
+      hasLength(1),
+    );
     await repository.deleteAnnotation(inkId);
-    expect(await repository.getAnnotations(documentId: documentId, pageIndex: 0), isEmpty);
+    expect(
+      await repository.getAnnotations(documentId: documentId, pageIndex: 0),
+      isEmpty,
+    );
     await repository.deleteDocument(documentId);
     expect(await repository.getAnnotations(documentId: documentId), isEmpty);
   });
 
-  test('document deletion attempts every file when one cleanup fails', () async {
-    final failingStorage = _FailingDeleteStorage(rootDirectory: root);
-    storage = failingStorage;
-    repository = DocumentRepository(database: database, fileStorage: storage);
-    final id = await repository.importDocument(
-      title: 'Cleanup resilience',
-      bytes: [37, 80, 68, 70],
-      extension: 'pdf',
-    );
-    await repository.updateDocumentMetadata(
-      documentId: id,
-      pageCount: 1,
-      thumbnailBytes: [137, 80, 78, 71],
-    );
-    final document = (await repository.getDocuments()).single;
-    failingStorage.failPath = document.filePath;
+  test(
+    'document deletion attempts every file when one cleanup fails',
+    () async {
+      final failingStorage = _FailingDeleteStorage(rootDirectory: root);
+      storage = failingStorage;
+      repository = DocumentRepository(database: database, fileStorage: storage);
+      final id = await repository.importDocument(
+        title: 'Cleanup resilience',
+        bytes: [37, 80, 68, 70],
+        extension: 'pdf',
+      );
+      await repository.updateDocumentMetadata(
+        documentId: id,
+        pageCount: 1,
+        thumbnailBytes: [137, 80, 78, 71],
+      );
+      final document = (await repository.getDocuments()).single;
+      failingStorage.failPath = document.filePath;
 
-    await repository.deleteDocument(id);
+      await repository.deleteDocument(id);
 
-    expect(await repository.getDocuments(), isEmpty);
-    expect(failingStorage.attemptedPaths, contains(document.filePath));
-    expect(failingStorage.attemptedPaths, contains(document.thumbnailPath));
-    expect(await File('${root.path}/${document.thumbnailPath}').exists(), isFalse);
-    expect(await File('${root.path}/${document.filePath}').exists(), isTrue);
-  });
+      expect(await repository.getDocuments(), isEmpty);
+      expect(failingStorage.attemptedPaths, contains(document.filePath));
+      expect(failingStorage.attemptedPaths, contains(document.thumbnailPath));
+      expect(
+        await File('${root.path}/${document.thumbnailPath}').exists(),
+        isFalse,
+      );
+      expect(await File('${root.path}/${document.filePath}').exists(), isTrue);
+    },
+  );
 
   test('rejects empty document titles', () async {
     expect(

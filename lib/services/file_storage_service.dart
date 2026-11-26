@@ -47,7 +47,6 @@ class FileStorageService {
     return relative;
   }
 
-
   /// Removes abandoned atomic-write files older than [maxAge].
   ///
   /// A recent .pending file may belong to an active write, so cleanup only

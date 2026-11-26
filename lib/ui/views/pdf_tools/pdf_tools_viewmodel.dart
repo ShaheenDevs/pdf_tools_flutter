@@ -53,7 +53,8 @@ class PdfToolsViewModel extends BaseViewModel {
         bytes: merged,
       );
       successMessage = 'Merged PDF saved to your document library.';
-      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
+      if (!previewReady)
+        errorMessage = 'PDF saved, but its preview is unavailable.';
     });
   }
 
@@ -100,7 +101,8 @@ class PdfToolsViewModel extends BaseViewModel {
           bytes: outputs[index],
         );
         if (!previewReady) {
-          errorMessage = 'A split PDF was saved, but its preview is unavailable.';
+          errorMessage =
+              'A split PDF was saved, but its preview is unavailable.';
         }
       }
       successMessage = 'Created ${outputs.length} split PDF file(s).';
@@ -126,7 +128,8 @@ class PdfToolsViewModel extends BaseViewModel {
         bytes: output,
       );
       successMessage = 'Image PDF saved to your document library.';
-      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
+      if (!previewReady)
+        errorMessage = 'PDF saved, but its preview is unavailable.';
     });
   }
 
@@ -177,10 +180,14 @@ class PdfToolsViewModel extends BaseViewModel {
       final issues = <String>[];
       if (failed > 0) issues.add('$failed file(s) could not be processed.');
       if (previewUnavailable > 0) {
-        issues.add('$previewUnavailable saved PDF(s) do not have preview thumbnails yet.');
+        issues.add(
+          '$previewUnavailable saved PDF(s) do not have preview thumbnails yet.',
+        );
       }
       if (issues.isNotEmpty || (!cancelled && succeeded == 0)) {
-        errorMessage = issues.isEmpty ? 'No files were processed.' : issues.join(' ');
+        errorMessage = issues.isEmpty
+            ? 'No files were processed.'
+            : issues.join(' ');
       }
       batchTotal = 0;
       batchCompleted = 0;
@@ -224,8 +231,6 @@ class PdfToolsViewModel extends BaseViewModel {
     });
   }
 
-
-
   Future<void> signPdf(String certificatePassword) async {
     await _run(() async {
       final pdfPick = await FilePicker.platform.pickFiles(
@@ -255,8 +260,10 @@ class PdfToolsViewModel extends BaseViewModel {
         title: '${p.basenameWithoutExtension(file.name)}_signed',
         bytes: signed,
       );
-      successMessage = 'Digitally signed PDF saved as a separate library document.';
-      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
+      successMessage =
+          'Digitally signed PDF saved as a separate library document.';
+      if (!previewReady)
+        errorMessage = 'PDF saved, but its preview is unavailable.';
     });
   }
 
@@ -275,11 +282,13 @@ class PdfToolsViewModel extends BaseViewModel {
         text: watermarkText,
       );
       final previewReady = await _savePdf(
-        title: '${p.basenameWithoutExtension(picked.files.single.name)}_watermarked',
+        title:
+            '${p.basenameWithoutExtension(picked.files.single.name)}_watermarked',
         bytes: output,
       );
       successMessage = 'Watermarked PDF saved as a separate library document.';
-      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
+      if (!previewReady)
+        errorMessage = 'PDF saved, but its preview is unavailable.';
     });
   }
 
@@ -300,12 +309,14 @@ class PdfToolsViewModel extends BaseViewModel {
         bytes: output,
       );
       successMessage = 'Numbered PDF saved as a separate library document.';
-      if (!previewReady) errorMessage = 'PDF saved, but its preview is unavailable.';
+      if (!previewReady)
+        errorMessage = 'PDF saved, but its preview is unavailable.';
     });
   }
 
   Future<List<int>> _readPickedFile(PlatformFile file) async {
-    final bytes = file.bytes ??
+    final bytes =
+        file.bytes ??
         (file.path == null ? null : await File(file.path!).readAsBytes());
     if (bytes == null || bytes.isEmpty) {
       throw const FileSystemException('A selected file could not be read.');
@@ -317,8 +328,11 @@ class PdfToolsViewModel extends BaseViewModel {
     required String title,
     required List<int> bytes,
   }) async {
-    if (bytes.isEmpty || !String.fromCharCodes(bytes.take(4)).startsWith('%PDF')) {
-      throw const FormatException('The PDF operation returned an invalid file.');
+    if (bytes.isEmpty ||
+        !String.fromCharCodes(bytes.take(4)).startsWith('%PDF')) {
+      throw const FormatException(
+        'The PDF operation returned an invalid file.',
+      );
     }
     final id = await _repository.importDocument(
       title: title,
@@ -349,18 +363,23 @@ class PdfToolsViewModel extends BaseViewModel {
     if (groups.isEmpty) {
       throw const FormatException('Enter at least one page range.');
     }
-    return groups.map((group) {
-      final match = RegExp(r'^(\d+)(?:\s*-\s*(\d+))?$').firstMatch(group);
-      if (match == null) {
-        throw FormatException('Invalid page range: $group');
-      }
-      final start = int.parse(match.group(1)!);
-      final end = int.parse(match.group(2) ?? match.group(1)!);
-      if (start < 1 || end < start || end > pageCount) {
-        throw FormatException('Page range $group is outside 1–$pageCount.');
-      }
-      return List<int>.generate(end - start + 1, (index) => start - 1 + index);
-    }).toList(growable: false);
+    return groups
+        .map((group) {
+          final match = RegExp(r'^(\d+)(?:\s*-\s*(\d+))?$').firstMatch(group);
+          if (match == null) {
+            throw FormatException('Invalid page range: $group');
+          }
+          final start = int.parse(match.group(1)!);
+          final end = int.parse(match.group(2) ?? match.group(1)!);
+          if (start < 1 || end < start || end > pageCount) {
+            throw FormatException('Page range $group is outside 1–$pageCount.');
+          }
+          return List<int>.generate(
+            end - start + 1,
+            (index) => start - 1 + index,
+          );
+        })
+        .toList(growable: false);
   }
 
   Future<void> _run(Future<void> Function() action) async {

@@ -16,10 +16,7 @@ class DocumentExportService {
       throw const FileSystemException('The document file is unavailable.');
     }
     return SharePlus.instance.share(
-      ShareParams(
-        title: title,
-        files: [XFile(filePath)],
-      ),
+      ShareParams(title: title, files: [XFile(filePath)]),
     );
   }
 
@@ -40,9 +37,7 @@ class DocumentExportService {
       fileName: suggestedFileName,
       bytes: Uint8List.fromList(bytes),
       type: FileType.custom,
-      allowedExtensions: [
-        suggestedFileName.split('.').last.toLowerCase(),
-      ],
+      allowedExtensions: [suggestedFileName.split('.').last.toLowerCase()],
     );
   }
 }

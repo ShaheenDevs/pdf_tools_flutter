@@ -57,10 +57,7 @@ class PageEditorViewModel extends BaseViewModel {
   }
 
   Future<void> rotatePage(DocumentPage page) async {
-    await _save(
-      pages,
-      rotations: {page.id: (page.rotation + 90) % 360},
-    );
+    await _save(pages, rotations: {page.id: (page.rotation + 90) % 360});
   }
 
   Future<void> cropPage(

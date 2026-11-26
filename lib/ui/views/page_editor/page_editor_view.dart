@@ -25,7 +25,7 @@ class PageEditorView extends StackedView<PageEditorViewModel> {
   ) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit pages'),
+        title: const Text('Edit pages'),
         actions: [
           if (viewModel.isBusy)
             const Padding(
@@ -77,28 +77,28 @@ class PageEditorView extends StackedView<PageEditorViewModel> {
               child: viewModel.isBusy && viewModel.pages.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : viewModel.pages.isEmpty
-                      ? const Center(child: Text('No editable scan pages found.'))
-                      : ReorderableListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                          itemCount: viewModel.pages.length,
-                          onReorder: viewModel.isBusy
-                              ? (_, __) {}
-                              : viewModel.reorderPage,
-                          buildDefaultDragHandles: false,
-                          itemBuilder: (context, index) {
-                            final page = viewModel.pages[index];
-                            return _PageCard(
-                              key: ValueKey(page.id),
-                              index: index,
-                              page: page,
-                              enabled: !viewModel.isBusy,
-                              previewLoader: () => viewModel.previewBytes(page),
-                              onRotate: () => viewModel.rotatePage(page),
-                              onCrop: () => _cropPage(context, viewModel, page),
-                              onDelete: () => _deletePage(context, viewModel, page),
-                            );
-                          },
-                        ),
+                  ? const Center(child: Text('No editable scan pages found.'))
+                  : ReorderableListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                      itemCount: viewModel.pages.length,
+                      onReorder: viewModel.isBusy
+                          ? (_, __) {}
+                          : viewModel.reorderPage,
+                      buildDefaultDragHandles: false,
+                      itemBuilder: (context, index) {
+                        final page = viewModel.pages[index];
+                        return _PageCard(
+                          key: ValueKey(page.id),
+                          index: index,
+                          page: page,
+                          enabled: !viewModel.isBusy,
+                          previewLoader: () => viewModel.previewBytes(page),
+                          onRotate: () => viewModel.rotatePage(page),
+                          onCrop: () => _cropPage(context, viewModel, page),
+                          onDelete: () => _deletePage(context, viewModel, page),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -142,7 +142,6 @@ class PageEditorView extends StackedView<PageEditorViewModel> {
     }
   }
 
-
   Future<void> _deletePage(
     BuildContext context,
     PageEditorViewModel viewModel,
@@ -152,7 +151,9 @@ class PageEditorView extends StackedView<PageEditorViewModel> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Delete page?'),
-        content: Text('Page ${page.pageIndex + 1} will be removed from this scan.'),
+        content: Text(
+          'Page ${page.pageIndex + 1} will be removed from this scan.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -324,7 +325,9 @@ class _CropDialogState extends State<_CropDialog> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${side[0].toUpperCase()}${side.substring(1)} margin  ${(_values[side]! * 100).round()}%'),
+                  Text(
+                    '${side[0].toUpperCase()}${side.substring(1)} margin  ${(_values[side]! * 100).round()}%',
+                  ),
                   Slider(
                     value: _values[side]!,
                     min: 0,

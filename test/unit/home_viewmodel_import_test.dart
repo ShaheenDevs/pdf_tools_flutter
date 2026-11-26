@@ -30,30 +30,43 @@ void main() {
     if (await root.exists()) await root.delete(recursive: true);
   });
 
-  test('imports an image, persists its thumbnail, and refreshes the library', () async {
-    final img.Image source = img.Image(width: 720, height: 480);
-    final Uint8List bytes = Uint8List.fromList(img.encodePng(source));
+  test(
+    'imports an image, persists its thumbnail, and refreshes the library',
+    () async {
+      final img.Image source = img.Image(width: 720, height: 480);
+      final Uint8List bytes = Uint8List.fromList(img.encodePng(source));
 
-    await viewModel.importPlatformFile(
-      PlatformFile(name: 'Receipt.png', size: bytes.length, bytes: bytes),
-    );
+      await viewModel.importPlatformFile(
+        PlatformFile(name: 'Receipt.png', size: bytes.length, bytes: bytes),
+      );
 
-    final documents = await repository.getDocuments();
-    expect(documents, hasLength(1));
-    expect(documents.single.title, 'Receipt');
-    expect(documents.single.pageCount, 1);
-    expect(documents.single.thumbnailPath, isNotNull);
-    expect(await storage.readBytes(documents.single.thumbnailPath!), isNotEmpty);
-    expect(viewModel.documents, hasLength(1));
-    expect(viewModel.errorMessage, isNull);
-  });
+      final documents = await repository.getDocuments();
+      expect(documents, hasLength(1));
+      expect(documents.single.title, 'Receipt');
+      expect(documents.single.pageCount, 1);
+      expect(documents.single.thumbnailPath, isNotNull);
+      expect(
+        await storage.readBytes(documents.single.thumbnailPath!),
+        isNotEmpty,
+      );
+      expect(viewModel.documents, hasLength(1));
+      expect(viewModel.errorMessage, isNull);
+    },
+  );
 
-  test('rejects unsupported file extensions without adding a document', () async {
-    await viewModel.importPlatformFile(
-      PlatformFile(name: 'notes.txt', size: 3, bytes: Uint8List.fromList([1, 2, 3])),
-    );
+  test(
+    'rejects unsupported file extensions without adding a document',
+    () async {
+      await viewModel.importPlatformFile(
+        PlatformFile(
+          name: 'notes.txt',
+          size: 3,
+          bytes: Uint8List.fromList([1, 2, 3]),
+        ),
+      );
 
-    expect(await repository.getDocuments(), isEmpty);
-    expect(viewModel.errorMessage, contains('Import failed'));
-  });
+      expect(await repository.getDocuments(), isEmpty);
+      expect(viewModel.errorMessage, contains('Import failed'));
+    },
+  );
 }

@@ -7,15 +7,16 @@ void main() {
   test('removes scanner temporary PDF and page images', () async {
     final directory = await Directory.systemTemp.createTemp('scanner-cleanup-');
     try {
-      final pdf = await File('${directory.path}/scan.pdf').writeAsBytes([37, 80, 68, 70]);
-      final page = await File('${directory.path}/page.jpg').writeAsBytes([255, 216, 255]);
+      final pdf = await File(
+        '${directory.path}/scan.pdf',
+      ).writeAsBytes([37, 80, 68, 70]);
+      final page = await File(
+        '${directory.path}/page.jpg',
+      ).writeAsBytes([255, 216, 255]);
       final service = DocumentScannerService();
 
       await service.cleanupTemporaryFiles(
-        ScannedDocumentResult(
-          imagePaths: [page.path],
-          pdfPath: pdf.path,
-        ),
+        ScannedDocumentResult(imagePaths: [page.path], pdfPath: pdf.path),
       );
 
       expect(await pdf.exists(), isFalse);

@@ -18,10 +18,7 @@ void main() {
     database = AppDatabase.forTesting();
     storageRoot = await Directory.systemTemp.createTemp('pdf-tools-widget-');
     storage = FileStorageService(rootDirectory: storageRoot);
-    repository = DocumentRepository(
-      database: database,
-      fileStorage: storage,
-    );
+    repository = DocumentRepository(database: database, fileStorage: storage);
   });
 
   tearDown(() async {

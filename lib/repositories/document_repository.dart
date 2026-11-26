@@ -45,7 +45,6 @@ class DocumentRepository {
     }
   }
 
-
   Future<int> importScannedDocument({
     required String title,
     required List<int> pdfBytes,
@@ -65,33 +64,39 @@ class DocumentRepository {
         if (bytes.isEmpty) {
           throw ArgumentError('Scanned page image cannot be empty.');
         }
-        imagePaths.add(await _fileStorage.saveBytes(
-          folder: StorageFolder.images,
-          bytes: bytes,
-          extension: 'jpg',
-        ));
+        imagePaths.add(
+          await _fileStorage.saveBytes(
+            folder: StorageFolder.images,
+            bytes: bytes,
+            extension: 'jpg',
+          ),
+        );
       }
       return await _database.transaction(() async {
         final DateTime now = DateTime.now();
-        final int documentId = await _database.into(_database.documents).insert(
-          DocumentsCompanion.insert(
-            title: title.trim().isEmpty ? 'Scanned document' : title.trim(),
-            filePath: pdfPath,
-            pageCount: Value(imagePaths.length),
-            fileSize: Value(pdfBytes.length),
-            createdAt: now,
-            updatedAt: now,
-            sourceType: const Value('scanned'),
-          ),
-        );
+        final int documentId = await _database
+            .into(_database.documents)
+            .insert(
+              DocumentsCompanion.insert(
+                title: title.trim().isEmpty ? 'Scanned document' : title.trim(),
+                filePath: pdfPath,
+                pageCount: Value(imagePaths.length),
+                fileSize: Value(pdfBytes.length),
+                createdAt: now,
+                updatedAt: now,
+                sourceType: const Value('scanned'),
+              ),
+            );
         for (var index = 0; index < imagePaths.length; index++) {
-          await _database.into(_database.documentPages).insert(
-            DocumentPagesCompanion.insert(
-              documentId: documentId,
-              pageIndex: index,
-              sourceImagePath: Value(imagePaths[index]),
-            ),
-          );
+          await _database
+              .into(_database.documentPages)
+              .insert(
+                DocumentPagesCompanion.insert(
+                  documentId: documentId,
+                  pageIndex: index,
+                  sourceImagePath: Value(imagePaths[index]),
+                ),
+              );
         }
         return documentId;
       });
@@ -124,9 +129,9 @@ class DocumentRepository {
       throw ArgumentError('Page order contains duplicate IDs.');
     }
 
-    final document = await (_database.select(_database.documents)
-          ..where((row) => row.id.equals(documentId)))
-        .getSingleOrNull();
+    final document = await (_database.select(
+      _database.documents,
+    )..where((row) => row.id.equals(documentId))).getSingleOrNull();
     if (document == null || document.sourceType != 'scanned') {
       throw StateError('Scanned document was not found.');
     }
@@ -162,30 +167,30 @@ class DocumentRepository {
         }
 
         if (deleteIds.isNotEmpty) {
-          await (_database.delete(_database.documentPages)
-                ..where((row) => row.id.isIn(deleteIds)))
-              .go();
+          await (_database.delete(
+            _database.documentPages,
+          )..where((row) => row.id.isIn(deleteIds))).go();
         }
 
         for (var index = 0; index < orderedPageIds.length; index++) {
           final pageId = orderedPageIds[index];
           final page = existingPages.firstWhere((item) => item.id == pageId);
-          await (_database.update(_database.documentPages)
-                ..where((row) => row.id.equals(pageId)))
-              .write(
+          await (_database.update(
+            _database.documentPages,
+          )..where((row) => row.id.equals(pageId))).write(
             DocumentPagesCompanion(
               pageIndex: Value(index),
               rotation: Value(rotations[pageId] ?? page.rotation),
-              cropData: Value(cropData.containsKey(pageId)
-                  ? cropData[pageId]
-                  : page.cropData),
+              cropData: Value(
+                cropData.containsKey(pageId) ? cropData[pageId] : page.cropData,
+              ),
             ),
           );
         }
 
-        await (_database.update(_database.documents)
-              ..where((row) => row.id.equals(documentId)))
-            .write(
+        await (_database.update(
+          _database.documents,
+        )..where((row) => row.id.equals(documentId))).write(
           DocumentsCompanion(
             filePath: Value(pdfPath),
             thumbnailPath: Value(thumbnailPath),
@@ -292,7 +297,6 @@ class DocumentRepository {
     }
   }
 
-
   Future<List<Annotation>> getAnnotations({
     required int documentId,
     int? pageIndex,
@@ -316,21 +320,24 @@ class DocumentRepository {
       throw ArgumentError('Annotation details are incomplete.');
     }
     final now = DateTime.now();
-    return _database.into(_database.annotations).insert(
-      AnnotationsCompanion.insert(
-        documentId: documentId,
-        pageIndex: pageIndex,
-        type: type.trim(),
-        payload: payload,
-        createdAt: now,
-        updatedAt: now,
-      ),
-    );
+    return _database
+        .into(_database.annotations)
+        .insert(
+          AnnotationsCompanion.insert(
+            documentId: documentId,
+            pageIndex: pageIndex,
+            type: type.trim(),
+            payload: payload,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
   }
 
   Future<void> deleteAnnotation(int annotationId) async {
-    await (_database.delete(_database.annotations)
-      ..where((row) => row.id.equals(annotationId))).go();
+    await (_database.delete(
+      _database.annotations,
+    )..where((row) => row.id.equals(annotationId))).go();
   }
 
   Future<void> deleteDocument(int documentId) async {

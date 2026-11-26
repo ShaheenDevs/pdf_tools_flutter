@@ -58,7 +58,9 @@ class _DocumentPreviewViewState extends State<DocumentPreviewView> {
       final message = result.status == ShareResultStatus.dismissed
           ? 'Sharing cancelled.'
           : 'Share sheet opened.';
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -82,9 +84,9 @@ class _DocumentPreviewViewState extends State<DocumentPreviewView> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(savedPath == null
-              ? 'Save cancelled.'
-              : 'Document copy saved.'),
+          content: Text(
+            savedPath == null ? 'Save cancelled.' : 'Document copy saved.',
+          ),
         ),
       );
     } catch (_) {

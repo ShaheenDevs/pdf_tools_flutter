@@ -34,10 +34,7 @@ void main() {
   });
 
   test('builds a multi-page PDF from edited images', () async {
-    final page = service.renderPage(
-      sourceBytes: sourceBytes,
-      rotation: 0,
-    );
+    final page = service.renderPage(sourceBytes: sourceBytes, rotation: 0);
     final pdf = await service.buildPdf([page, page]);
     expect(pdf.length, greaterThan(100));
     expect(String.fromCharCodes(pdf.take(4)), '%PDF');
