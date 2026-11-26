@@ -398,7 +398,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
               DropdownButton<double>(
                 value: _strokeWidth,
                 underline: const SizedBox.shrink(),
-                items: const [2.0, 3.0, 5.0, 8.0].map((v) => DropdownMenuItem(value: v, child: Text('\${v.toInt()}'))).toList(),
+                items: const [2.0, 3.0, 5.0, 8.0].map((v) => DropdownMenuItem(value: v, child: Text('${v.toInt()}'))).toList(),
                 onChanged: (v) { if (v != null) setState(() => _strokeWidth = v); },
               ),
             ]),
@@ -435,6 +435,7 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
                                     strokes: _savedStrokes,
                                     current: _currentStroke,
                                     currentTool: _tool,
+                                    currentWidth: _strokeWidth,
                                   ),
                                   size: size,
                                 ),
@@ -517,11 +518,13 @@ class _SavedStroke {
     required this.points,
     required this.color,
     required this.type,
+    required this.width,
   });
 
   final List<Offset> points;
   final int color;
   final String type;
+  final double width;
 
   factory _SavedStroke.fromRow(db.Annotation row) {
     final payload = jsonDecode(row.payload) as Map<String, dynamic>;
@@ -537,6 +540,7 @@ class _SavedStroke {
       points: points,
       color: payload['color'] as int? ?? 0xFF172554,
       type: row.type,
+      width: (payload['width'] as num?)?.toDouble() ?? 3,
     );
   }
 }
@@ -546,16 +550,18 @@ class _MarkupPainter extends CustomPainter {
     required this.strokes,
     required this.current,
     required this.currentTool,
+    required this.currentWidth,
   });
 
   final List<_SavedStroke> strokes;
   final List<Offset> current;
   final MarkupTool currentTool;
+  final double currentWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
     for (final stroke in strokes) {
-      _draw(canvas, size, stroke.points, stroke.color, stroke.type);
+      _draw(canvas, size, stroke.points, stroke.color, stroke.type, stroke.width);
     }
     final type = switch (currentTool) {
       MarkupTool.pen => 'ink',
@@ -568,6 +574,7 @@ class _MarkupPainter extends CustomPainter {
       current,
       currentTool == MarkupTool.highlight ? 0x66FFCC00 : 0xFF172554,
       type,
+      currentWidth,
     );
   }
 
@@ -577,6 +584,7 @@ class _MarkupPainter extends CustomPainter {
     List<Offset> points,
     int color,
     String type,
+    double width,
   ) {
     if (points.length < 2) return;
     final paint = Paint()
@@ -584,7 +592,7 @@ class _MarkupPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke
-      ..strokeWidth = type == 'highlight' ? 18 : 3;
+      ..strokeWidth = type == 'highlight' ? 18 : width;
     final path = Path()
       ..moveTo(points.first.dx * size.width, points.first.dy * size.height);
     for (final point in points.skip(1)) {
@@ -597,5 +605,6 @@ class _MarkupPainter extends CustomPainter {
   bool shouldRepaint(covariant _MarkupPainter oldDelegate) =>
       oldDelegate.strokes != strokes ||
       oldDelegate.current != current ||
-      oldDelegate.currentTool != currentTool;
+      oldDelegate.currentTool != currentTool ||
+      oldDelegate.currentWidth != currentWidth;
 }
