@@ -53,8 +53,9 @@ class PdfToolsViewModel extends BaseViewModel {
         bytes: merged,
       );
       successMessage = 'Merged PDF saved to your document library.';
-      if (!previewReady)
+      if (!previewReady) {
         errorMessage = 'PDF saved, but its preview is unavailable.';
+      }
     });
   }
 
@@ -128,8 +129,9 @@ class PdfToolsViewModel extends BaseViewModel {
         bytes: output,
       );
       successMessage = 'Image PDF saved to your document library.';
-      if (!previewReady)
+      if (!previewReady) {
         errorMessage = 'PDF saved, but its preview is unavailable.';
+      }
     });
   }
 
@@ -262,8 +264,9 @@ class PdfToolsViewModel extends BaseViewModel {
       );
       successMessage =
           'Digitally signed PDF saved as a separate library document.';
-      if (!previewReady)
+      if (!previewReady) {
         errorMessage = 'PDF saved, but its preview is unavailable.';
+      }
     });
   }
 
@@ -287,8 +290,9 @@ class PdfToolsViewModel extends BaseViewModel {
         bytes: output,
       );
       successMessage = 'Watermarked PDF saved as a separate library document.';
-      if (!previewReady)
+      if (!previewReady) {
         errorMessage = 'PDF saved, but its preview is unavailable.';
+      }
     });
   }
 
@@ -309,8 +313,9 @@ class PdfToolsViewModel extends BaseViewModel {
         bytes: output,
       );
       successMessage = 'Numbered PDF saved as a separate library document.';
-      if (!previewReady)
+      if (!previewReady) {
         errorMessage = 'PDF saved, but its preview is unavailable.';
+      }
     });
   }
 

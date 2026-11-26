@@ -29,26 +29,28 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
               _StatusMessage(message: viewModel.errorMessage!, isError: true),
             if (viewModel.successMessage != null)
               _StatusMessage(message: viewModel.successMessage!),
-            _ToolCard(
-              icon: Icons.merge_type_rounded,
-              title: 'Merge PDFs',
-              description:
-                  'Combine two or more PDF files in the selected order.',
-              buttonLabel: 'Choose PDFs',
-              busy: viewModel.isBusy,
-              onPressed: viewModel.mergePdfs,
-            ),
-            _ToolCard(
-              icon: Icons.call_split_rounded,
-              title: 'Split PDF',
-              description:
-                  'Export one or more page ranges as separate PDF files.',
-              buttonLabel: viewModel.hasSplitSource
-                  ? 'Choose another PDF'
-                  : 'Choose PDF',
-              busy: viewModel.isBusy,
-              onPressed: viewModel.selectPdfForSplit,
-            ),
+            if (initialTool == 'Merge PDFs')
+              _ToolCard(
+                icon: Icons.merge_type_rounded,
+                title: 'Merge PDFs',
+                description:
+                    'Combine two or more PDF files in the selected order.',
+                buttonLabel: 'Choose PDFs',
+                busy: viewModel.isBusy,
+                onPressed: viewModel.mergePdfs,
+              ),
+            if (initialTool == 'Split PDF')
+              _ToolCard(
+                icon: Icons.call_split_rounded,
+                title: 'Split PDF',
+                description:
+                    'Export one or more page ranges as separate PDF files.',
+                buttonLabel: viewModel.hasSplitSource
+                    ? 'Choose another PDF'
+                    : 'Choose PDF',
+                busy: viewModel.isBusy,
+                onPressed: viewModel.selectPdfForSplit,
+              ),
             if (viewModel.hasSplitSource) ...[
               Card(
                 child: Padding(
@@ -88,59 +90,66 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
                 ),
               ),
             ],
-            _ToolCard(
-              icon: Icons.image_outlined,
-              title: 'Images to PDF',
-              description: 'Turn multiple JPG or PNG images into one PDF.',
-              buttonLabel: 'Choose images',
-              busy: viewModel.isBusy,
-              onPressed: viewModel.imagesToPdf,
-            ),
-            _ToolCard(
-              icon: Icons.verified_user_outlined,
-              title: 'Digital signature',
-              description:
-                  'Sign with a PKCS#12 / PFX certificate stored on your device.',
-              buttonLabel: 'Choose certificate',
-              busy: viewModel.isBusy,
-              onPressed: () => _requestCertificatePassword(context, viewModel),
-            ),
-            _ToolCard(
-              icon: Icons.branding_watermark_outlined,
-              title: 'Add watermark',
-              description:
-                  'Add custom translucent text to every page and save a copy.',
-              buttonLabel: 'Choose PDF',
-              busy: viewModel.isBusy,
-              onPressed: () => _requestWatermark(context, viewModel),
-            ),
-            _ToolCard(
-              icon: Icons.format_list_numbered_rounded,
-              title: 'Add page numbers',
-              description:
-                  'Place page numbers at the bottom-right of each page.',
-              buttonLabel: 'Choose PDF',
-              busy: viewModel.isBusy,
-              onPressed: viewModel.addPageNumbers,
-            ),
-            _ToolCard(
-              icon: Icons.library_add_check_outlined,
-              title: 'Batch compress PDFs',
-              description:
-                  'Compress several PDFs independently; one failed file will not stop the rest.',
-              buttonLabel: 'Choose multiple PDFs',
-              busy: viewModel.isBusy,
-              onPressed: viewModel.batchCompressPdfs,
-            ),
-            _ToolCard(
-              icon: Icons.compress_rounded,
-              title: 'Compress PDF',
-              description:
-                  'Optimize a PDF locally and save a separate compressed copy.',
-              buttonLabel: 'Choose PDF',
-              busy: viewModel.isBusy,
-              onPressed: viewModel.compressPdf,
-            ),
+            if (initialTool == 'Images to PDF')
+              _ToolCard(
+                icon: Icons.image_outlined,
+                title: 'Images to PDF',
+                description: 'Turn multiple JPG or PNG images into one PDF.',
+                buttonLabel: 'Choose images',
+                busy: viewModel.isBusy,
+                onPressed: viewModel.imagesToPdf,
+              ),
+            if (initialTool == 'Digital signature')
+              _ToolCard(
+                icon: Icons.verified_user_outlined,
+                title: 'Digital signature',
+                description:
+                    'Sign with a PKCS#12 / PFX certificate stored on your device.',
+                buttonLabel: 'Choose certificate',
+                busy: viewModel.isBusy,
+                onPressed: () =>
+                    _requestCertificatePassword(context, viewModel),
+              ),
+            if (initialTool == 'Add watermark')
+              _ToolCard(
+                icon: Icons.branding_watermark_outlined,
+                title: 'Add watermark',
+                description:
+                    'Add custom translucent text to every page and save a copy.',
+                buttonLabel: 'Choose PDF',
+                busy: viewModel.isBusy,
+                onPressed: () => _requestWatermark(context, viewModel),
+              ),
+            if (initialTool == 'Add page numbers')
+              _ToolCard(
+                icon: Icons.format_list_numbered_rounded,
+                title: 'Add page numbers',
+                description:
+                    'Place page numbers at the bottom-right of each page.',
+                buttonLabel: 'Choose PDF',
+                busy: viewModel.isBusy,
+                onPressed: viewModel.addPageNumbers,
+              ),
+            if (initialTool == 'Compress PDF')
+              _ToolCard(
+                icon: Icons.library_add_check_outlined,
+                title: 'Batch compress PDFs',
+                description:
+                    'Compress several PDFs independently; one failed file will not stop the rest.',
+                buttonLabel: 'Choose multiple PDFs',
+                busy: viewModel.isBusy,
+                onPressed: viewModel.batchCompressPdfs,
+              ),
+            if (initialTool == 'Compress PDF')
+              _ToolCard(
+                icon: Icons.compress_rounded,
+                title: 'Compress PDF',
+                description:
+                    'Optimize a PDF locally and save a separate compressed copy.',
+                buttonLabel: 'Choose PDF',
+                busy: viewModel.isBusy,
+                onPressed: viewModel.compressPdf,
+              ),
             if (viewModel.isBusy && viewModel.batchTotal > 0) ...[
               const SizedBox(height: 8),
               LinearProgressIndicator(

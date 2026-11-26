@@ -33,14 +33,14 @@ class HomeView extends StackedView<HomeViewModel> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Import PDF or image',
-            onPressed: viewModel.isBusy ? null : viewModel.importDocument,
-            icon: const Icon(Icons.add_rounded),
-          ),
-          const SizedBox(width: 8),
-        ],
+        // actions: [
+        //   IconButton(
+        //     tooltip: 'Import PDF or image',
+        //     onPressed: viewModel.isBusy ? null : viewModel.importDocument,
+        //     icon: const Icon(Icons.add_rounded),
+        //   ),
+        //   const SizedBox(width: 8),
+        // ],
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -159,13 +159,13 @@ class HomeView extends StackedView<HomeViewModel> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: viewModel.isBusy ? null : viewModel.importDocument,
-        icon: const Icon(Icons.file_upload_outlined),
-        label: const Text('Import file'),
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: viewModel.isBusy ? null : viewModel.importDocument,
+      //   icon: const Icon(Icons.file_upload_outlined),
+      //   label: const Text('Import file'),
+      // ),
     );
-  }
+  } 
 
   Future<void> _openPdfTools(
     BuildContext context,
@@ -339,7 +339,7 @@ class _ToolGrid extends StatelessWidget {
     _ToolItem('Split PDF', Icons.call_split_rounded),
     _ToolItem('Images to PDF', Icons.image_outlined),
     _ToolItem('Compress PDF', Icons.compress_rounded),
-    _ToolItem('Annotate PDF', Icons.edit_note_rounded),
+    // _ToolItem('Annotate PDF', Icons.edit_note_rounded),
   ];
 
   @override
