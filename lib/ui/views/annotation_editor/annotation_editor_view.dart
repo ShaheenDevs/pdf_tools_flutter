@@ -9,6 +9,7 @@ import 'package:pdfx/pdfx.dart';
 import 'package:pdf_tools_flutter/app/app.locator.dart';
 import 'package:pdf_tools_flutter/database/app_database.dart' as db;
 import 'package:pdf_tools_flutter/repositories/document_repository.dart';
+import 'package:pdf_tools_flutter/services/document_export_service.dart';
 import 'package:pdf_tools_flutter/services/pdf_metadata_service.dart';
 import 'package:pdf_tools_flutter/services/pdf_tools_service.dart';
 
@@ -36,11 +37,15 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
   final DocumentRepository _repository = locator<DocumentRepository>();
   final PdfToolsService _pdfToolsService = PdfToolsService();
   final PdfMetadataService _metadataService = PdfMetadataService();
+  final DocumentExportService _exportService = DocumentExportService();
   final List<Offset> _currentStroke = [];
   PdfDocument? _document;
   Uint8List? _pageImage;
   List<_SavedStroke> _savedStrokes = [];
   MarkupTool _tool = MarkupTool.pen;
+  Color _inkColor = const Color(0xFF1E3A8A);
+  double _strokeWidth = 3;
+  static const List<Color> _palette = [Color(0xFF1E3A8A), Color(0xFFEF4444), Color(0xFF059669), Color(0xFFFBBF24), Color(0xFF111827)];
   int _page = 1;
   double _pageAspectRatio = 0.707;
   bool _loading = true;
@@ -166,9 +171,10 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
         MarkupTool.highlight => 'highlight',
         MarkupTool.signature => 'signature',
       };
-      final color = _tool == MarkupTool.highlight ? 0x66FFCC00 : 0xFF172554;
+      final color = _tool == MarkupTool.highlight ? 0x66FFCC00 : _inkColor.toARGB32();
       final payload = jsonEncode({
         'color': color,
+        'width': _strokeWidth,
         'points': _currentStroke
             .map((point) => [point.dx, point.dy])
             .toList(growable: false),
@@ -314,6 +320,8 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
       appBar: AppBar(
         title: Text('Annotate: ${widget.title}'),
         actions: [
+          IconButton(tooltip: 'Share PDF', onPressed: _saving || _loading ? null : _shareDocument, icon: const Icon(Icons.share_outlined)),
+          IconButton(tooltip: 'Save a copy', onPressed: _saving || _loading ? null : _saveDocumentCopy, icon: const Icon(Icons.file_download_outlined)),
           IconButton(
             tooltip: 'Export annotated copy',
             onPressed: _saving || _loading ? null : _exportAnnotatedCopy,
@@ -351,15 +359,51 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
               ],
             ),
           ),
-          Wrap(
-            spacing: 8,
-            children: [
-              _toolChoice(MarkupTool.pen, 'Pen', Icons.edit),
-              _toolChoice(MarkupTool.highlight, 'Highlight', Icons.highlight),
-              _toolChoice(MarkupTool.signature, 'Draw signature', Icons.draw),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: [
+                _toolChoice(MarkupTool.pen, 'Pen', Icons.edit),
+                const SizedBox(width: 8),
+                _toolChoice(MarkupTool.highlight, 'Highlight', Icons.wb_sunny_outlined),
+                const SizedBox(width: 8),
+                _toolChoice(MarkupTool.signature, 'Signature', Icons.gesture),
+              ]),
+            ),
           ),
-          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Row(children: [
+              Text('Color:', style: TextStyle(color: Theme.of(context).hintColor)),
+              const SizedBox(width: 8),
+              ..._palette.map((color) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => setState(() => _inkColor = color),
+                  child: Container(
+                    width: 34, height: 34,
+                    decoration: BoxDecoration(
+                      color: color, shape: BoxShape.circle,
+                      border: Border.all(color: _inkColor == color ? Theme.of(context).colorScheme.primary : Colors.white, width: _inkColor == color ? 3 : 1),
+                    ),
+                    child: _inkColor == color ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
+                  ),
+                ),
+              )),
+              const Spacer(),
+              Text('Stroke:', style: TextStyle(color: Theme.of(context).hintColor)),
+              const SizedBox(width: 6),
+              DropdownButton<double>(
+                value: _strokeWidth,
+                underline: const SizedBox.shrink(),
+                items: const [2.0, 3.0, 5.0, 8.0].map((v) => DropdownMenuItem(value: v, child: Text('\${v.toInt()}'))).toList(),
+                onChanged: (v) { if (v != null) setState(() => _strokeWidth = v); },
+              ),
+            ]),
+          ),
+          const Divider(height: 1),
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -436,6 +480,26 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
         ],
       ),
     );
+  }
+
+  Future<void> _shareDocument() async {
+    try {
+      await _exportService.shareFile(filePath: widget.filePath, title: widget.title);
+    } catch (_) {
+      if (mounted) setState(() => _message = 'Could not share this PDF.');
+    }
+  }
+
+  Future<void> _saveDocumentCopy() async {
+    try {
+      final saved = await _exportService.saveCopy(
+        filePath: widget.filePath,
+        suggestedFileName: widget.title.toLowerCase().endsWith('.pdf') ? widget.title : '\${widget.title}.pdf',
+      );
+      if (mounted && saved != null) setState(() => _message = 'PDF copy saved.');
+    } catch (_) {
+      if (mounted) setState(() => _message = 'Could not save a PDF copy.');
+    }
   }
 
   Widget _toolChoice(MarkupTool tool, String label, IconData icon) {
