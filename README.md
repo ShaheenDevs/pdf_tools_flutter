@@ -545,3 +545,10 @@ Run code generation only after the generated Stacked and Drift dependencies/conf
 - Earlier startup-recovery run #172 passed Flutter analysis and the complete test step, but a newer push cancelled its APK build before completion. The new repository changes trigger a fresh full CI run.
 - Commits: code `fb88c59f`; regression test `094f4315`.
 - No local CLI commands or tests were run.
+
+
+### 2026-11-26 — Annotation editor UI refresh
+- Refreshed `annotation_editor_view.dart` toward the supplied mobile reference: compact document header, direct Share and Save a copy actions, horizontally scrollable markup tool chips, a five-color ink palette, and selectable stroke widths.
+- Selected ink color and width are saved with each new annotation and used when rendering saved markups. Highlight keeps its dedicated translucent yellow treatment.
+- Existing local annotation persistence, page navigation, clear-page confirmation, and annotated-copy export are retained.
+- Commit: `1d6daca7`; stroke-width follow-up: `0b5d3a22`. GitHub Actions validation is running; no local CLI commands or tests were run.
