@@ -30,7 +30,9 @@ class PdfToolsService {
     required List<List<int>> pageRanges,
   }) async {
     if (sourceBytes.isEmpty || pageRanges.isEmpty) {
-      throw ArgumentError('A source PDF and at least one page range are required.');
+      throw ArgumentError(
+        'A source PDF and at least one page range are required.',
+      );
     }
 
     final pdf = Pdf();
@@ -38,7 +40,9 @@ class PdfToolsService {
       final outputs = <Uint8List>[];
       for (final range in pageRanges) {
         if (range.isEmpty || range.toSet().length != range.length) {
-          throw ArgumentError('Each page range must contain unique page indexes.');
+          throw ArgumentError(
+            'Each page range must contain unique page indexes.',
+          );
         }
         final sink = MemorySink();
         final input = PdfInput(MemorySource(Uint8List.fromList(sourceBytes)));
@@ -99,7 +103,6 @@ class PdfToolsService {
     }
   }
 
-
   Future<Uint8List> addWatermark({
     required List<int> sourceBytes,
     required String text,
@@ -111,22 +114,25 @@ class PdfToolsService {
     final pdf = Pdf();
     final output = MemorySink();
     try {
-      await _runPdf(() => pdf.rewrite(
-        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
-        output,
-        (editor) async {
-          await editor.addWatermark(
-            normalized,
-            style: const PdfWatermarkStyle(
-              fontSize: 34,
-              opacity: 0.22,
-              angleDegrees: -35,
-            ),
-            position: const PdfWatermarkPosition.center(),
-            layer: PdfWatermarkLayer.foreground,
-          );
-        },
-      ));
+      await _runPdf(
+        () => pdf.rewrite(
+          PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+          output,
+          (editor) async {
+            await editor.addWatermark(
+              normalized,
+              style: const PdfWatermarkStyle(
+                fontSize: 78,
+                opacity: 0.5,
+                angleDegrees: 45,
+                color: PdfColor.red,
+              ),
+              position: const PdfWatermarkPosition.center(),
+              layer: PdfWatermarkLayer.foreground,
+            );
+          },
+        ),
+      );
       return output.takeBytes();
     } finally {
       await pdf.dispose();
@@ -140,36 +146,37 @@ class PdfToolsService {
     final pdf = Pdf();
     final output = MemorySink();
     try {
-      await _runPdf(() => pdf.rewrite(
-        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
-        output,
-        (editor) async {
-          final count = await editor.pageCount();
-          for (var page = 0; page < count; page++) {
-            await editor.addWatermark(
-              'Page ${page + 1} of $count',
-              pages: PdfPages.single(page),
-              style: const PdfWatermarkStyle(
-                fontSize: 9,
-                opacity: 0.85,
-                angleDegrees: 0,
-              ),
-              position: const PdfWatermarkPosition.corner(
-                PdfCorner.bottomRight,
-                marginX: 28,
-                marginY: 20,
-              ),
-              layer: PdfWatermarkLayer.foreground,
-            );
-          }
-        },
-      ));
+      await _runPdf(
+        () => pdf.rewrite(
+          PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+          output,
+          (editor) async {
+            final count = await editor.pageCount();
+            for (var page = 0; page < count; page++) {
+              await editor.addWatermark(
+                'Page ${page + 1} of $count',
+                pages: PdfPages.single(page),
+                style: const PdfWatermarkStyle(
+                  fontSize: 9,
+                  opacity: 0.85,
+                  angleDegrees: 0,
+                ),
+                position: const PdfWatermarkPosition.corner(
+                  PdfCorner.bottomRight,
+                  marginX: 28,
+                  marginY: 20,
+                ),
+                layer: PdfWatermarkLayer.foreground,
+              );
+            }
+          },
+        ),
+      );
       return output.takeBytes();
     } finally {
       await pdf.dispose();
     }
   }
-
 
   Future<Uint8List> signPdf({
     required List<int> sourceBytes,
@@ -178,23 +185,28 @@ class PdfToolsService {
     String? reason,
     String? location,
   }) async {
-    if (sourceBytes.isEmpty || pkcs12Bytes.isEmpty ||
+    if (sourceBytes.isEmpty ||
+        pkcs12Bytes.isEmpty ||
         certificatePassword.isEmpty) {
-      throw ArgumentError('A PDF, PKCS#12 certificate, and certificate password are required.');
+      throw ArgumentError(
+        'A PDF, PKCS#12 certificate, and certificate password are required.',
+      );
     }
     final pdf = Pdf();
     final output = MemorySink();
     try {
-      await _runPdf(() => pdf.sign(
-        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
-        output,
-        credentials: PdfSigningCredentials.pkcs12(
-          MemorySource(Uint8List.fromList(pkcs12Bytes)),
-          certificatePassword,
+      await _runPdf(
+        () => pdf.sign(
+          PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+          output,
+          credentials: PdfSigningCredentials.pkcs12(
+            MemorySource(Uint8List.fromList(pkcs12Bytes)),
+            certificatePassword,
+          ),
+          reason: reason,
+          location: location,
         ),
-        reason: reason,
-        location: location,
-      ));
+      );
       final signed = output.takeBytes();
       if (signed.isEmpty) {
         throw const FormatException('The signed PDF is empty.');
@@ -222,39 +234,45 @@ class PdfToolsService {
     final pdf = Pdf();
     final output = MemorySink();
     try {
-      await _runPdf(() => pdf.rewrite(
-        PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
-        output,
-        (editor) async {
-          final pageInfo = await editor.pageInfo();
-          for (final entry in annotationsByPage.entries) {
-            final pageIndex = entry.key;
-            if (pageIndex < 0 || pageIndex >= pageInfo.length) {
-              throw ArgumentError('Markup refers to a page outside this PDF.');
+      await _runPdf(
+        () => pdf.rewrite(
+          PdfInput(MemorySource(Uint8List.fromList(sourceBytes))),
+          output,
+          (editor) async {
+            final pageInfo = await editor.pageInfo();
+            for (final entry in annotationsByPage.entries) {
+              final pageIndex = entry.key;
+              if (pageIndex < 0 || pageIndex >= pageInfo.length) {
+                throw ArgumentError(
+                  'Markup refers to a page outside this PDF.',
+                );
+              }
+              if (entry.value.isEmpty) continue;
+              final info = pageInfo[pageIndex];
+              final overlayBytes = await _renderMarkupOverlay(
+                entry.value,
+                widthPoints: info.effectiveWidth,
+                heightPoints: info.effectiveHeight,
+              );
+              await editor.addImageStamp(
+                MemorySource(overlayBytes),
+                bounds: PdfRect(
+                  x: 0,
+                  y: 0,
+                  width: info.effectiveWidth,
+                  height: info.effectiveHeight,
+                ),
+                pages: PdfPages.single(pageIndex),
+              );
             }
-            if (entry.value.isEmpty) continue;
-            final info = pageInfo[pageIndex];
-            final overlayBytes = await _renderMarkupOverlay(
-              entry.value,
-              widthPoints: info.effectiveWidth,
-              heightPoints: info.effectiveHeight,
-            );
-            await editor.addImageStamp(
-              MemorySource(overlayBytes),
-              bounds: PdfRect(
-                x: 0,
-                y: 0,
-                width: info.effectiveWidth,
-                height: info.effectiveHeight,
-              ),
-              pages: PdfPages.single(pageIndex),
-            );
-          }
-        },
-      ));
+          },
+        ),
+      );
       final result = output.takeBytes();
       if (result.isEmpty) {
-        throw const FormatException('The annotated PDF could not be generated.');
+        throw const FormatException(
+          'The annotated PDF could not be generated.',
+        );
       }
       return result;
     } finally {
@@ -272,7 +290,10 @@ class PdfToolsService {
     }
     const pixelsPerPoint = 2.0;
     final width = (widthPoints * pixelsPerPoint).round().clamp(1, 2400).toInt();
-    final height = (heightPoints * pixelsPerPoint).round().clamp(1, 3200).toInt();
+    final height = (heightPoints * pixelsPerPoint)
+        .round()
+        .clamp(1, 3200)
+        .toInt();
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder);
     canvas.scale(width.toDouble(), height.toDouble());

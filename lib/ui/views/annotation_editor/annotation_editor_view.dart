@@ -150,9 +150,9 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
   }
 
   Offset _normalize(Offset point, Size size) => Offset(
-        (point.dx / size.width).clamp(0.0, 1.0).toDouble(),
-        (point.dy / size.height).clamp(0.0, 1.0).toDouble(),
-      );
+    (point.dx / size.width).clamp(0.0, 1.0).toDouble(),
+    (point.dy / size.height).clamp(0.0, 1.0).toDouble(),
+  );
 
   Future<void> _saveStroke() async {
     if (_currentStroke.length < 2) {
@@ -196,31 +196,44 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
       _message = null;
     });
     try {
-      final rows = await _repository.getAnnotations(documentId: widget.documentId);
+      final rows = await _repository.getAnnotations(
+        documentId: widget.documentId,
+      );
       final grouped = <int, List<PdfAnnotationStroke>>{};
       for (final row in rows) {
         final payload = jsonDecode(row.payload) as Map<String, dynamic>;
         final rawPoints = payload['points'] as List?;
         if (rawPoints == null || rawPoints.length < 2) continue;
-        final points = rawPoints.map((point) {
-          final pair = point as List;
-          if (pair.length != 2) {
-            throw const FormatException('A saved markup point is invalid.');
-          }
-          final x = (pair[0] as num).toDouble();
-          final y = (pair[1] as num).toDouble();
-          if (!x.isFinite || !y.isFinite || x < 0 || x > 1 || y < 0 || y > 1) {
-            throw const FormatException('A saved markup point is outside the page.');
-          }
-          return Offset(x, y);
-        }).toList(growable: false);
-        grouped.putIfAbsent(row.pageIndex, () => []).add(
-          PdfAnnotationStroke(
-            points: points,
-            color: payload['color'] as int? ?? 0xFF172554,
-            type: row.type,
-          ),
-        );
+        final points = rawPoints
+            .map((point) {
+              final pair = point as List;
+              if (pair.length != 2) {
+                throw const FormatException('A saved markup point is invalid.');
+              }
+              final x = (pair[0] as num).toDouble();
+              final y = (pair[1] as num).toDouble();
+              if (!x.isFinite ||
+                  !y.isFinite ||
+                  x < 0 ||
+                  x > 1 ||
+                  y < 0 ||
+                  y > 1) {
+                throw const FormatException(
+                  'A saved markup point is outside the page.',
+                );
+              }
+              return Offset(x, y);
+            })
+            .toList(growable: false);
+        grouped
+            .putIfAbsent(row.pageIndex, () => [])
+            .add(
+              PdfAnnotationStroke(
+                points: points,
+                color: payload['color'] as int? ?? 0xFF172554,
+                type: row.type,
+              ),
+            );
       }
       final sourceBytes = await File(widget.filePath).readAsBytes();
       final annotated = await _pdfToolsService.exportAnnotatedPdf(
@@ -241,13 +254,17 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
         thumbnailBytes: metadata.firstPageThumbnail,
       );
       if (mounted) {
-        setState(() => _message = 'Annotated PDF copy saved to your document library.');
+        setState(
+          () => _message = 'Annotated PDF copy saved to your document library.',
+        );
       }
     } catch (error) {
       if (mounted) {
-        setState(() => _message = error is ArgumentError || error is FormatException
-            ? error.toString().replaceFirst('FormatException: ', '')
-            : 'Could not export the annotated PDF. Your original document is safe.');
+        setState(
+          () => _message = error is ArgumentError || error is FormatException
+              ? error.toString().replaceFirst('FormatException: ', '')
+              : 'Could not export the annotated PDF. Your original document is safe.',
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -312,7 +329,9 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
               children: [
                 IconButton(
                   tooltip: 'Previous page',
-                  onPressed: _page > 1 && !_loading ? () => _changePage(-1) : null,
+                  onPressed: _page > 1 && !_loading
+                      ? () => _changePage(-1)
+                      : null,
                   icon: const Icon(Icons.chevron_left),
                 ),
                 Expanded(
@@ -362,8 +381,10 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
                               Image.memory(_pageImage!, fit: BoxFit.fill),
                               GestureDetector(
                                 behavior: HitTestBehavior.opaque,
-                                onPanStart: (details) => _startStroke(details, size),
-                                onPanUpdate: (details) => _extendStroke(details, size),
+                                onPanStart: (details) =>
+                                    _startStroke(details, size),
+                                onPanUpdate: (details) =>
+                                    _extendStroke(details, size),
                                 onPanEnd: (_) => _saveStroke(),
                                 child: CustomPaint(
                                   painter: _MarkupPainter(
@@ -381,27 +402,33 @@ class _AnnotationEditorViewState extends State<AnnotationEditorView> {
               },
             ),
           ),
-          if (_loading || _saving)
-            const LinearProgressIndicator(),
+          if (_loading || _saving) const LinearProgressIndicator(),
           if (_message != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Text(_message!, style: Theme.of(context).textTheme.bodySmall),
+              child: Text(
+                _message!,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
             child: Row(
               children: [
-                OutlinedButton.icon(
-                  onPressed: _saving || _loading ? null : _clearPageMarkups,
-                  icon: const Icon(Icons.delete_outline),
-                  label: const Text('Clear page'),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _saving || _loading ? null : _clearPageMarkups,
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Clear page'),
+                  ),
                 ),
-                const Spacer(),
-                FilledButton.icon(
-                  onPressed: _saving || _loading ? null : _saveStroke,
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text('Save markup'),
+                const SizedBox(width: 22),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: _saving || _loading ? null : _saveStroke,
+                    icon: const Icon(Icons.save_outlined),
+                    label: const Text('Save markup'),
+                  ),
                 ),
               ],
             ),
@@ -435,10 +462,12 @@ class _SavedStroke {
   factory _SavedStroke.fromRow(db.Annotation row) {
     final payload = jsonDecode(row.payload) as Map<String, dynamic>;
     final points = (payload['points'] as List)
-        .map((point) => Offset(
-              (point[0] as num).toDouble(),
-              (point[1] as num).toDouble(),
-            ))
+        .map(
+          (point) => Offset(
+            (point[0] as num).toDouble(),
+            (point[1] as num).toDouble(),
+          ),
+        )
         .toList(growable: false);
     return _SavedStroke(
       points: points,

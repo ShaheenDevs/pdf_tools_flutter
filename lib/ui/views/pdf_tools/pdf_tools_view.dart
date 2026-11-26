@@ -26,16 +26,14 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
             ),
             const SizedBox(height: 16),
             if (viewModel.errorMessage != null)
-              _StatusMessage(
-                message: viewModel.errorMessage!,
-                isError: true,
-              ),
+              _StatusMessage(message: viewModel.errorMessage!, isError: true),
             if (viewModel.successMessage != null)
               _StatusMessage(message: viewModel.successMessage!),
             _ToolCard(
               icon: Icons.merge_type_rounded,
               title: 'Merge PDFs',
-              description: 'Combine two or more PDF files in the selected order.',
+              description:
+                  'Combine two or more PDF files in the selected order.',
               buttonLabel: 'Choose PDFs',
               busy: viewModel.isBusy,
               onPressed: viewModel.mergePdfs,
@@ -43,8 +41,11 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
             _ToolCard(
               icon: Icons.call_split_rounded,
               title: 'Split PDF',
-              description: 'Export one or more page ranges as separate PDF files.',
-              buttonLabel: viewModel.hasSplitSource ? 'Choose another PDF' : 'Choose PDF',
+              description:
+                  'Export one or more page ranges as separate PDF files.',
+              buttonLabel: viewModel.hasSplitSource
+                  ? 'Choose another PDF'
+                  : 'Choose PDF',
               busy: viewModel.isBusy,
               onPressed: viewModel.selectPdfForSplit,
             ),
@@ -67,7 +68,8 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
                         decoration: const InputDecoration(
                           labelText: 'Page ranges',
                           hintText: 'Example: 1-3; 4-6; 8',
-                          helperText: 'Use semicolons to create separate output files.',
+                          helperText:
+                              'Use semicolons to create separate output files.',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -75,7 +77,9 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
                       FilledButton.icon(
                         onPressed: viewModel.isBusy
                             ? null
-                            : () => viewModel.splitPdfByRanges(viewModel.splitRangeText),
+                            : () => viewModel.splitPdfByRanges(
+                                viewModel.splitRangeText,
+                              ),
                         icon: const Icon(Icons.file_download_outlined),
                         label: const Text('Create split PDFs'),
                       ),
@@ -95,7 +99,8 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
             _ToolCard(
               icon: Icons.verified_user_outlined,
               title: 'Digital signature',
-              description: 'Sign with a PKCS#12 / PFX certificate stored on your device.',
+              description:
+                  'Sign with a PKCS#12 / PFX certificate stored on your device.',
               buttonLabel: 'Choose certificate',
               busy: viewModel.isBusy,
               onPressed: () => _requestCertificatePassword(context, viewModel),
@@ -103,7 +108,8 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
             _ToolCard(
               icon: Icons.branding_watermark_outlined,
               title: 'Add watermark',
-              description: 'Add custom translucent text to every page and save a copy.',
+              description:
+                  'Add custom translucent text to every page and save a copy.',
               buttonLabel: 'Choose PDF',
               busy: viewModel.isBusy,
               onPressed: () => _requestWatermark(context, viewModel),
@@ -111,7 +117,8 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
             _ToolCard(
               icon: Icons.format_list_numbered_rounded,
               title: 'Add page numbers',
-              description: 'Place page numbers at the bottom-right of each page.',
+              description:
+                  'Place page numbers at the bottom-right of each page.',
               buttonLabel: 'Choose PDF',
               busy: viewModel.isBusy,
               onPressed: viewModel.addPageNumbers,
@@ -119,7 +126,8 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
             _ToolCard(
               icon: Icons.library_add_check_outlined,
               title: 'Batch compress PDFs',
-              description: 'Compress several PDFs independently; one failed file will not stop the rest.',
+              description:
+                  'Compress several PDFs independently; one failed file will not stop the rest.',
               buttonLabel: 'Choose multiple PDFs',
               busy: viewModel.isBusy,
               onPressed: viewModel.batchCompressPdfs,
@@ -127,7 +135,8 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
             _ToolCard(
               icon: Icons.compress_rounded,
               title: 'Compress PDF',
-              description: 'Optimize a PDF locally and save a separate compressed copy.',
+              description:
+                  'Optimize a PDF locally and save a separate compressed copy.',
               buttonLabel: 'Choose PDF',
               busy: viewModel.isBusy,
               onPressed: viewModel.compressPdf,
@@ -165,8 +174,6 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
     );
   }
 
-
-
   Future<void> _requestCertificatePassword(
     BuildContext context,
     PdfToolsViewModel viewModel,
@@ -198,7 +205,6 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
         ],
       ),
     );
-    controller.dispose();
     if (password != null && password.isNotEmpty) {
       await viewModel.signPdf(password);
     }
@@ -235,7 +241,6 @@ class PdfToolsView extends StackedView<PdfToolsViewModel> {
         ],
       ),
     );
-    controller.dispose();
     if (text != null && text.trim().isNotEmpty) {
       await viewModel.watermarkPdf(text);
     }
@@ -280,9 +285,15 @@ class _ToolCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                   const SizedBox(height: 4),
-                  Text(description, style: const TextStyle(color: Colors.black54)),
+                  Text(
+                    description,
+                    style: const TextStyle(color: Colors.black54),
+                  ),
                   const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.centerLeft,
